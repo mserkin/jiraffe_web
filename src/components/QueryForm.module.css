@@ -1,0 +1,10 @@
+.formContainer {
+    background-color: #d0d2d5;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    width: 100%;       /* Растягиваем на всю ширину правой колонки */
+    max-width: 100%;   /* Больше никакой фиксированной ширины */
+    margin: 0;         /* Сбрасываем старый margin */
+}

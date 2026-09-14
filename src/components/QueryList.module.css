@@ -1,0 +1,11 @@
+.formContainer {
+    background-color: #f0f2f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;             /* 20px свободного места со всех четырех сторон */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 420px;          /* Ваше отличное ограничение ширины */
+    margin: 0;
+    box-sizing: border-box;    /* ГАРАНТИРУЕТ, что padding 20px останется ВНУТРИ формы и не раздует её */
+}
