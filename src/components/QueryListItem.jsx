@@ -13,11 +13,9 @@ const QueryListItem = ({
     };
 
     return (
-        <div className={styles.queryName}>
-            <span>
-                {name}
-            </span>
-            <span>
+        <div className={styles.queryItem}>
+            <span>{name}</span>
+            <span className={styles.menuWrapper}>
                 <button
                     className={styles.menuBtn}
                     type="button"

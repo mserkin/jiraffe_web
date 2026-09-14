@@ -1,24 +1,39 @@
 .queryName {
     display: flex;
     align-items: center;
-    gap: 15px;        
+    gap: 15px;
     padding: 8px 10px;
     border-bottom: 1px solid #b8babd;
-    width: 100%;      
+    width: 100%;
     color: darkgray;
+    transition: background-color 150ms ease-in-out;
+}
+
+.queryName:hover,
+.queryName:focus-within {
+    background-color: #e4e7eb;
+}
+
+.queryName > span:last-child {
+    margin-left: auto;
 }
 
 .menuBtn {
-    flex-shrink: 0;
-    text-align: right;  
-    justify-self: flex-end;
-    border: none;
+    flex-shrink: 0; 
+    border: 2px solid transparent;
+    border-radius: 5px;
     text-align: center;
-    padding: 0px 5px;    
+    padding: 0px 5px;
+    color: darkslategray;
+    background-color: transparent;
+    visibility: hidden;
 }
 
-.menuBtn:hover {
+.queryName:hover .menuBtn {
+    visibility: visible;
+}
+.menuBtn:hover,
+.menuBtn:focus-visible {
     border: 2px solid darkgray;
-    padding: 0px 5px;
-    border-radius: 5px;
+    background-color: #f0f2f5;
 }
