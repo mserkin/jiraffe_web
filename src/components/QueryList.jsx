@@ -1,33 +1,53 @@
-import { useEffect } from 'react';
-import { fetchQueryList } from '../redux/slices/queryListSlice';
-import { setIsLoading, selectIsLoading } from '../redux/slices/statusSlice';
-import styles from './QueryList.module.css'
-import { useDispatch, useSelector } from 'react-redux';
-
+import { useEffect } from "react";
+import { fetchQueryList } from "../redux/slices/queryListSlice";
+import { setIsLoading, selectIsLoading } from "../redux/slices/statusSlice";
+import styles from "./QueryList.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import QueryListItem from "./QueryListItem";
 
 const QueryList = () => {
-    const BACKEND_URI = 'http://localhost:3010/queries';
+  const BACKEND_URI = "http://localhost:3010/queries";
+  const dispatch = useDispatch();
+  const isLoading = useSelector(selectIsLoading);
 
-    const dispatch = useDispatch();
-    const isLoading = useSelector(selectIsLoading);
-    useEffect(() => {
-        const getQueryList = async () => {
-            try {
-                dispatch(setIsLoading(true));
-                await dispatch(fetchQueryList(BACKEND_URI)).unwrap();
-            } finally {
-                dispatch(setIsLoading(false));
-            }
-        };
+  const queryList = useSelector((state) => state.queryList);
 
-        getQueryList();
-    }, [dispatch]);
+  useEffect(() => {
+    const getQueryList = async () => {
+      try {
+        dispatch(setIsLoading(true));
+        await dispatch(fetchQueryList(BACKEND_URI)).unwrap();
+      } finally {
+        dispatch(setIsLoading(false));
+      }
+    };
 
-    return (
-        <form className={styles.formContainer}>
-            <h2>Запросы</h2>
-        </form>
-    )
-}
+    getQueryList();
+  }, [dispatch]);
 
-export default QueryList
+  return (
+    <form className={styles.formContainer}>
+      <div>
+        <h2 className={styles.title}>Запросы</h2>
+      </div>
+      <div>
+        {queryList.length === 0 ? (
+          <div className={styles.emptyQueryListMessage}>Пока нет запросов</div>
+        ) : (
+          Array.isArray(queryList) &&
+          queryList.map((query, index) => {
+            return (
+              <QueryListItem
+                key={`QueryListItem-${query.id}`}
+                id={query.id}
+                name={query.name}
+              />
+            );
+          })
+        )}
+      </div>
+    </form>
+  );
+};
+
+export default QueryList;

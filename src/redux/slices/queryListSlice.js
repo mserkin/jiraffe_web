@@ -27,13 +27,15 @@ const queryListSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(fetchQueryList.fulfilled, (state, action) => {
-            if (action.payload.id && action.payload.name) {
-                state.push({
-                    id: action.payload.id,
-                    name: action.payload.name,
-                });
-            }
-            console.log(state);
+            const queries = Array.isArray(action.payload) ? action.payload : [action.payload];
+            const filtered_queries = queries
+                .filter((query) => query?.id && query?.name)
+                .map((query) => ({
+                    id: query.id,
+                    name: query.name,
+                }));
+            console.log(filtered_queries);
+            return filtered_queries;
         });
     },
 });

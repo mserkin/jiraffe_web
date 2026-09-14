@@ -9,3 +9,15 @@
     margin: 0;
     box-sizing: border-box;    /* ГАРАНТИРУЕТ, что padding 20px останется ВНУТРИ формы и не раздует её */
 }
+
+.formContainer h2 {
+    color: darkslategray;        /* Строго черный цвет */
+    margin-top: 0;         /* Убираем лишний отступ сверху */
+    margin-bottom: 15px;   /* Отступ до начала списка книг */
+    font-size: 24px;
+    text-align: center;
+}
+
+.emptyQueryListMessage {
+    color: darkslategray;
+}

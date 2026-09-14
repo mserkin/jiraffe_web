@@ -1,0 +1,24 @@
+.queryName {
+    display: flex;
+    align-items: center;
+    gap: 15px;        
+    padding: 8px 10px;
+    border-bottom: 1px solid #b8babd;
+    width: 100%;      
+    color: darkgray;
+}
+
+.menuBtn {
+    flex-shrink: 0;
+    text-align: right;  
+    justify-self: flex-end;
+    border: none;
+    text-align: center;
+    padding: 0px 5px;    
+}
+
+.menuBtn:hover {
+    border: 2px solid darkgray;
+    padding: 0px 5px;
+    border-radius: 5px;
+}
