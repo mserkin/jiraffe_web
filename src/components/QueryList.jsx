@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { fetchQueryList } from '../redux/slices/queryListSlice';
 import { setIsLoading, selectIsLoading } from '../redux/slices/statusSlice';
 import styles from './QueryList.module.css'
@@ -9,18 +10,18 @@ const QueryList = () => {
 
     const dispatch = useDispatch();
     const isLoading = useSelector(selectIsLoading);
-    const getQueryList = async () => {
-        try {
-            dispatch(setIsLoading(true));
-            await dispatch(fetchQueryList(BACKEND_URI)).unwrap();
-        }
-        finally {
-            dispatch(setIsLoading(false));
-        }
+    useEffect(() => {
+        const getQueryList = async () => {
+            try {
+                dispatch(setIsLoading(true));
+                await dispatch(fetchQueryList(BACKEND_URI)).unwrap();
+            } finally {
+                dispatch(setIsLoading(false));
+            }
+        };
 
-    }
-
-    getQueryList();
+        getQueryList();
+    }, [dispatch]);
 
     return (
         <form className={styles.formContainer}>

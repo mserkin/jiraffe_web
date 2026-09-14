@@ -33,6 +33,7 @@ const queryListSlice = createSlice({
                     name: action.payload.name,
                 });
             }
+            console.log(state);
         });
     },
 });
