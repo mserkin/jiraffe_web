@@ -4,9 +4,9 @@ import { setIsLoading, selectIsLoading } from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import QueryListItem from "./QueryListItem";
+import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
 
 const QueryList = () => {
-  const BACKEND_URI = "http://localhost:3010/queries";
   const dispatch = useDispatch();
   const isLoading = useSelector(selectIsLoading);
 
@@ -16,7 +16,7 @@ const QueryList = () => {
     const getQueryList = async () => {
       try {
         dispatch(setIsLoading(true));
-        await dispatch(fetchQueryList(BACKEND_URI)).unwrap();
+        await dispatch(fetchQueryList(BACKEND_URI+QUERIES_PATH_PART)).unwrap();
       } finally {
         dispatch(setIsLoading(false));
       }
