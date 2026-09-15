@@ -5,11 +5,12 @@ import styles from "./QueryList.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import QueryListItem from "./QueryListItem";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
+import { selectOpenQuery } from "../redux/slices/openQuerySlice";
 
 const QueryList = () => {
   const dispatch = useDispatch();
   const isLoading = useSelector(selectIsLoading);
-
+  const openQuery = useSelector(selectOpenQuery);
   const queryList = useSelector((state) => state.queryList);
 
   useEffect(() => {
@@ -37,11 +38,12 @@ const QueryList = () => {
           Array.isArray(queryList) &&
           queryList.map((query, index) => {
             return (
-              <QueryListItem
-                key={`QueryListItem-${query.id}`}
-                id={query.id}
-                name={query.name}
-              />
+                <QueryListItem
+                    key={`QueryListItem-${query.id}`}
+                    id={query.id}
+                    name={query.name}
+                    isOpen={query.id === openQuery.id}
+                />
             );
           })
         )}

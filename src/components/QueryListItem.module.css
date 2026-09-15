@@ -9,12 +9,33 @@
     transition: background-color 150ms ease-in-out;
 }
 
+.openQuery {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #b8babd;
+    width: 100%;
+    color: white;
+    transition: background-color 150ms ease-in-out;
+    background-color: #4af;
+}
+
+.openQuery:hover,
+.openQuery:focus-within
+{
+    background-color: #38f;
+}
+
 .queryName:hover,
-.queryName:focus-within {
+.queryName:focus-within 
+{
     background-color: #e4e7eb;
 }
 
-.queryName > span:last-child {
+.queryName > span:last-child,
+.openQuery > span:last-child
+{
     margin-left: auto;
 }
 
@@ -29,9 +50,18 @@
     visibility: hidden;
 }
 
-.queryName:hover .menuBtn {
+.queryName:hover .menuBtn
+{
     visibility: visible;
 }
+
+.openQuery:hover .menuBtn
+{
+    visibility: visible;
+    background-color: #5bf;
+    color: white
+}
+
 .menuBtn:hover,
 .menuBtn:focus-visible {
     border: 2px solid darkgray;
