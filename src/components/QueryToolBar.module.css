@@ -1,0 +1,36 @@
+ul {
+    margin: 0;
+    list-style-type: none;
+}
+
+.toolbar {
+    padding: 10px, 30px;
+    height: 100px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.toolbarIconItem {
+    cursor: pointer;
+    width: 56px;
+    height: 56px;
+    padding: 10px;
+    color: darkslategray;
+}
+
+.toolbarTextItem {
+    cursor: pointer;
+    flex-grow: 1;
+    height: 48px;
+    color: darkslategray;
+    font-size: 1.5rem;
+    padding-top: 10px;
+}
+
+.toolbarIconItem:hover {
+    border: 1px solid #08c;
+    border-radius: 5px;
+    background-color: rgb(119, 194, 255);
+}
