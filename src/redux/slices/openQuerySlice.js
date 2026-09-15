@@ -4,10 +4,9 @@ import { setError } from './errorSlice';
 
 const initialState = {};
 
-const fetchQuery = createAsyncThunk('openQuery', async (url, query_id, thunkAPI) => {
-    console.log(thunkAPI);
+const fetchQuery = createAsyncThunk('openQuery', async ({url, queryId}) => {
     try {
-        const res = await axios.get(`${url}/${query_id}`);
+        const res = await axios.get(`${url}/${queryId}`);
         return res.data;
     } catch (error) {
         thunkAPI.dispatch(
@@ -23,23 +22,16 @@ const openQuerySlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder.addCase(fetchQuery.fulfilled, (state, action) => {
-            if (action.payload.id && action.payload.name) {
-                state.push({
-                    id: action.payload.id,
-                    name: action.payload.name,
-                    queryText: action.payload.queryText,
-                    epicViewType: action.payload.epicViewType
-                });
-            }
+            return action.payload;
         });
     },
 });
 
 //const { addBook, deleteBook, toggleFavorite } = booksSlice.actions;
 
-const selectQueryList = (state) => state.openQuery;
+const selectOpenQuery = (state) => state.openQuery;
 
 export {
-    selectQuery, fetchQuery,
+    selectOpenQuery, fetchQuery,
 };
 export default openQuerySlice.reducer;
