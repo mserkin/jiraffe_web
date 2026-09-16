@@ -1,9 +1,8 @@
-import { text } from 'express';
 import styles from './QueryForm.module.css';
 import QueryToolBar from './QueryToolBar';
 const QueryForm = () => {
     return (
-        <>
+        <form className={styles.formContainer}>
             <QueryToolBar />
             <div className={styles.gridContainer}>
                 <div className={`${styles.item} ${styles.query_label}`}>
@@ -31,13 +30,13 @@ const QueryForm = () => {
                     Уровень 1
                 </div>
                 <div className={`${styles.item} ${styles.level_settings}`}>
-                    <input type="text" readonly></input>
+                    <textarea></textarea>
                 </div>
                 <div className={`${styles.item} ${styles.level_setup_btn}`}>
                     <button>Настроить</button>
                 </div>
             </div>
-        </>
+        </form>
     );
 };
 

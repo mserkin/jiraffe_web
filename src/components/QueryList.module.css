@@ -11,9 +11,9 @@
 }
 
 .formContainer h2 {
-    color: darkslategray;        /* Строго черный цвет */
-    margin-top: 0;         /* Убираем лишний отступ сверху */
-    margin-bottom: 15px;   /* Отступ до начала списка книг */
+    color: darkslategray;
+    margin-top: 0;       
+    margin-bottom: 15px;
     font-size: 24px;
     text-align: center;
 }
