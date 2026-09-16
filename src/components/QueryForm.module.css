@@ -1,10 +1,55 @@
-.formContainer {
+.gridContainer {
+    margin-top: 25px;
+    font-size: 1.5rem;
+    display: grid;
+    grid-template-rows: 80px 80px 100px 80px; 
+    grid-template-columns: 1fr 1fr 5fr 1fr;
+    color: darkslategray;
     background-color: #d0d2d5;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 5px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    width: 100%;       /* Растягиваем на всю ширину правой колонки */
-    max-width: 100%;   /* Больше никакой фиксированной ширины */
-    margin: 0;         /* Сбрасываем старый margin */
+    grid-auto-rows: 100px;
+    justify-items: stretch;
+    align-items: center;
+    grid-template-areas:
+        'query_label query_label query query'
+        'epic_label epic_label epic_choice epic_choice'
+        'delete_btn level_label level_settings level_setup_btn';
+}
+
+.item {
+    color: darkslategray;
+    background-color: #d0d2d5;
+}
+
+.query_label {
+    grid-area: query_label;
+    text-align: right;
+}
+
+.query {
+    grid-area: query;
+}
+
+.epic_label {
+    grid-area: epic_label;
+    text-align: right;
+}
+
+.epic_choice {
+    grid-area: epic_choice;
+}
+
+.delete_btn {
+    grid-area: delete_btn;
+}
+
+.level_label {
+    grid-area: level_label;
+}
+
+.level_settings{
+    grid-area: level_settings;
+} 
+
+.level_setup_btn{
+    grid-area: level_setup_btn;
 }
