@@ -15,10 +15,10 @@ const QueryForm = () => {
                     У эпиков показывать
                 </div>
                 <div className={`${styles.item} ${styles.epic_choice}`}>
-                    <select name="select">
-                        <option value="value1">Только связанные</option>
-                        <option value="value2">Только принадлежащие</option>
-                        <option value="value3" selected>
+                    <select name="select" defaultValue="linkedAndChildren">
+                        <option value="linkedOnly">Только связанные</option>
+                        <option value="childrenOnly">Только принадлежащие</option>
+                        <option value="linkedAndChildren">
                             И связанные и принадлежащие
                         </option>
                     </select>
@@ -34,6 +34,9 @@ const QueryForm = () => {
                 </div>
                 <div className={`${styles.item} ${styles.level_setup_btn}`}>
                     <button>Настроить</button>
+                </div>
+                <div className={`${styles.item} ${styles.add_level_btn}`}>
+                    <button className={styles.addLevelButton}>Добавить уровень</button>
                 </div>
             </div>
         </form>
