@@ -1,6 +1,7 @@
 import styles from './QueryList.module.css'
 const Results = () => {
-    const handleSubmit = (e) => {
+    const handleSubmit = (event) => {
+        event.preventDefault();
     }
 
     return (

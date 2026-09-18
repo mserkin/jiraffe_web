@@ -7,7 +7,6 @@ const QueryForm = () => {
     const dispatch = useDispatch();
 
     const handleSubmit = (event) => {
-        console.log(e);
         event.preventDefault();
     };
 

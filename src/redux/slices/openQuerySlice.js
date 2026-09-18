@@ -4,7 +4,7 @@ import { setError } from './errorSlice';
 
 const initialState = {};
 
-const fetchQuery = createAsyncThunk('openQuery', async ({url, queryId}) => {
+const fetchQuery = createAsyncThunk('openQuery', async ({url, queryId}, thunkAPI) => {
     try {
         const res = await axios.get(`${url}/${queryId}`);
         return res.data;
