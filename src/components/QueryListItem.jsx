@@ -5,6 +5,7 @@ import { fetchQuery } from "../redux/slices/openQuerySlice";
 import {
   selectIsQueryChanged,
   setIsLoading,
+  setIsQueryChanged,
 } from "../redux/slices/statusSlice";
 import { useRef } from "react";
 
@@ -24,11 +25,7 @@ const QueryListItem = ({ id, name, isOpen }) => {
     dialogRef.current?.close();
   };
 
-  const handleItemClick = async (queryId) => {
-    console.log(`handleItemClick(${queryId})`);
-    if (isQueryChanged) {
-      dialogRef.current?.showModal();
-    } else {
+  const openQuery = async (queryId) => {
       try {
         dispatch(setIsLoading(true));
         await dispatch(
@@ -40,6 +37,23 @@ const QueryListItem = ({ id, name, isOpen }) => {
       } finally {
         dispatch(setIsLoading(false));
       }
+  }
+
+  const handleDiscardChanges = async (event) => {
+    event.stopPropagation();
+    dialogRef.current?.close();
+    dispatch(setIsQueryChanged(false));
+    await openQuery(id);
+  };
+
+  const handleItemClick = async (queryId) => {
+    console.log(`handleItemClick(${queryId})`);
+    if (isQueryChanged) {
+      dialogRef.current?.showModal();
+      return;
+    }
+    else {
+      await openQuery(queryId);
     }
   };
 
@@ -68,7 +82,7 @@ const QueryListItem = ({ id, name, isOpen }) => {
         отменить их и открыть новый запрос, нажмите Нет, чтобы вернуться к
         текущему запросу.
         <div className={styles.dialog_buttons}>
-          <button type="button" onClick={handleDialogClose}>
+          <button type="button" onClick={handleDiscardChanges}>
             Да
           </button>
           <button type="button" onClick={handleDialogClose}>
