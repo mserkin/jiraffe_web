@@ -67,3 +67,33 @@
     border: 2px solid darkgray;
     background-color: #f0f2f5;
 }
+
+.dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    max-width: min(90vw, 420px);
+    padding: 20px;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    background: #fff;
+    color: #1f2937;
+}
+
+.dialog::backdrop {
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.dialog_buttons {
+  display: flex;
+  justify-content: center; /* Centers buttons horizontally */
+  align-items: center;     /* Centers buttons vertically (if div has height) */
+  gap: 10px;               /* Adds clean spacing between the buttons */
+}
+.dialog button {
+    margin-top: 12px;
+    margin-right: 10px;
+    padding: 10px 20px 10px 20px;
+}
