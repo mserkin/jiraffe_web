@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import styles from "./QueryListItem.module.css";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
@@ -29,7 +29,7 @@ const QueryListItem = ({ id, index, name, isOpen }) => {
     dialogRef.current?.close();
   };
 
-  const openQuery = async (queryId) => {
+  const openQuery = useCallback(async (queryId) => {
     try {
       dispatch(setIsLoading(true));
       await dispatch(
@@ -41,7 +41,7 @@ const QueryListItem = ({ id, index, name, isOpen }) => {
     } finally {
       dispatch(setIsLoading(false));
     }
-  };
+  }, [dispatch]);
 
   const handleDiscardChanges = async (event) => {
     event.stopPropagation();
@@ -60,19 +60,18 @@ const QueryListItem = ({ id, index, name, isOpen }) => {
     }
   };
 
-  const openInitialQuery = async () => {
-    if (!isInitialQueryOpened && index == 0) {
-      useEffect(() => {
-        async function doOpenInitialQuery() {
-          await openQuery(id);
-          dispatch(setIsInitialQueryOpened(true));
-        }
-        doOpenInitialQuery();
-      }, [dispatch, isInitialQueryOpened]);
+  useEffect(() => {
+    if (isInitialQueryOpened || index !== 0) {
+      return;
     }
-  };
 
-  openInitialQuery();
+    async function doOpenInitialQuery() {
+      await openQuery(id);
+      dispatch(setIsInitialQueryOpened(true));
+    }
+
+    doOpenInitialQuery();
+  }, [dispatch, id, index, isInitialQueryOpened, openQuery]);
 
   return (
     <div
