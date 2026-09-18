@@ -1,21 +1,56 @@
+import { useDispatch } from 'react-redux';
+import { setIsQueryChanged } from '../redux/slices/statusSlice';
 import styles from './QueryForm.module.css';
 import QueryToolBar from './QueryToolBar';
+
 const QueryForm = () => {
+    const dispatch = useDispatch();
+
+    const handleSubmit = (event) => {
+        console.log(e);
+        event.preventDefault();
+    };
+
+    const handleSetupLevelClick = () => {
+        console.log("handleSetupLevelClick");
+        dispatch(setIsQueryChanged(true));
+    };
+
+    const handleAddLevelClick = () => {
+        console.log("handleAddLevelClick");
+        dispatch(setIsQueryChanged(true));
+    };
+    
+    const handleLevelSettingsChanged = () => {
+        console.log("handleLevelSettingsChanged");
+        dispatch(setIsQueryChanged(true));
+    }
+
+    const handleEpicChoiceChanged = () => {
+        console.log("handleEpicChoiceChanged");
+        dispatch(setIsQueryChanged(true));
+    }
+
+    const handleQueryChanged = () => {
+        console.log("handleQueryChanged");
+        dispatch(setIsQueryChanged(true));
+    }
+
     return (
-        <form className={styles.formContainer}>
+        <form className={styles.formContainer} onSubmit={handleSubmit}>
             <QueryToolBar />
             <div className={styles.gridContainer}>
                 <div className={`${styles.item} ${styles.query_label}`}>
                     Запрос:
                 </div>
                 <div className={`${styles.item} ${styles.query}`}>
-                    <input type="text" placeholder="Текст запроса"></input>
+                    <input id="query_input" type="text" placeholder="Текст запроса" onChange={handleQueryChanged}></input>
                 </div>
                 <div className={`${styles.item} ${styles.epic_label}`}>
                     У эпиков показывать
                 </div>
                 <div className={`${styles.item} ${styles.epic_choice}`}>
-                    <select name="select" defaultValue="linkedAndChildren">
+                    <select id="epic_choice" name="select" defaultValue="linkedAndChildren" onChange={handleEpicChoiceChanged}>
                         <option value="linkedOnly">Только связанные</option>
                         <option value="childrenOnly">Только принадлежащие</option>
                         <option value="linkedAndChildren">
@@ -23,20 +58,17 @@ const QueryForm = () => {
                         </option>
                     </select>
                 </div>
-                <div className={`${styles.item} ${styles.delete_btn}`}>
-                    <button>Удалить</button>
-                </div>
                 <div className={`${styles.item} ${styles.level_label}`}>
                     Уровень 1
                 </div>
                 <div className={`${styles.item} ${styles.level_settings}`}>
-                    <textarea></textarea>
+                    <textarea id="level_settings" onChange={handleLevelSettingsChanged}></textarea>
                 </div>
                 <div className={`${styles.item} ${styles.level_setup_btn}`}>
-                    <button>Настроить</button>
+                    <button id="level_setup_btn" type="button" onClick={handleSetupLevelClick}>Настроить</button>
                 </div>
                 <div className={`${styles.item} ${styles.add_level_btn}`}>
-                    <button className={styles.addLevelButton}>Добавить уровень</button>
+                    <button id="add_level_btn" type="button" className={styles.addLevelButton} onClick={handleAddLevelClick}>Добавить уровень</button>
                 </div>
             </div>
         </form>
