@@ -134,8 +134,8 @@ const QueryListItem = ({ id, index, name, isOpen }) => {
         onClick={(event) => event.stopPropagation()}
       >
         В текущий запрос внесены не сохраненные изменения. Нажмите Да, чтобы
-        отменить их и открыть новый запрос, нажмите Нет, чтобы вернуться к
-        текущему запросу.
+        отменить их, нажмите Нет, чтобы вернуться к текущему запросу.
+        <br/>Отменить изменения?
         <div className={styles.dialog_buttons}>
           <button type="button" onClick={handleDiscardChanges}>
             Да

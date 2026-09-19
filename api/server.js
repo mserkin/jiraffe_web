@@ -1,9 +1,11 @@
 import express from 'express';
 import { connect, Schema, model } from 'mongoose';
 import cors from 'cors';
+import { randomUUID } from 'node:crypto';
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const PORT = 3010;
 
@@ -19,6 +21,12 @@ const queryShortInfoSchema = new Schema(
     {
         id: String,
         name: String,
+        queryText: String,
+        epicViewType: String,
+        levelFilters: {
+            type: [Schema.Types.Mixed],
+            default: [],
+        },        
     },
     { collection: 'queries' },
 );
@@ -69,12 +77,52 @@ async function getQueryById(req, res) {
     }
 }
 
+async function insertQuery(req, res) {
+    try {
+        if (
+            !req.body
+            || typeof req.body !== 'object'
+            || Array.isArray(req.body)
+        ) {
+            return res
+                .status(400)
+                .json({ error: 'Тело запроса должно быть объектом' });
+        }
+
+        if (Object.prototype.hasOwnProperty.call(req.body, 'id')) {
+            return res
+                .status(400)
+                .json({ error: 'Поле id не должно передаваться' });
+        }
+
+        const query = await QueryShortInfo.create({
+            ...req.body,
+            id: randomUUID(),
+        });
+        const queryDocument = query.toObject({ versionKey: false });
+        delete queryDocument._id;
+
+        return res
+            .status(201)
+            .json(queryDocument);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: 'Ошибка сервера при сохранении запроса' });
+    }
+}
+
 app.get('/queries', async (req, res) => {
     getQueryList(res);
 });
 
 app.get('/queries/:id', async (req, res) => {
     getQueryById(req, res);
+});
+
+app.post('/queries', async (req, res) => {
+    insertQuery(req, res);
 });
 
 app.listen(PORT, () => {
