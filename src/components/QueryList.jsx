@@ -58,6 +58,35 @@ const QueryList = () => {
     [dispatch, refreshQueryList],
   );
 
+  const handleQueryRenamed = useCallback(
+    async (renamedQueryName) => {
+      const refreshedQueryList = await refreshQueryList();
+      const queries = Array.isArray(refreshedQueryList)
+        ? refreshedQueryList
+        : [refreshedQueryList];
+      const renamedQuery = queries.find(
+        (query) => query?.name === renamedQueryName,
+      );
+
+      if (!renamedQuery) {
+        throw new Error(`Не удалось найти переименованный запрос "${renamedQueryName}"`);
+      }
+
+      dispatch(setIsLoading(true));
+      try {
+        await dispatch(
+          fetchQuery({
+            url: BACKEND_URI + QUERIES_PATH_PART,
+            queryId: renamedQuery.id,
+          }),
+        ).unwrap();
+      } finally {
+        dispatch(setIsLoading(false));
+      }
+    },
+    [dispatch, refreshQueryList],
+  );
+
   return (
     <div className={styles.formContainer} aria-busy={isLoading}>
       <div>
@@ -77,6 +106,7 @@ const QueryList = () => {
                     name={query.name}
                     isOpen={query.id === openQuery.id}
                     onQueryCloned={handleQueryCloned}
+                    onQueryRenamed={handleQueryRenamed}
                 />
             )
           )

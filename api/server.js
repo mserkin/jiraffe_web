@@ -113,17 +113,63 @@ async function insertQuery(req, res) {
     }
 }
 
+async function updateQueryById(req, res) {
+    try {
+        const { id } = req.params;
+
+        if ( !req.body || typeof req.body !== 'object' || Array.isArray(req.body) ) {
+            return res
+                .status(400)
+                .json({ error: 'Тело запроса должно быть объектом' });
+        }
+
+       const updatedQuery = {
+            ...req.body,
+            id,
+        };
+
+        const query = await QueryShortInfo.findOneAndUpdate(
+            { id },
+            { $set: updatedQuery },
+            { new: true, runValidators: true },
+        );
+
+        if (!query) {
+            return res
+                .status(404)
+                .json({ error: 'Документ с указанным id не найден' });
+        }
+
+        const queryDocument = query.toObject({ versionKey: false });
+        delete queryDocument._id;
+
+        return res
+            .status(200)
+            .json(queryDocument);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: 'Ошибка сервера при обновлении запроса' });
+    }
+}
+
 app.get('/queries', async (req, res) => {
     getQueryList(res);
+});
+
+app.post('/queries', async (req, res) => {
+    insertQuery(req, res);
 });
 
 app.get('/queries/:id', async (req, res) => {
     getQueryById(req, res);
 });
 
-app.post('/queries', async (req, res) => {
-    insertQuery(req, res);
+app.put('/queries/:id', async (req, res) => {
+    updateQueryById(req, res);
 });
+
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);
