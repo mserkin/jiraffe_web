@@ -2,6 +2,7 @@ import express from 'express';
 import { connect, Schema, model } from 'mongoose';
 import cors from 'cors';
 import { randomUUID } from 'node:crypto';
+import { MONGO_LOGIN, MONGO_PASSWORD } from './credits.js';
 
 const app = express();
 app.use(cors());
@@ -11,7 +12,7 @@ const PORT = 3010;
 
 // 1. Подключаемся к MongoDB (к базе данных 'apps')
 connect(
-      'mongodb+srv://mikhailserkin_db_user:eoqec1ZfzUoGNoqu@cluster0.uvazvte.mongodb.net/jiraffe'
+      `mongodb+srv://${MONGO_LOGIN}:${MONGO_PASSWORD}@cluster0.uvazvte.mongodb.net/jiraffe`
 //    'mongodb://127.0.0.1:27017/apps'
 )
     .then(() => console.log('Успешно подключились к MongoDB!'))
