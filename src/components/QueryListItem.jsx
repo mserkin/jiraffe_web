@@ -14,7 +14,7 @@ import {
 } from "../redux/slices/statusSlice";
 import { setError } from "../redux/slices/errorSlice";
 
-const QueryListItem = ({ id, index, name, isOpen }) => {
+const QueryListItem = ({ id, index, name, isOpen, onQueryCloned }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [queryName, setQueryName] = useState(name);
   const [isCloneConfirmationPending, setIsCloneConfirmationPending] =
@@ -57,13 +57,14 @@ const QueryListItem = ({ id, index, name, isOpen }) => {
       dispatch(setIsLoading(true));
       console.log(clonedQuery);
       await axios.post(BACKEND_URI + QUERIES_PATH_PART, clonedQuery);
+      await onQueryCloned(queryName);
       dispatch(setIsQueryChanged(false));
     } catch (error) {
       dispatch(setError(`Ошибка при подключении к серверу: ${error.message}`));
     } finally {
       dispatch(setIsLoading(false));
     }
-  }, [dispatch, openQueryData, queryName]);
+  }, [dispatch, onQueryCloned, openQueryData, queryName]);
 
   const handleCloneSubmit = async (event) => {
     event.preventDefault();

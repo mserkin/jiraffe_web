@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import { fetchQueryList } from "../redux/slices/queryListSlice";
 import { setIsLoading, selectIsLoading } from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
-import { useDispatch, useSelector } from "react-redux";
 import QueryListItem from "./QueryListItem";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
 import { selectOpenQuery } from "../redux/slices/openQuerySlice";
@@ -13,18 +14,51 @@ const QueryList = () => {
   const openQuery = useSelector(selectOpenQuery);
   const queryList = useSelector((state) => state.queryList);
 
+  const refreshQueryList = useCallback(async () => {
+    dispatch(setIsLoading(true));
+    try {
+      return await dispatch(
+        fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),
+      ).unwrap();
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  }, [dispatch]);
+
   useEffect(() => {
-    const getQueryList = async () => {
+    refreshQueryList();
+  }, [refreshQueryList]);
+
+  const handleQueryCloned = useCallback(
+    async (clonedQueryName) => {
+      console.log("handleQueryCloned executed");
+      const refreshedQueryList = await refreshQueryList();
+      const queries = Array.isArray(refreshedQueryList)
+        ? refreshedQueryList
+        : [refreshedQueryList];
+      const clonedQuery = queries.find(
+        (query) => query?.name === clonedQueryName,
+      );
+      console.log(`clonedQuery=${clonedQuery.id}`);
+
+      if (!clonedQuery) {
+        throw new Error(`Не удалось найти клонированный запрос "${clonedQueryName}"`);
+      }
+
+      dispatch(setIsLoading(true));
       try {
-        dispatch(setIsLoading(true));
-        await dispatch(fetchQueryList(BACKEND_URI+QUERIES_PATH_PART)).unwrap();
+        await dispatch(
+          fetchQuery({
+            url: BACKEND_URI + QUERIES_PATH_PART,
+            queryId: clonedQuery.id,
+          }),
+        ).unwrap();
       } finally {
         dispatch(setIsLoading(false));
       }
-    };
-
-    getQueryList();
-  }, [dispatch]);
+    },
+    [dispatch, refreshQueryList],
+  );
 
   return (
     <div className={styles.formContainer} aria-busy={isLoading}>
@@ -44,6 +78,7 @@ const QueryList = () => {
                     id={query.id}
                     name={query.name}
                     isOpen={query.id === openQuery.id}
+                    onQueryCloned={handleQueryCloned}
                 />
             )
           )
