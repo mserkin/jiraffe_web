@@ -50,6 +50,47 @@
     visibility: hidden;
 }
 
+
+.menuOpen {
+    visibility: visible;
+}
+
+.menuWrapper {
+    position: relative;
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+}
+
+.contextMenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 10;
+    display: flex;
+    min-width: 150px;
+    flex-direction: column;
+    padding: 4px 0;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+    background-color: white;
+}
+
+.contextMenu button {
+    border: 0;
+    padding: 8px 12px;
+    color: darkslategray;
+    background-color: transparent;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.contextMenu button:hover,
+.contextMenu button:focus-visible {
+    background-color: #e4e7eb;
+}
+
 .queryName:hover .menuBtn
 {
     visibility: visible;
