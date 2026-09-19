@@ -61,7 +61,6 @@ const QueryForm = () => {
                     <select
                         id="epic_choice"
                         name="select"
-                        defaultValue="linkedAndChildren"
                         value={
                             openQuery.epicViewType
                                 ? openQuery.epicViewType

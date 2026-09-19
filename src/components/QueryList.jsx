@@ -27,7 +27,7 @@ const QueryList = () => {
   }, [dispatch]);
 
   return (
-    <form className={styles.formContainer} aria-busy={isLoading}>
+    <div className={styles.formContainer} aria-busy={isLoading}>
       <div>
         <h2 className={styles.title}>Запросы</h2>
       </div>
@@ -49,7 +49,7 @@ const QueryList = () => {
           )
         )}
       </div>
-    </form>
+    </div>
   );
 };
 
