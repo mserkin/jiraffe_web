@@ -6,7 +6,7 @@ import { setIsLoading, selectIsLoading } from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
 import QueryListItem from "./QueryListItem";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
-import { selectOpenQuery } from "../redux/slices/openQuerySlice";
+import { fetchQuery, selectOpenQuery } from "../redux/slices/openQuerySlice";
 
 const QueryList = () => {
   const dispatch = useDispatch();
@@ -31,7 +31,6 @@ const QueryList = () => {
 
   const handleQueryCloned = useCallback(
     async (clonedQueryName) => {
-      console.log("handleQueryCloned executed");
       const refreshedQueryList = await refreshQueryList();
       const queries = Array.isArray(refreshedQueryList)
         ? refreshedQueryList
@@ -39,7 +38,6 @@ const QueryList = () => {
       const clonedQuery = queries.find(
         (query) => query?.name === clonedQueryName,
       );
-      console.log(`clonedQuery=${clonedQuery.id}`);
 
       if (!clonedQuery) {
         throw new Error(`Не удалось найти клонированный запрос "${clonedQueryName}"`);

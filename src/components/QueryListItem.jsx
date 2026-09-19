@@ -4,7 +4,7 @@ import axios from "axios";
 
 import styles from "./QueryListItem.module.css";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
-import { fetchQuery, selectOpenQuery } from "../redux/slices/openQuerySlice";
+import { fetchQuery } from "../redux/slices/openQuerySlice";
 import {
   selectIsInitialQueryOpened,
   selectIsQueryChanged,
@@ -23,7 +23,6 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned }) => {
   const dispatch = useDispatch();
   const isQueryChanged = useSelector(selectIsQueryChanged);
   const isInitialQueryOpened = useSelector(selectIsInitialQueryOpened);
-  const openQueryData = useSelector(selectOpenQuery);
   const dialogRef = useRef(null);
   const cloneDialogRef = useRef(null);
   const menuRef = useRef(null);
@@ -45,17 +44,19 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned }) => {
   };
 
   const saveClonedQuery = useCallback(async () => {
-    console.log("saveClonedQuery executed");
-    const queryWithoutId = { ...openQueryData };
-    delete queryWithoutId.id;
-    const clonedQuery = {
-      ...queryWithoutId,
-      name: queryName,
-    };
-
     try {
       dispatch(setIsLoading(true));
-      console.log(clonedQuery);
+      const sourceQuery = (
+        await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)
+      ).data;
+      const queryWithoutId = { ...sourceQuery };
+
+      delete queryWithoutId.id;
+      const clonedQuery = {
+        ...queryWithoutId,
+        name: queryName,
+      };
+
       await axios.post(BACKEND_URI + QUERIES_PATH_PART, clonedQuery);
       await onQueryCloned(queryName);
       dispatch(setIsQueryChanged(false));
@@ -64,7 +65,7 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned }) => {
     } finally {
       dispatch(setIsLoading(false));
     }
-  }, [dispatch, onQueryCloned, openQueryData, queryName]);
+  }, [dispatch, id, onQueryCloned, queryName]);
 
   const handleCloneSubmit = async (event) => {
     event.preventDefault();
