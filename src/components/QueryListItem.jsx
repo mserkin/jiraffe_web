@@ -143,7 +143,7 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed,
     } finally {
       dispatch(setIsLoading(false));
     }
-  }, [dispatch, id, onQueryRenamed, queryName]);
+  }, [dispatch, id, onQueryDeleted]);
 
 
   const handleDeleteSubmit = async (event) => {

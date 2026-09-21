@@ -124,7 +124,7 @@ const QueryList = () => {
     } finally {
       dispatch(setIsLoading(false));
     }
-  }, [dispatch, refreshQueryList]);
+  }, [dispatch, openQuery.id, refreshQueryList]);
 
   return (
     <div className={styles.formContainer} aria-busy={isLoading}>
