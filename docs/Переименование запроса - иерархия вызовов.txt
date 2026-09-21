@@ -1,0 +1,44 @@
+QueryListItem
+=============
+	handleMenuItemClick																																			; Обработать нажатие какого-то пункта контекстного меню
+		handleRenameClick																																		; Обработать нажатие пункта Переименовать
+		    setQueryName(name);																																	; Сохраняем имя запроса в стейте
+    		renameDialogRef.current?.showModal();																												; Показ диалога для ввода нового имени
+    		handleRenameSubmit																																	; Обработка нажатия Ok в диалоге ввода имени
+    		    if (isQueryChanged) {																															; Есть ли несохраненные изменения в текущем открытом запросе?
+					setIsRenameConfirmationPending(true);																										; 	Есть - Выставляем флаг пендинга переименования
+					discardChangesDialogRef.current?.showModal();																								; 		Показ диалога подтверждения сброса изменений 
+						Да - handleDiscardChanges 																												;		Нажали Да (сброс изменений)?
+						    discardChangesDialogRef.current?.close();																							; 			Закрываем диалог подтверждения сброса изменений 
+						    if (isRenameConfirmationPending) {																									;	 		Если выставлен признак именно пендинга переименования 
+								setIsRenameConfirmationPending(false);																							;			Снимаем его
+								await saveRenamedQuery();																										; 			Сохраняем переименованный запрос
+									const sourceQuery = (await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)).data;										; 				Получаем запрос с бека
+									const renamedQuery = {...sourceQuery, name: queryName,};																	; 				Изменяем имя на новое
+									await axios.put(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`, renamedQuery);													;				Отдаем изменный запрос на бек
+									await onQueryRenamed(queryName);																							; 				Дергаем колбек для обновления списка запросов
+										QueryList
+										=========
+											handleQueryRenamed																									;	 			Обработка переименования запроса
+												const refreshedQueryList = await refreshQueryList();															; 					Обновить список запросов
+													return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();							;						Получить список запросов
+												const renamedQuery = queries.find((query) => query?.name === renamedQueryName,);								; 					Находим переименнованный запрос в списке
+												await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: renamedQuery.id, }),).unwrap();		; 					Получаем переименованный запрос с бека по id
+									dispatch(setIsQueryChanged(false));																							;			Сброс признака наличия несохраненных изменений
+						Нет - handleDialogClose																													; 		Нет - закрытие диалога ввода нового имени
+					    	discardChangesDialogRef.current?.close();																							; 			закрываем диалог
+					    	if (isRenameConfirmationPending) {	setIsRenameConfirmationPending(false); } 														; 			Если установлен признак пендинга переименования снимаем его
+				else
+					await saveRenamedQuery();
+						const sourceQuery = (await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)).data;													; 	Нет - Сохраняем переименованный запрос
+						const renamedQuery = {...sourceQuery, name: queryName,};																				; 		Получаем запрос с бека
+						await axios.put(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`, renamedQuery);																; 		Изменяем имя на новое
+						await onQueryRenamed(queryName);																										; 		Дергаем колбек для обновления списка запросов
+							QueryList
+							=========
+								handleQueryRenamed																												;			Обработка переименования запроса
+									const refreshedQueryList = await refreshQueryList();																		;					Обновить список запросов
+										return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();										;					Получить список запросов
+									const renamedQuery = queries.find((query) => query?.name === renamedQueryName,);											;					Находим переименнованный запрос в списке
+									await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: renamedQuery.id, }),).unwrap();					;					Получаем переименованный запрос с бека по id
+						dispatch(setIsQueryChanged(false));																										;		Сброс признака наличия несохраненных изменений

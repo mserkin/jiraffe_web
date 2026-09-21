@@ -1,0 +1,40 @@
+QueryListItem
+=============
+handleMenuItemClick																																				; Обработать нажатие какого-то пункта контекстного меню
+	handleDeleteClick																																			; Обработать нажатие пункта Удалить
+		deleteDialogRef.current?.showModal();																													; Показ диалога подтверждения удаления
+		handleDeleteSubmit 																																		; Обработка нажатия Yes в диалоге подтверждения удаления
+			if (isQueryChanged) {																																; Есть ли несохраненные изменения в текущем открытом запросе?
+				setIsDeleteConfirmationPending(true);																											; 	Есть - Выставляем флаг пендинга удаления
+				discardChangesDialogRef.current?.showModal();																									; 		Показ диалога подтверждения сброса изменений 
+					Да - handleDiscardChanges 																													;		Нажали Да (сброс изменений)
+						discardChangesDialogRef.current?.close();  																								;	 		Закрываем диалог подтверждения сброса изменений 						if (isDeleteConfirmationPending) {																										; 			Если выставлен признак именно пендинга удаления
+							setIsDeleteConfirmationPending(false);																								;			Снимаем его
+							await deleteQuery(); 																												;			Удаление запроса
+								await axios.delete(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`, deletedQuery);													; 				Отдаем запрос на удаление на бек
+								await onQueryDeleted(); 																								; 				Дергаем колбек для обновления списка запросов после удаления передавая туда id бывшего открытого запроса, взятый из стейта	
+									QueryList
+									=========
+										handleQueryDeleted																										;		 			Обработка удаления запроса
+											const refreshedQueryList = await refreshQueryList();																; 						Обновить список запросов
+												return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();								;							Получить список запросов
+											const openQuery = queries.find((query) => query?.id === id,);											; 						Ищем бывший открытый запрос в списке по id
+>											await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: renamedQuery.id, }),).unwrap();			; 							Найдено - получаем запрос с бека по id		
+																																								; 							Не найдено - открываем первый запрос из списка
+												dispatch(setIsQueryChanged(false));																				; 					Сброс признака наличия несохраненных изменений
+					Нет - handleDialogClose																														;		Нажали Нет - закрытие диалога ввода нового имени
+						discardChangesDialogRef.current?.close();																								;	 		закрываем диалог
+						if (isDeleteConfirmationPending) {	setIsDeleteConfirmationPending(false); }															; 			Если установлен признак пендинга удаления снимаем его
+			else
+				await deleteQuery(); 																															;	Нет - Сохраняем переименованный запрос
+					await axios.delete(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`, deletedQuery);																; 				Отдаем запрос на удаление на бек
+						await onQueryDeleted(); 																										; 				Дергаем колбек для обновления списка запросов после удаления передавая туда id бывшего открытого запроса, взятый из стейта	
+							QueryList
+							=========
+								handleQueryDeleted																												;		 			Обработка удаления запроса
+									const refreshedQueryList = await refreshQueryList();																		; 						Обновить список запросов
+										return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();										;							Получить список запросов
+									const openQuery = queries.find((query) => query?.id === id,);													; 						Ищем бывший открытый запрос в списке по id
+>									await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: renamedQuery.id, }),).unwrap();					; 							Найдено - получаем запрос с бека по id		
+																																								; 							Не найдено - открываем первый запрос из списка
+	`									dispatch(setIsQueryChanged(false));																						; 					Сброс признака наличия несохраненных изменений

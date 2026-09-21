@@ -2,11 +2,16 @@ import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { fetchQueryList } from "../redux/slices/queryListSlice";
-import { setIsLoading, selectIsLoading } from "../redux/slices/statusSlice";
+import {
+  setIsLoading,
+  selectIsLoading,
+  setIsInitialQueryOpened,
+} from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
 import QueryListItem from "./QueryListItem";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
 import { fetchQuery, selectOpenQuery } from "../redux/slices/openQuerySlice";
+import { getEntriesWithValuesStr } from "../modules/utils";
 
 const QueryList = () => {
   const dispatch = useDispatch();
@@ -40,7 +45,9 @@ const QueryList = () => {
       );
 
       if (!clonedQuery) {
-        throw new Error(`Не удалось найти клонированный запрос "${clonedQueryName}"`);
+        throw new Error(
+          `Не удалось найти клонированный запрос "${clonedQueryName}"`,
+        );
       }
 
       dispatch(setIsLoading(true));
@@ -69,7 +76,9 @@ const QueryList = () => {
       );
 
       if (!renamedQuery) {
-        throw new Error(`Не удалось найти переименованный запрос "${renamedQueryName}"`);
+        throw new Error(
+          `Не удалось найти переименованный запрос "${renamedQueryName}"`,
+        );
       }
 
       dispatch(setIsLoading(true));
@@ -87,6 +96,36 @@ const QueryList = () => {
     [dispatch, refreshQueryList],
   );
 
+  const handleQueryDeleted = useCallback(async () => {
+    console.log(`handleQueryDeleted executed`);
+    console.log(`openQuery: ${getEntriesWithValuesStr(openQuery)}`)
+    const id = openQuery.id;
+    console.log(`id=${id}`);
+    const refreshedQueryList = await refreshQueryList();
+    const queries = Array.isArray(refreshedQueryList)
+      ? refreshedQueryList
+      : [refreshedQueryList];
+    const openQueryFound = queries.find((query) => query?.id === id);
+    console.log(`openQueryFound=${getEntriesWithValuesStr(openQueryFound)}`);
+    if (!openQueryFound) {
+      console.log("Setting setIsInitialQueryOpened=false");
+      dispatch(setIsInitialQueryOpened(false));
+      console.log("isInitialQueryOpened is set to false");
+    }
+
+    dispatch(setIsLoading(true));
+    try {
+      await dispatch(
+        fetchQuery({
+          url: BACKEND_URI + QUERIES_PATH_PART,
+          queryId: id,
+        }),
+      ).unwrap();
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  }, [dispatch, refreshQueryList]);
+
   return (
     <div className={styles.formContainer} aria-busy={isLoading}>
       <div>
@@ -94,22 +133,22 @@ const QueryList = () => {
       </div>
       <div>
         {isLoading && <div>Загрузка...</div>}
-        {queryList.length === 0 && !isLoading ?  (
+        {queryList.length === 0 && !isLoading ? (
           <div className={styles.emptyQueryListMessage}>Пока нет запросов</div>
         ) : (
           Array.isArray(queryList) &&
           queryList.map((query, index) => (
-                <QueryListItem
-                    key={`QueryListItem-${query.id}`}
-                    index={index}
-                    id={query.id}
-                    name={query.name}
-                    isOpen={query.id === openQuery.id}
-                    onQueryCloned={handleQueryCloned}
-                    onQueryRenamed={handleQueryRenamed}
-                />
-            )
-          )
+            <QueryListItem
+              key={`QueryListItem-${query.id}`}
+              index={index}
+              id={query.id}
+              name={query.name}
+              isOpen={query.id === openQuery.id}
+              onQueryCloned={handleQueryCloned}
+              onQueryRenamed={handleQueryRenamed}
+              onQueryDeleted={handleQueryDeleted}
+            />
+          ))
         )}
       </div>
     </div>

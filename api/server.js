@@ -155,6 +155,34 @@ async function updateQueryById(req, res) {
     }
 }
 
+async function deleteQueryById(req, res) {
+    try {
+        const { id } = req.params;
+
+        const query = await QueryShortInfo.findOne({ id }, { _id: 0 });
+
+        if (!query) {
+            return res
+                .status(404)
+                .json({ message: 'Запрос не найден' });
+        }
+
+        await QueryShortInfo.deleteOne({ id });
+
+        const queryDocument = query.toObject({ versionKey: false });
+        delete queryDocument._id;
+
+        return res
+            .status(200)
+            .json(queryDocument);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: 'Ошибка сервера при обновлении запроса' });
+    }
+}
+
 app.get('/queries', async (req, res) => {
     getQueryList(res);
 });
@@ -169,6 +197,10 @@ app.get('/queries/:id', async (req, res) => {
 
 app.put('/queries/:id', async (req, res) => {
     updateQueryById(req, res);
+});
+
+app.delete('/queries/:id', async (req, res) => {
+    deleteQueryById(req, res);
 });
 
 

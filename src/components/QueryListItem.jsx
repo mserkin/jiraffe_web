@@ -14,12 +14,14 @@ import {
 } from "../redux/slices/statusSlice";
 import { setError } from "../redux/slices/errorSlice";
 
-const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed }) => {
+const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed, onQueryDeleted }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [queryName, setQueryName] = useState(name);
   const [isCloneConfirmationPending, setIsCloneConfirmationPending] =
     useState(false);
   const [isRenameConfirmationPending, setIsRenameConfirmationPending] =
+    useState(false);
+  const [isDeleteConfirmationPending, setIsDeleteConfirmationPending] =
     useState(false);
   const MENU_BUTTON_ID_PREFIX = "menuBtn";
   const dispatch = useDispatch();
@@ -28,9 +30,9 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
   const discardChangesDialogRef = useRef(null);
   const cloneDialogRef = useRef(null);
   const renameDialogRef = useRef(null);
+  const deleteDialogRef = useRef(null);
   const menuRef = useRef(null);
   const MENU_ITEMS = {
-    menu_item_execute: "Выполнить",
     menu_item_rename: "Переименовать",
     menu_item_clone: "Клонировать",
     menu_item_delete: "Удалить",
@@ -49,6 +51,11 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
   const handleRenameClick = () => {
     setQueryName(name);
     renameDialogRef.current?.showModal();
+  }
+
+  const handleDeleteClick = () => {
+    setQueryName(name);
+    deleteDialogRef.current?.showModal();
   }
 
   const saveClonedQuery = useCallback(async () => {
@@ -120,8 +127,38 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
       discardChangesDialogRef.current?.showModal();
       return;
     }
+    else {
+      await saveRenamedQuery();
+    }
+  };
 
-    await saveRenamedQuery();
+  const deleteQuery = useCallback(async () => {
+    try {
+      dispatch(setIsLoading(true));
+      await axios.delete(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`);
+      await onQueryDeleted();
+      dispatch(setIsQueryChanged(false));
+    } catch (error) {
+      dispatch(setError(`Ошибка при подключении к серверу: ${error.message}`));
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  }, [dispatch, id, onQueryRenamed, queryName]);
+
+
+  const handleDeleteSubmit = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteDialogRef.current?.close();
+
+    if (isQueryChanged) {
+      setIsDeleteConfirmationPending(true);
+      discardChangesDialogRef.current?.showModal();
+      return;
+    }
+    else {
+      await deleteQuery();
+    }
   };
 
   const handleMenuItemClick = (event) => {
@@ -131,12 +168,11 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
       case "menu_item_rename":
         handleRenameClick();
         break;
-      case "menu_item_execute":
-        break;
       case "menu_item_clone":
         handleCloneClick();
         break;
       case "menu_item_delete":
+        handleDeleteClick();
         break;
     }
   };
@@ -167,6 +203,9 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
     }
     if (isRenameConfirmationPending) {
       setIsRenameConfirmationPending(false);
+    }
+    if (isDeleteConfirmationPending) {
+      setIsDeleteConfirmationPending(false);
     }
   };
 
@@ -200,7 +239,11 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
       await saveRenamedQuery();
       return;
     }
-
+    if (isDeleteConfirmationPending) {
+      setIsDeleteConfirmationPending(false);
+      await deleteQuery();
+      return;
+    }
     dispatch(setIsQueryChanged(false));
     await openQuery(id);
   };
@@ -333,6 +376,27 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed 
           </div>
         </form>
       </dialog>
+      <dialog
+        ref={deleteDialogRef}
+        className={styles.dialog}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <p>Вы уверены, что хотите удалить запрос '{queryName}' ?</p>
+        <form onSubmit={handleDeleteSubmit}>
+          <div className={styles.dialog_buttons}>
+            <button type="submit">Yes</button>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                deleteDialogRef.current?.close();
+              }}
+            >
+              No
+            </button>
+          </div>
+        </form>
+      </dialog>      
     </div>
   );
 };
