@@ -1,0 +1,18 @@
+QueryToolBar
+=============
+	handleSaveAsClick																																			; Обработать нажатие кнопки Создать
+   		saveAsDialogRef.current?.showModal();																												; Показ диалога для ввода нового имени
+    	handleSaveAsSubmit																																	; Обработка нажатия Ok в диалоге ввода имени
+			await saveAsQuery();		
+																												; 			Создать пустой запрос
+				id = await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery);														;				Создаем запрос на беке
+				setIsQueryListRefreshPending({id: id});																								; 				Выставляем признак необходимости обновления списка
+				QueryList
+				=========
+					if (isQueryListRefreshPending) 																							;			Проверяем наличие пендинга 
+						setIsQueryListRefreshPending(null)																					;				Сбрасываем пендинг обновления списка запросов
+						handleQueryCreated(id) 																								;	 			Обработка переименования запроса
+							const refreshedQueryList = await refreshQueryList();															; 					Обновить список запросов
+								return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();							;						Получить список запросов
+							const createdQuery = queries.find((query) => query?.id === createdQueryId,);									; 					Находим новый запрос в списке
+							await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: createdQuery.id, }),).unwrap();		; 					Получаем новый запрос с бека по id

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsQueryChanged } from '../redux/slices/statusSlice';
 import styles from './QueryForm.module.css';
 import QueryToolBar from './QueryToolBar';
-import { selectOpenQuery } from '../redux/slices/openQuerySlice';
+import { selectOpenQuery, setQueryText, setEpicViewType, setLevelFilters } from '../redux/slices/openQuerySlice';
 
 const QueryForm = () => {
     const dispatch = useDispatch();
@@ -30,11 +30,13 @@ const QueryForm = () => {
 
     const handleEpicChoiceChanged = () => {
         console.log('handleEpicChoiceChanged');
+        dispatch(setEpicViewType(document.getElementById('epic_choice').value));
         dispatch(setIsQueryChanged(true));
     };
 
-    const handleQueryChanged = () => {
+    const handleQueryTextChanged = () => {
         console.log('handleQueryChanged');
+        dispatch(setQueryText(document.getElementById('query_input').value));
         dispatch(setIsQueryChanged(true));
     };
 
@@ -51,7 +53,7 @@ const QueryForm = () => {
                         type="text"
                         placeholder="Текст запроса"
                         value={openQuery.queryText ? openQuery.queryText : ''}
-                        onChange={handleQueryChanged}
+                        onChange={handleQueryTextChanged}
                     />
                 </div>
                 <div className={`${styles.item} ${styles.epic_label}`}>

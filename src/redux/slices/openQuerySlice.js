@@ -28,7 +28,17 @@ const fetchQuery = createAsyncThunk(
 const openQuerySlice = createSlice({
     name: 'openQuery',
     initialState,
-    reducers: {},
+    reducers: {
+        setEpicViewType: (state, action) => {
+            state.epicViewType = action.payload;
+        },
+        setQueryText: (state, action) => {
+            state.queryText = action.payload;
+        },
+        setLevelFilters: (state, action) => {
+            state.levelFilters = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder.addCase(fetchQuery.fulfilled, (state, action) => {
             console.log(action.payload);
@@ -36,8 +46,22 @@ const openQuerySlice = createSlice({
         });
     },
 });
-
+const { setQueryText, setEpicViewType, setLevelFilters } = openQuerySlice.actions;
 const selectOpenQuery = (state) => state.openQuery;
 
-export { selectOpenQuery, fetchQuery };
+const selectEpicViewType = (state) => state.openQuery.epicViewType;
+const selectQueryText = (state) => state.openQuery.queryText;
+const selectLevelFilters = (state) => state.openQuery.levelFilters;
+
+export {
+    selectOpenQuery, 
+    fetchQuery,
+    setQueryText,
+    selectQueryText,
+    setEpicViewType,
+    selectEpicViewType,
+    setLevelFilters,
+    selectLevelFilters,
+};
+
 export default openQuerySlice.reducer;

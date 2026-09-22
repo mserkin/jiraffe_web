@@ -27,6 +27,7 @@ const QueryToolBar = () => {
     const openQuery = useSelector(selectOpenQuery);
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const createDialogRef = useRef(null);
+    const saveAsDialogRef = useRef(null);
     const discardChangesDialogRef = useRef(null);
     const [queryName, setQueryName] = useState('');
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
@@ -34,6 +35,10 @@ const QueryToolBar = () => {
 
     const handleAddClick = (event) => {
         createDialogRef.current?.showModal();
+    };
+
+    const handleSaveAsClick = (event) => {
+        saveAsDialogRef.current?.showModal();
     };
 
     const createQuery = useCallback(async () => {
@@ -62,6 +67,32 @@ const QueryToolBar = () => {
         }
     }, [dispatch, queryName]);
 
+    const saveAsQuery = useCallback(async () => {
+        console.log('saveAsQuery executed');
+        try {
+            dispatch(setIsLoading(true));
+            const newQuery = {
+                name: queryName,
+                queryText: openQuery.queryText,
+                epicViewType: openQuery.epicViewType,
+                levelFilters: openQuery.levelFilters,
+            };
+            console.log('POST /queries');
+            const createdQuery = (
+                await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery)
+            ).data;
+            console.log(`createdQuery.id=${createdQuery.id}`);
+            dispatch(setIsQueryListRefreshPending(createdQuery.id));
+            dispatch(setIsQueryChanged(false));
+        } catch (error) {
+            dispatch(
+                setError(`Ошибка при подключении к серверу: ${error.message}`),
+            );
+        } finally {
+            dispatch(setIsLoading(false));
+        }
+    }, [dispatch, queryName, openQuery]);
+
     const handleCreateSubmit = async (event) => {
         console.log('handleCreateSubmit executed');
         event.preventDefault();
@@ -77,6 +108,15 @@ const QueryToolBar = () => {
             console.log('isQueryChange==false');
             await createQuery();
         }
+    };
+
+    const handleSaveAsSubmit = async (event) => {
+        console.log('handleSaveAsSubmit executed');
+        event.preventDefault();
+        event.stopPropagation();
+        saveAsDialogRef.current?.close();
+
+        await saveAsQuery();
     };
 
     const handleDialogClose = (event) => {
@@ -103,13 +143,13 @@ const QueryToolBar = () => {
         <header>
             <nav>
                 <ul className={styles.toolbar}>
-                    <li className={styles.toolbarIconItem}>
-                        <VscAdd size={32} onClick={handleAddClick} />
+                    <li className={styles.toolbarIconItem} onClick={handleAddClick}>
+                        <VscAdd size={32} />
                     </li>
                     <li className={styles.toolbarIconItem}>
                         <VscSave size={32} />
                     </li>
-                    <li className={styles.toolbarIconItem}>
+                    <li className={styles.toolbarIconItem} onClick={handleSaveAsClick}>
                         <VscSaveAs size={32} />
                     </li>
                     <li className={styles.toolbarIconItem}>
@@ -159,6 +199,36 @@ const QueryToolBar = () => {
                     </div>
                 </div>
             </dialog>
+            <dialog
+                ref={saveAsDialogRef}
+                className={styles.dialog}
+                onClick={(event) => event.stopPropagation()}
+            >
+                <p>Под каким именем хотите сохранить запрос: </p>
+                <div>
+                    <input
+                        type="text"
+                        value={queryName}
+                        className={styles.query_name_input}
+                        onChange={(event) => setQueryName(event.target.value)}
+                        autoFocus
+                    />
+                    <div className={styles.dialog_buttons}>
+                        <button type="submit" onClick={handleSaveAsSubmit}>
+                            Ok
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                saveAsDialogRef.current?.close();
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </dialog>            
             <dialog
                 ref={discardChangesDialogRef}
                 className={styles.dialog}
