@@ -6,7 +6,8 @@ import {
   setIsLoading,
   selectIsLoading,
   setIsInitialQueryOpened,
-  selectIsQueryListRefreshPending
+  selectIsQueryListRefreshPending,
+  setIsQueryListRefreshPending
 } from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
 import QueryListItem from "./QueryListItem";
@@ -128,15 +129,15 @@ const QueryList = () => {
     }
   }, [dispatch, openQuery.id, refreshQueryList]);
 
-const handleIsQueryListRefreshPending = useCallback(async () => {
+const handleIsQueryListRefreshPending = useCallback(async (queryId) => {
     console.log(`handleIsQueryListRefreshPending executed`);
     const id = isQueryListRefreshPending.id;
-    console.log(`id=${id}`);
+    console.log(`id=${queryId}`);
     const refreshedQueryList = await refreshQueryList();
     const queries = Array.isArray(refreshedQueryList)
       ? refreshedQueryList
       : [refreshedQueryList];
-    const openQueryFound = queries.find((query) => query?.id === id);
+    const openQueryFound = queries.find((query) => query?.id === queryId);
     console.log(`openQueryFound=${getEntriesWithValuesStr(openQueryFound)}`);
 
     dispatch(setIsLoading(true));
@@ -144,14 +145,27 @@ const handleIsQueryListRefreshPending = useCallback(async () => {
       await dispatch(
         fetchQuery({
           url: BACKEND_URI + QUERIES_PATH_PART,
-          queryId: id,
+          queryId,
         }),
       ).unwrap();
     } finally {
       dispatch(setIsLoading(false));
     }
-  }, [dispatch, isQueryListRefreshPending]);
+  }, [dispatch, refreshQueryList]);
 
+  useEffect(() => {
+      if (!isQueryListRefreshPending) {
+          return;
+      }
+
+      handleIsQueryListRefreshPending(isQueryListRefreshPending)
+          .catch((error) => {
+              console.error('Не удалось обновить список запросов', error);
+          })
+          .finally(() => {
+              dispatch(setIsQueryListRefreshPending(false));
+          });
+  }, [dispatch, handleIsQueryListRefreshPending, isQueryListRefreshPending]);
 
   return (
     <div className={styles.formContainer} aria-busy={isLoading}>

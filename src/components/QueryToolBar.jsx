@@ -51,7 +51,7 @@ const QueryToolBar = () => {
                 await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery)
             ).data;
             console.log(`createdQuery.id=${createdQuery.id}`);
-            setIsQueryListRefreshPending(createdQuery.id);
+            dispatch(setIsQueryListRefreshPending(createdQuery.id));
             dispatch(setIsQueryChanged(false));
         } catch (error) {
             dispatch(
