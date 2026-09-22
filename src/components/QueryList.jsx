@@ -6,6 +6,7 @@ import {
   setIsLoading,
   selectIsLoading,
   setIsInitialQueryOpened,
+  selectIsQueryListRefreshPending
 } from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
 import QueryListItem from "./QueryListItem";
@@ -17,6 +18,7 @@ const QueryList = () => {
   const dispatch = useDispatch();
   const isLoading = useSelector(selectIsLoading);
   const openQuery = useSelector(selectOpenQuery);
+  const isQueryListRefreshPending = useSelector(selectIsQueryListRefreshPending);
   const queryList = useSelector((state) => state.queryList);
 
   const refreshQueryList = useCallback(async () => {
@@ -125,6 +127,31 @@ const QueryList = () => {
       dispatch(setIsLoading(false));
     }
   }, [dispatch, openQuery.id, refreshQueryList]);
+
+const handleIsQueryListRefreshPending = useCallback(async () => {
+    console.log(`handleIsQueryListRefreshPending executed`);
+    const id = isQueryListRefreshPending.id;
+    console.log(`id=${id}`);
+    const refreshedQueryList = await refreshQueryList();
+    const queries = Array.isArray(refreshedQueryList)
+      ? refreshedQueryList
+      : [refreshedQueryList];
+    const openQueryFound = queries.find((query) => query?.id === id);
+    console.log(`openQueryFound=${getEntriesWithValuesStr(openQueryFound)}`);
+
+    dispatch(setIsLoading(true));
+    try {
+      await dispatch(
+        fetchQuery({
+          url: BACKEND_URI + QUERIES_PATH_PART,
+          queryId: id,
+        }),
+      ).unwrap();
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  }, [dispatch, isQueryListRefreshPending]);
+
 
   return (
     <div className={styles.formContainer} aria-busy={isLoading}>

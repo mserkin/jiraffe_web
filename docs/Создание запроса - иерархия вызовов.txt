@@ -1,0 +1,41 @@
+QueryToolBar
+=============
+	handleAddClick																																			; Обработать нажатие кнопки Создать
+   		createDialogRef.current?.showModal();																												; Показ диалога для ввода нового имени
+    	handleCreateSubmit																																	; Обработка нажатия Ok в диалоге ввода имени
+    		if (isQueryChanged) {																															; Есть ли несохраненные изменения в текущем открытом запросе?
+				setIsCreateConfirmationPending(true);																										; 	Есть - Выставляем флаг пендинга создания
+				discardChangesDialogRef.current?.showModal();																								; 		Показ диалога подтверждения сброса изменений 
+					Да - handleDiscardChanges 																												;		Нажали Да (сброс изменений)?
+						discardChangesDialogRef.current?.close();																							; 			Закрываем диалог подтверждения сброса изменений 
+						if (isCreateConfirmationPending) {																									;	 		Если выставлен признак именно пендинга создания
+							setIsCreateConfirmationPending(false);																							;			Снимаем его
+							await createQuery();																											; 			Создать пустой запрос
+								id = await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery);														;				Создаем запрос на беке
+								setIsQueryListRefreshPending({id: id});																								; 				Выставляем признак необходимости обновления списка
+								QueryList
+								=========
+									if (isQueryListRefreshPending) 																							;			Проверяем наличие пендинга 
+										setIsQueryListRefreshPending(null)																					;				Сбрасываем пендинг обновления списка запросов
+										handleQueryCreated(id) 																								;	 			Обработка переименования запроса
+											const refreshedQueryList = await refreshQueryList();															; 					Обновить список запросов
+												return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();							;						Получить список запросов
+											const createdQuery = queries.find((query) => query?.id === createdQueryId,);									; 					Находим новый запрос в списке
+											await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: createdQuery.id, }),).unwrap();		; 					Получаем новый запрос с бека по id
+								dispatch(setIsQueryChanged(false));																							;			Сброс признака наличия несохраненных изменений
+					Нет - handleDialogClose																													; 		Нет - закрытие диалога ввода нового имени
+						discardChangesDialogRef.current?.close();																							; 			закрываем диалог
+						if (isCreateConfirmationPending) {	setIsCreateConfirmationPending(false); } 														; 			Если установлен признак пендинга создания снимаем его
+			else
+				await createQuery();																											; 			Создать пустой запрос
+					id = await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery);														;				Создаем запрос на беке
+					setIsQueryListRefreshPending({id: id});																								; 				Выставляем признак необходимости обновления списка
+					QueryList
+					=========
+						if (isQueryListRefreshPending) 																							;			Проверяем наличие пендинга 
+							setIsQueryListRefreshPending(null)																					;				Сбрасываем пендинг обновления списка запросов
+							handleQueryCreated(id) 																								;	 			Обработка переименования запроса
+								const refreshedQueryList = await refreshQueryList();															; 					Обновить список запросов
+									return await dispatch(fetchQueryList(BACKEND_URI + QUERIES_PATH_PART),).unwrap();							;						Получить список запросов
+								const createdQuery = queries.find((query) => query?.id === createdQueryId,);									; 					Находим новый запрос в списке
+								await dispatch( fetchQuery({ url: BACKEND_URI + QUERIES_PATH_PART, queryId: createdQuery.id, }),).unwrap();		; 					Получаем новый запрос с бека по id

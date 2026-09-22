@@ -4,6 +4,7 @@ const initialState = {
   isLoading: false,
   isQueryChanged: false,
   isInitialQueryOpened: false,
+  isQueryListRefreshPending: false
 };
 
 const statusSlice = createSlice({
@@ -19,13 +20,17 @@ const statusSlice = createSlice({
     setIsInitialQueryOpened: (state, action) => {
       state.isInitialQueryOpened = action.payload;
     },
+    setIsQueryListRefreshPending: (state, action) => {
+      state.isQueryListRefreshPending = action.payload;
+    },
   },
 });
 
-const { setIsLoading, setIsQueryChanged, setIsInitialQueryOpened } = statusSlice.actions;
+const { setIsLoading, setIsQueryChanged, setIsInitialQueryOpened, setIsQueryListRefreshPending } = statusSlice.actions;
 const selectIsLoading = (state) => state.status.isLoading;
 const selectIsQueryChanged = (state) => state.status.isQueryChanged;
 const selectIsInitialQueryOpened = (state) => state.status.isInitialQueryOpened;
+const selectIsQueryListRefreshPending = (state) => state.status.isQueryListRefreshPending;
 
 export {
   setIsLoading,
@@ -34,5 +39,7 @@ export {
   selectIsQueryChanged,
   setIsInitialQueryOpened,
   selectIsInitialQueryOpened,
+  setIsQueryListRefreshPending,
+  selectIsQueryListRefreshPending
 };
 export default statusSlice.reducer;
