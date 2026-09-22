@@ -29,6 +29,9 @@ const openQuerySlice = createSlice({
     name: 'openQuery',
     initialState,
     reducers: {
+        setQueryName: (state, action) => {
+            state.name = action.payload;
+        },
         setEpicViewType: (state, action) => {
             state.epicViewType = action.payload;
         },
@@ -46,9 +49,9 @@ const openQuerySlice = createSlice({
         });
     },
 });
-const { setQueryText, setEpicViewType, setLevelFilters } = openQuerySlice.actions;
+const { setQueryName, setQueryText, setEpicViewType, setLevelFilters } = openQuerySlice.actions;
 const selectOpenQuery = (state) => state.openQuery;
-
+const selectQueryName = (state) => state.name;
 const selectEpicViewType = (state) => state.openQuery.epicViewType;
 const selectQueryText = (state) => state.openQuery.queryText;
 const selectLevelFilters = (state) => state.openQuery.levelFilters;
@@ -56,6 +59,8 @@ const selectLevelFilters = (state) => state.openQuery.levelFilters;
 export {
     selectOpenQuery, 
     fetchQuery,
+    setQueryName,
+    selectQueryName,
     setQueryText,
     selectQueryText,
     setEpicViewType,

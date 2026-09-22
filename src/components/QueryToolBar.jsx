@@ -3,7 +3,7 @@ import {
     VscAdd,
     VscSave,
     VscSaveAs,
-    VscEditCompact,
+    VscRename,
     VscPlay,
     VscDebugStop,
     VscSettings,
@@ -16,7 +16,7 @@ import {
     setIsQueryListRefreshPending,
 } from '../redux/slices/statusSlice';
 import styles from './QueryToolBar.module.css';
-import { selectOpenQuery } from '../redux/slices/openQuerySlice';
+import { selectOpenQuery, setQueryName } from '../redux/slices/openQuerySlice';
 import { useCallback, useRef, useState } from 'react';
 import { setError } from '../redux/slices/errorSlice';
 import axios from 'axios';
@@ -28,8 +28,9 @@ const QueryToolBar = () => {
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const createDialogRef = useRef(null);
     const saveAsDialogRef = useRef(null);
+    const changeNameDialogRef = useRef(null);
     const discardChangesDialogRef = useRef(null);
-    const [queryName, setQueryName] = useState('');
+    const [queryTitle, setQueryTitle] = useState('');
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
         useState(false);
 
@@ -37,16 +38,26 @@ const QueryToolBar = () => {
         createDialogRef.current?.showModal();
     };
 
+    const handleSaveClick = async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await saveQuery();
+    };
+
     const handleSaveAsClick = (event) => {
         saveAsDialogRef.current?.showModal();
     };
+
+    const handleEditNameClick = async (event) => {
+        changeNameDialogRef.current?.showModal();
+    }
 
     const createQuery = useCallback(async () => {
         console.log('createQuery executed');
         try {
             dispatch(setIsLoading(true));
             const newQuery = {
-                name: queryName,
+                name: queryTitle,
                 queryText: null,
                 epicViewType: null,
                 levelFilters: [],
@@ -65,14 +76,14 @@ const QueryToolBar = () => {
         } finally {
             dispatch(setIsLoading(false));
         }
-    }, [dispatch, queryName]);
+    }, [dispatch, queryTitle]);
 
     const saveAsQuery = useCallback(async () => {
         console.log('saveAsQuery executed');
         try {
             dispatch(setIsLoading(true));
             const newQuery = {
-                name: queryName,
+                name: queryTitle,
                 queryText: openQuery.queryText,
                 epicViewType: openQuery.epicViewType,
                 levelFilters: openQuery.levelFilters,
@@ -91,7 +102,31 @@ const QueryToolBar = () => {
         } finally {
             dispatch(setIsLoading(false));
         }
-    }, [dispatch, queryName, openQuery]);
+    }, [dispatch, queryTitle, openQuery]);
+
+    const saveQuery = useCallback(async () => {
+        console.log('saveQuery executed');
+        try {
+            dispatch(setIsLoading(true));
+            const updatedQuery = {
+                id: openQuery.id, 
+                name: openQuery.name,
+                queryText: openQuery.queryText,
+                epicViewType: openQuery.epicViewType,
+                levelFilters: openQuery.levelFilters,
+            };
+            console.log('PUT /queries/id');
+            await axios.put(`${BACKEND_URI}${QUERIES_PATH_PART}/${openQuery.id}`, updatedQuery);
+            dispatch(setIsQueryListRefreshPending(openQuery.id));
+            dispatch(setIsQueryChanged(false));
+        } catch (error) {
+            dispatch(
+                setError(`Ошибка при подключении к серверу: ${error.message}`),
+            );
+        } finally {
+            dispatch(setIsLoading(false));
+        }
+    }, [dispatch, openQuery]);    
 
     const handleCreateSubmit = async (event) => {
         console.log('handleCreateSubmit executed');
@@ -118,6 +153,16 @@ const QueryToolBar = () => {
 
         await saveAsQuery();
     };
+
+    const handleChangeNameSubmit = (event) => {
+        console.log('handleChangeNameSubmit executed');
+        event.preventDefault();
+        event.stopPropagation();
+        changeNameDialogRef.current?.close();
+
+        dispatch(setQueryName(queryTitle));
+        dispatch(setIsQueryChanged(true));
+    }
 
     const handleDialogClose = (event) => {
         event.stopPropagation();
@@ -146,14 +191,14 @@ const QueryToolBar = () => {
                     <li className={styles.toolbarIconItem} onClick={handleAddClick}>
                         <VscAdd size={32} />
                     </li>
-                    <li className={styles.toolbarIconItem}>
+                    <li aria-disabled="true" className={isQueryChanged ? styles.toolbarIconItem : styles.toolbarIconItemDisabled} onClick={handleSaveClick}>
                         <VscSave size={32} />
                     </li>
                     <li className={styles.toolbarIconItem} onClick={handleSaveAsClick}>
                         <VscSaveAs size={32} />
                     </li>
-                    <li className={styles.toolbarIconItem}>
-                        <VscEditCompact size={32} />
+                    <li className={styles.toolbarIconItem} onClick={handleEditNameClick}>
+                        <VscRename size={32} />
                     </li>
                     <li className={styles.toolbarTextItem}>
                         {openQuery.name ? openQuery.name : 'Jiraffe in the Web'}
@@ -178,9 +223,9 @@ const QueryToolBar = () => {
                 <div>
                     <input
                         type="text"
-                        value={queryName}
+                        value={queryTitle}
                         className={styles.query_name_input}
-                        onChange={(event) => setQueryName(event.target.value)}
+                        onChange={(event) => setQueryTitle(event.target.value)}
                         autoFocus
                     />
                     <div className={styles.dialog_buttons}>
@@ -208,9 +253,9 @@ const QueryToolBar = () => {
                 <div>
                     <input
                         type="text"
-                        value={queryName}
+                        value={queryTitle}
                         className={styles.query_name_input}
-                        onChange={(event) => setQueryName(event.target.value)}
+                        onChange={(event) => setQueryTitle(event.target.value)}
                         autoFocus
                     />
                     <div className={styles.dialog_buttons}>
@@ -229,6 +274,36 @@ const QueryToolBar = () => {
                     </div>
                 </div>
             </dialog>            
+            <dialog
+                ref={changeNameDialogRef}
+                className={styles.dialog}
+                onClick={(event) => event.stopPropagation()}
+            >
+                <p>Введите новое название запроса: </p>
+                <div>
+                    <input
+                        type="text"
+                        value={queryTitle}
+                        className={styles.query_name_input}
+                        onChange={(event) => setQueryTitle(event.target.value)}
+                        autoFocus
+                    />
+                    <div className={styles.dialog_buttons}>
+                        <button type="submit" onClick={handleChangeNameSubmit}>
+                            Ok
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                changeNameDialogRef.current?.close();
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </dialog>             
             <dialog
                 ref={discardChangesDialogRef}
                 className={styles.dialog}
