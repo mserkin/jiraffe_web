@@ -272,132 +272,137 @@ const QueryListItem = ({ id, index, name, isOpen, onQueryCloned, onQueryRenamed,
   }, [dispatch, id, index, isInitialQueryOpened, openQuery]);
 
   return (
-    <div
-      className={isOpen ? styles.openQuery : styles.queryName}
-      onClick={() => handleItemClick(id)}
-    >
-      <span>{name}</span>
-      <span className={styles.menuWrapper} ref={menuRef}>
-        <button
-          className={`${styles.menuBtn} ${isMenuOpen ? styles.menuOpen : ""}`}
-          type="button"
-          id={`${MENU_BUTTON_ID_PREFIX}${id}`}
-          aria-expanded={isMenuOpen}
-          aria-haspopup="menu"
-          onClick={handleButtonClick}
-        >
-          ...
-        </button>
-        {isMenuOpen && (
-          <div className={styles.contextMenu} role="menu">
-            {Object.entries(MENU_ITEMS).map(([menuItemId, menuItemText]) => (
+      <div
+          className={isOpen ? styles.openQuery : styles.queryName}
+          onClick={() => handleItemClick(id)}
+      >
+          <span>{name}</span>
+          <span className={styles.menuWrapper} ref={menuRef}>
               <button
-                id={menuItemId}
-                key={menuItemId}
-                type="button"
-                role="menuitem"
-                onClick={handleMenuItemClick}
+                  className={`${styles.menuBtn} ${isMenuOpen ? styles.menuOpen : ''}`}
+                  type="button"
+                  id={`${MENU_BUTTON_ID_PREFIX}${id}`}
+                  aria-expanded={isMenuOpen}
+                  aria-haspopup="menu"
+                  onClick={handleButtonClick}
               >
-                {menuItemText}
+                  ...
               </button>
-            ))}
-          </div>
-        )}
-      </span>
-      <dialog
-        ref={discardChangesDialogRef}
-        className={styles.dialog}
-        onClick={(event) => event.stopPropagation()}
-      >
-        В текущий запрос внесены не сохраненные изменения. Нажмите Да, чтобы
-        отменить их, нажмите Нет, чтобы вернуться к текущему запросу.
-        <br />
-        Отменить изменения?
-        <div className={styles.dialog_buttons}>
-          <button type="button" onClick={handleDiscardChanges}>
-            Да
-          </button>
-          <button type="button" onClick={handleDialogClose}>
-            Нет
-          </button>
-        </div>
-      </dialog>
-      <dialog
-        ref={cloneDialogRef}
-        className={styles.dialog}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <p>Введите название нового запроса:</p>
-        <form onSubmit={handleCloneSubmit}>
-          <input
-            type="text"
-            value={queryName}
-            onChange={(event) => setQueryName(event.target.value)}
-            autoFocus
-          />
-          <div className={styles.dialog_buttons}>
-            <button type="submit">Ok</button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                cloneDialogRef.current?.close();
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </dialog>
-      <dialog
-        ref={renameDialogRef}
-        className={styles.dialog}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <p>Введите новое название запроса:</p>
-        <form onSubmit={handleRenameSubmit}>
-          <input
-            type="text"
-            value={queryName}
-            onChange={(event) => setQueryName(event.target.value)}
-            autoFocus
-          />
-          <div className={styles.dialog_buttons}>
-            <button type="submit">Ok</button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                renameDialogRef.current?.close();
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </dialog>
-      <dialog
-        ref={deleteDialogRef}
-        className={styles.dialog}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <p>Вы уверены, что хотите удалить запрос '{queryName}' ?</p>
-        <form onSubmit={handleDeleteSubmit}>
-          <div className={styles.dialog_buttons}>
-            <button type="submit">Yes</button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                deleteDialogRef.current?.close();
-              }}
-            >
-              No
-            </button>
-          </div>
-        </form>
-      </dialog>      
-    </div>
+              {isMenuOpen && (
+                  <div className={styles.contextMenu} role="menu">
+                      {Object.entries(MENU_ITEMS).map(
+                          ([menuItemId, menuItemText]) => (
+                              <button
+                                  id={menuItemId}
+                                  key={menuItemId}
+                                  type="button"
+                                  role="menuitem"
+                                  onClick={handleMenuItemClick}
+                              >
+                                  {menuItemText}
+                              </button>
+                          ),
+                      )}
+                  </div>
+              )}
+          </span>
+          <dialog
+              ref={discardChangesDialogRef}
+              className={styles.dialog}
+              onClick={(event) => event.stopPropagation()}
+          >
+              В текущий запрос внесены не сохраненные изменения. Нажмите Да,
+              чтобы отменить их, нажмите Нет, чтобы вернуться к текущему
+              запросу.
+              <br />
+              Отменить изменения?
+              <div className={styles.dialog_buttons}>
+                  <button type="button" onClick={handleDiscardChanges}>
+                      Да
+                  </button>
+                  <button type="button" onClick={handleDialogClose}>
+                      Нет
+                  </button>
+              </div>
+          </dialog>
+          <dialog
+              ref={cloneDialogRef}
+              className={styles.dialog}
+              onClick={(event) => event.stopPropagation()}
+          >
+              <p>Введите название нового запроса:</p>
+              <form onSubmit={handleCloneSubmit}>
+                  <input
+                      type="text"
+                      value={queryName}
+                      onChange={(event) => setQueryName(event.target.value)}
+                      autoFocus
+                      className={styles.query_name_input}
+                  />
+                  <div className={styles.dialog_buttons}>
+                      <button type="submit">Ok</button>
+                      <button
+                          type="button"
+                          onClick={(event) => {
+                              event.stopPropagation();
+                              cloneDialogRef.current?.close();
+                          }}
+                      >
+                          Cancel
+                      </button>
+                  </div>
+              </form>
+          </dialog>
+          <dialog
+              ref={renameDialogRef}
+              className={styles.dialog}
+              onClick={(event) => event.stopPropagation()}
+          >
+              <p>Введите новое название запроса:</p>
+              <form onSubmit={handleRenameSubmit}>
+                  <input
+                      type="text"
+                      value={queryName}
+                      className={styles.query_name_input}
+                      onChange={(event) => setQueryName(event.target.value)}
+                      autoFocus
+                  />
+                  <div className={styles.dialog_buttons}>
+                      <button type="submit">Ok</button>
+                      <button
+                          type="button"
+                          onClick={(event) => {
+                              event.stopPropagation();
+                              renameDialogRef.current?.close();
+                          }}
+                      >
+                          Cancel
+                      </button>
+                  </div>
+              </form>
+          </dialog>
+          <dialog
+              ref={deleteDialogRef}
+              className={styles.dialog}
+              onClick={(event) => event.stopPropagation()}
+          >
+              <p>Вы уверены, что хотите удалить запрос '{queryName}' ?</p>
+              <form onSubmit={handleDeleteSubmit}>
+                  <div className={styles.dialog_buttons}>
+                      <button type="submit">Yes</button>
+                      <button
+                          type="button"
+                          onClick={(event) => {
+                              event.stopPropagation();
+                              deleteDialogRef.current?.close();
+                          }}
+                      >
+                          No
+                      </button>
+                  </div>
+              </form>
+          </dialog>
+      </div>
   );
 };
 

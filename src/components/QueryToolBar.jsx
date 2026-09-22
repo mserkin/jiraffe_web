@@ -1,85 +1,110 @@
-import { useSelector } from 'react-redux';
-import { VscAdd, VscSave, VscSaveAs, VscEditCompact, VscPlay, VscDebugStop, VscSettings } from 'react-icons/vsc';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    VscAdd,
+    VscSave,
+    VscSaveAs,
+    VscEditCompact,
+    VscPlay,
+    VscDebugStop,
+    VscSettings,
+} from 'react-icons/vsc';
 
-import { selectIsQueryChanged, setIsQueryChanged, setIsLoading, setIsQueryListRefreshPending} from "../redux/slices/statusSlice";
+import {
+    selectIsQueryChanged,
+    setIsQueryChanged,
+    setIsLoading,
+    setIsQueryListRefreshPending,
+} from '../redux/slices/statusSlice';
 import styles from './QueryToolBar.module.css';
 import { selectOpenQuery } from '../redux/slices/openQuerySlice';
 import { useCallback, useRef, useState } from 'react';
-import { selectIsQueryChanged } from '../redux/slices/statusSlice';
+import { setError } from '../redux/slices/errorSlice';
+import axios from 'axios';
+import { BACKEND_URI, QUERIES_PATH_PART } from '../modules/const';
 
 const QueryToolBar = () => {
+    const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const createDialogRef = useRef(null);
-    const [queryName, setQueryName] = useState(null);
-    const [isCreateConfirmationPending, setIsCreateConfirmationPending] = useState(false);
+    const discardChangesDialogRef = useRef(null);
+    const [queryName, setQueryName] = useState('');
+    const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
+        useState(false);
 
     const handleAddClick = (event) => {
         createDialogRef.current?.showModal();
-    }
+    };
 
     const createQuery = useCallback(async () => {
+        console.log('createQuery executed');
         try {
             dispatch(setIsLoading(true));
             const newQuery = {
                 name: queryName,
                 queryText: null,
                 epicViewType: null,
-                levelFilters: []
+                levelFilters: [],
             };
+            console.log('POST /queries');
             const createdQuery = (
                 await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery)
             ).data;
-            setIsQueryListRefreshPending(createdQuery.id)
+            console.log(`createdQuery.id=${createdQuery.id}`);
+            setIsQueryListRefreshPending(createdQuery.id);
             dispatch(setIsQueryChanged(false));
         } catch (error) {
-            dispatch(setError(`Ошибка при подключении к серверу: ${error.message}`));
+            dispatch(
+                setError(`Ошибка при подключении к серверу: ${error.message}`),
+            );
         } finally {
             dispatch(setIsLoading(false));
         }
-    }, [dispatch, id, onQueryRenamed, queryName]);
+    }, [dispatch, queryName]);
 
-    const handleCreateSubmit = async (event)  => {
+    const handleCreateSubmit = async (event) => {
+        console.log('handleCreateSubmit executed');
         event.preventDefault();
         event.stopPropagation();
         createDialogRef.current?.close();
 
         if (isQueryChanged) {
+            console.log('isQueryChange==true');
             setIsCreateConfirmationPending(true);
             discardChangesDialogRef.current?.showModal();
             return;
-        }
-        else {
+        } else {
+            console.log('isQueryChange==false');
             await createQuery();
         }
-    }
+    };
 
-  const handleDialogClose = (event) => {
-    event.stopPropagation();
-    discardChangesDialogRef.current?.close();
-    if (isCreateConfirmationPending) {
-      setIsCreateConfirmationPending(false);
-    }
-  };
+    const handleDialogClose = (event) => {
+        event.stopPropagation();
+        discardChangesDialogRef.current?.close();
+        if (isCreateConfirmationPending) {
+            setIsCreateConfirmationPending(false);
+        }
+    };
 
-const handleDiscardChanges = async (event) => {
-    event.stopPropagation();
-    discardChangesDialogRef.current?.close();
-    if (isCreateConfirmationPending) {
-      setIsCreateConfirmationPending(false);
-      await createQuery();
-      return;
-    }
-    dispatch(setIsQueryChanged(false));
-    //await openQuery(id);
-  };
+    const handleDiscardChanges = async (event) => {
+        event.stopPropagation();
+        discardChangesDialogRef.current?.close();
+        if (isCreateConfirmationPending) {
+            setIsCreateConfirmationPending(false);
+            await createQuery();
+            return;
+        }
+        dispatch(setIsQueryChanged(false));
+        //await openQuery(id);
+    };
 
     return (
         <header>
             <nav>
                 <ul className={styles.toolbar}>
                     <li className={styles.toolbarIconItem}>
-                        <VscAdd size={32} onClick={handleAddClick}/>
+                        <VscAdd size={32} onClick={handleAddClick} />
                     </li>
                     <li className={styles.toolbarIconItem}>
                         <VscSave size={32} />
@@ -91,9 +116,7 @@ const handleDiscardChanges = async (event) => {
                         <VscEditCompact size={32} />
                     </li>
                     <li className={styles.toolbarTextItem}>
-                    {
-                        openQuery.name ? openQuery.name : "Jiraffe in the Web"
-                    }
+                        {openQuery.name ? openQuery.name : 'Jiraffe in the Web'}
                     </li>
                     <li className={styles.toolbarIconItem}>
                         <VscPlay size={32} />
@@ -110,44 +133,48 @@ const handleDiscardChanges = async (event) => {
                 ref={createDialogRef}
                 className={styles.dialog}
                 onClick={(event) => event.stopPropagation()}
-                >
+            >
                 <p>Введите название нового запроса:</p>
-                <form onSubmit={handleCreateSubmit}>
+                <div>
                     <input
-                    type="text"
-                    value={queryName}
-                    onChange={(event) => setQueryName(event.target.value)}
-                    autoFocus
+                        type="text"
+                        value={queryName}
+                        className={styles.query_name_input}
+                        onChange={(event) => setQueryName(event.target.value)}
+                        autoFocus
                     />
                     <div className={styles.dialog_buttons}>
-                    <button type="submit">Ok</button>
-                    <button
-                        type="button"
-                        onClick={(event) => {
-                        event.stopPropagation();
-                        createDialogRef.current?.close();
-                        }}
-                    >
-                        Cancel
-                    </button>
+                        <button type="submit" onClick={handleCreateSubmit}>
+                            Ok
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                createDialogRef.current?.close();
+                            }}
+                        >
+                            Cancel
+                        </button>
                     </div>
-                </form>
+                </div>
             </dialog>
             <dialog
                 ref={discardChangesDialogRef}
                 className={styles.dialog}
                 onClick={(event) => event.stopPropagation()}
-                >
-                В текущий запрос внесены не сохраненные изменения. Нажмите Да, чтобы
-                отменить их, нажмите Нет, чтобы вернуться к текущему запросу.
+            >
+                В текущий запрос внесены не сохраненные изменения. Нажмите Да,
+                чтобы отменить их, нажмите Нет, чтобы вернуться к текущему
+                запросу.
                 <br />
                 Отменить изменения?
                 <div className={styles.dialog_buttons}>
                     <button type="button" onClick={handleDiscardChanges}>
-                    Да
+                        Да
                     </button>
                     <button type="button" onClick={handleDialogClose}>
-                    Нет
+                        Нет
                     </button>
                 </div>
             </dialog>

@@ -64,3 +64,7 @@ ul {
     margin-right: 10px;
     padding: 10px 20px 10px 20px;
 }
+
+.query_name_input {
+    width: 100%;
+}
