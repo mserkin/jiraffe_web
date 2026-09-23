@@ -18,21 +18,41 @@ connect(
     .then(() => console.log('Успешно подключились к MongoDB!'))
     .catch((err) => console.error('Ошибка подключения к базе:', err));
 
+const member = new Schema (
+    {
+        login: String,
+        name: String
+    }
+)
+
 const queryShortInfoSchema = new Schema(
     {
         id: String,
         name: String,
         queryText: String,
         epicViewType: String,
-        levelFilters: {
+        members: [{
             type: [Schema.Types.Mixed],
             default: [],
-        },        
+        }],        
     },
     { collection: 'queries' },
 );
 
+const SettingsSchema = new Schema(
+    {
+        login: String,
+        password: String,
+        jira_url: String,
+        project: String,
+        members: [member],        
+    },
+    { collection: 'settings' },
+);
+
+
 const QueryShortInfo = model('Query', queryShortInfoSchema)
+const Settings = model('Settings', SettingsSchema)
 
 async function getQueryList(res) {
     try {
@@ -183,6 +203,23 @@ async function deleteQueryById(req, res) {
     }
 }
 
+async function getSettings(res) {
+    try {
+        const settings = await Settings.findOne(
+            {},
+            { _id: 0, "members._id": 0 },
+        );
+        return res
+            .status(200)
+            .json(settings);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: 'Ошибка сервера при поиске запросов' });
+    }
+}
+
 app.get('/queries', async (req, res) => {
     getQueryList(res);
 });
@@ -201,6 +238,10 @@ app.put('/queries/:id', async (req, res) => {
 
 app.delete('/queries/:id', async (req, res) => {
     deleteQueryById(req, res);
+});
+
+app.get('/settings', async (req, res) => {
+    getSettings(res);
 });
 
 
