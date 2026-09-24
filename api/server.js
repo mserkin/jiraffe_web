@@ -30,11 +30,7 @@ const queryShortInfoSchema = new Schema(
         id: String,
         name: String,
         queryText: String,
-        epicViewType: String,
-        members: [{
-            type: [Schema.Types.Mixed],
-            default: [],
-        }],        
+        epicViewType: String,    
     },
     { collection: 'queries' },
 );
@@ -152,7 +148,7 @@ async function updateQueryById(req, res) {
         const query = await QueryShortInfo.findOneAndUpdate(
             { id },
             { $set: updatedQuery },
-            { new: true, runValidators: true },
+            { returnDocument: 'after', runValidators: true },
         );
 
         if (!query) {
@@ -220,6 +216,41 @@ async function getSettings(res) {
     }
 }
 
+async function updateSettings(req, res) {
+    try {
+        if ( !req.body || typeof req.body !== 'object' || Array.isArray(req.body) ) {
+            return res
+                .status(400)
+                .json({ error: 'Тело запроса должно быть объектом' });
+        }
+
+        const updated_settings = {...req.body}
+        const settings = await Settings.findOneAndUpdate(
+            {},
+            { $set: updated_settings},
+            { returnDocument: 'after', runValidators: true },
+        );
+
+        if (!settings) {
+            return res
+                .status(404)
+                .json({ error: 'Документ настроек не найден в базе данных!' });
+        }
+
+        const settingsDocument = settings.toObject({ versionKey: false });
+        delete settingsDocument._id;
+
+        return res
+            .status(200)
+            .json(settingsDocument);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: 'Ошибка сервера при обновлении настроек' });
+    }
+}
+
 app.get('/queries', async (req, res) => {
     getQueryList(res);
 });
@@ -244,6 +275,9 @@ app.get('/settings', async (req, res) => {
     getSettings(res);
 });
 
+app.put('/settings', async (req, res) => {
+    updateSettings(req, res);
+});
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);

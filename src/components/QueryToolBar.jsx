@@ -35,6 +35,7 @@ const QueryToolBar = () => {
     const [queryTitle, setQueryTitle] = useState("");
     const [userLogin, setUserLogin] = useState("");
     const [userPassword, setUserPassword] = useState("");
+    const [project, setProject] = useState("");
     const [jiraServer, setJiraServer] = useState("");
     const [teamMembers, setTeamMembers] = useState([]);
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
@@ -177,7 +178,14 @@ const QueryToolBar = () => {
         dispatch(setIsQueryChanged(true));
     };
 
-    const handleSettingsSubmit = (event) => {};
+    const handleSettingsSubmit = (event) => {
+        console.log("handleSettingsSubmit executed");
+        event.preventDefault();
+        event.stopPropagation();
+        
+        settingsDialogRef.current?.close();
+    };
+
     const handleAddUserClick = (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -376,13 +384,14 @@ const QueryToolBar = () => {
                             type="password"
                             value={userPassword}
                             className={styles.query_name_input}
+                            autoComplete="true"
                             onChange={(event) =>
                                 setUserPassword(event.target.value)
                             }
                         />
                     </div>
                     <div className={styles.settings_dialog_setting_label}>
-                        <label htmlFor="userLoginInput"> Сервер Jira: </label>
+                        <label htmlFor="jiraServerInput"> Сервер Jira: </label>
                     </div>
                     <div className={styles.settings_dialog_setting}>
                         <input
@@ -392,9 +401,21 @@ const QueryToolBar = () => {
                             onChange={(event) =>
                                 setJiraServer(event.target.value)
                             }
-                            autoFocus
                         />
                     </div>
+                    <div className={styles.settings_dialog_setting_label}>
+                        <label htmlFor="projectInput"> Проект: </label>
+                    </div>
+                    <div className={styles.settings_dialog_setting}>
+                        <input
+                            id="projectInput"
+                            type="text"
+                            value={project}
+                            onChange={(event) =>
+                                setProject(event.target.value)
+                            }
+                        />
+                    </div>                    
                     <div className={styles.settings_dialog_section_header}>
                         Члены команды
                     </div>
