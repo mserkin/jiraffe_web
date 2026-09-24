@@ -340,9 +340,9 @@ const QueryToolBar = () => {
                 onClick={(event) => event.stopPropagation()}
             >
                 <p>Настройки Jiraffe {VERSION}</p>
-                <div className="gridContainer">
+                <div className={styles.gridContainer}>
                     <div className={styles.jira_login_label}>
-                        <label forHtml="userLoginInput"> Логин: </label>
+                        <label htmlFor="userLoginInput"> Логин: </label>
                     </div>
                     <div className={styles.jira_login}>
                         <input
@@ -355,10 +355,10 @@ const QueryToolBar = () => {
                             autoFocus
                         />
                     </div>
-                    <div className="jira_password_label">
-                        <label forHtml="userPasswordInput"> Пароль: </label>
+                    <div className={styles.jira_password_label}>
+                        <label htmlFor="userPasswordInput"> Пароль: </label>
                     </div>
-                    <div className="jira_password">
+                    <div className={styles.jira_password}>
                         <input
                             id="userPasswordInput"
                             type="password"
@@ -369,13 +369,13 @@ const QueryToolBar = () => {
                             }
                         />
                     </div>
-                    <div className="user_login_label">Логин</div>
-                    <div className="user_name_label">Имя</div>
-                    <div className="user_login">
+                    <div className={styles.user_login_label}>Логин</div>
+                    <div className={styles.user_name_label}>Имя</div>
+                    <div className={styles.user_login}>
                         <input id="userLoginInput" type="text" />
                     </div>
-                    <div className="user_name">
-                        <input id="userNameInput" type="text" />
+                    <div className={styles.user_name}>
+                        <input id="userNameTeamInput" type="text" />
                     </div>
                     <div className={`${styles.item} ${styles.add_level_btn}`}>
                         <button
