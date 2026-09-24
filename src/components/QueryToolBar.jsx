@@ -350,13 +350,13 @@ const QueryToolBar = () => {
             >
                 <p>Настройки Jiraffe {VERSION}</p>
                 <div className={styles.gridContainer}>
-                    <div className={styles.jira_creds_header}>
+                    <div className={styles.settings_dialog_section_header}>
                         Учетные данные Jira
                     </div>                    
-                    <div className={styles.jira_login_label}>
+                    <div className={styles.settings_dialog_setting_label}>
                         <label htmlFor="userLoginInput"> Логин: </label>
                     </div>
-                    <div className={styles.jira_login}>
+                    <div className={styles.settings_dialog_setting}>
                         <input
                             id="userLoginInput"
                             type="text"
@@ -367,10 +367,10 @@ const QueryToolBar = () => {
                             autoFocus
                         />
                     </div>
-                    <div className={styles.jira_password_label}>
+                    <div className={styles.settings_dialog_setting_label}>
                         <label htmlFor="userPasswordInput"> Пароль: </label>
                     </div>
-                    <div className={styles.jira_password}>
+                    <div className={styles.settings_dialog_setting}>
                         <input
                             id="userPasswordInput"
                             type="password"
@@ -381,10 +381,10 @@ const QueryToolBar = () => {
                             }
                         />
                     </div>
-                    <div className={styles.jira_login_label}>
+                    <div className={styles.settings_dialog_setting_label}>
                         <label htmlFor="userLoginInput"> Сервер Jira: </label>
                     </div>
-                    <div className={styles.jira_login}>
+                    <div className={styles.settings_dialog_setting}>
                         <input
                             id="jiraServerInput"
                             type="text"
@@ -395,15 +395,16 @@ const QueryToolBar = () => {
                             autoFocus
                         />
                     </div>
-                    <div className={styles.team_members_header}>
+                    <div className={styles.settings_dialog_section_header}>
                         Члены команды
                     </div>
-                    <div className={styles.user_login_label}>Логин</div>
-                    <div className={styles.user_name_label}>Имя</div>
+                    <div className={styles.team_members_label}>Логин</div>
+                    <div className={styles.team_members_label}>Имя</div>
                     {teamMembers.map((member, index) => (
                         <React.Fragment key={`member-${index}`}>
-                            <div className={styles.user_login}>
-                                <input
+                            <div>
+                                <input 
+                                    className={styles.team_member_input}
                                     type="text"
                                     value={member.login}
                                     onChange={(event) => {
@@ -413,8 +414,9 @@ const QueryToolBar = () => {
                                     }}
                                 />
                             </div>
-                            <div className={styles.user_name}>
+                            <div>
                                 <input
+                                    className={styles.team_member_input}
                                     type="text"
                                     value={member.name}
                                     onChange={(event) => {

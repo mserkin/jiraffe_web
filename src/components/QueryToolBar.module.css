@@ -68,6 +68,7 @@ ul {
   display: flex;
   justify-content: center; /* Centers buttons horizontally */
   align-items: center;     /* Centers buttons vertically (if div has height) */
+  margin-top: 20px;
   gap: 10px;               /* Adds clean spacing between the buttons */
 }
 
@@ -105,65 +106,30 @@ ul {
     background-color: white;
 }
 
-.jira_creds_header {
+.settings_dialog_section_header {
     grid-column: 1 / -1;
     font-weight: bold;
-    padding: 0px 0px 0px 0px;
-    margin-top: 10px;
-}
-
-.jira_login_label {
-    text-align: right;
-    padding: 0px 10px 0px 0px;
-}
-
-.jira_login {
-    padding-left: 10px;
-}
-
-.jira_login input {
-    font-size: 1rem;
-    width: 100%;
-}
-
-.jira_password_label {
-    text-align: right;
-    padding: 0px 10px 0px 0px;
-}
-
-.jira_password {
-    padding-left: 10px;
-}
-
-.jira_password input {
-    font-size: 1rem;
-    width: 100%;
-}
-
-.user_login_label {
-    text-align: center;
-    padding: 10px 10px 0px 0px;
-}
-
-.user_name_label {
     padding: 10px 0px 0px 0px;
-    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 10px;
 }
 
-.user_login {
+.settings_dialog_setting_label {
+    text-align: right;
     padding: 0px 10px 0px 0px;
 }
 
-.user_login input {
+.settings_dialog_setting input {
     font-size: 1rem;
     width: 100%;
 }
 
-.user_name {
-    padding-left: 10px;
+.team_members_label {
+    text-align: center;
+    padding-top: 10px;
 }
 
-.user_name input {
+.team_member_input {
     font-size: 1rem;
     width: 100%;
 }
@@ -171,12 +137,9 @@ ul {
 .add_level_btn {
     grid-column: 1 / -1;
     width: 100%;
-    margin-top: 10px;
 }
 
-.team_members_header {
+.add_level_button {
     grid-column: 1 / -1;
-    font-weight: bold;
-    padding: 10px 0px 5px 0px;
-    margin-top: 10px;
+    width: 100%;
 }
