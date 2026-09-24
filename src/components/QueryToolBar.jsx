@@ -1,3 +1,4 @@
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     VscAdd,
@@ -34,6 +35,7 @@ const QueryToolBar = () => {
     const [queryTitle, setQueryTitle] = useState("");
     const [userLogin, setUserLogin] = useState("");
     const [userPassword, setUserPassword] = useState("");
+    const [teamMembers, setTeamMembers] = useState([]);
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
         useState(false);
 
@@ -175,7 +177,13 @@ const QueryToolBar = () => {
     };
 
     const handleSettingsSubmit = (event) => {};
-    const handleAddUserClick = (event) => {};
+    const handleAddUserClick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (teamMembers.length < 14) {
+            setTeamMembers([...teamMembers, { login: "", name: "" }]);
+        }
+    };
 
     const handleDialogClose = (event) => {
         event.stopPropagation();
@@ -369,24 +377,49 @@ const QueryToolBar = () => {
                             }
                         />
                     </div>
+                    <div className={styles.team_members_header}>
+                        Члены команды
+                    </div>
                     <div className={styles.user_login_label}>Логин</div>
                     <div className={styles.user_name_label}>Имя</div>
-                    <div className={styles.user_login}>
-                        <input id="userLoginInput" type="text" />
-                    </div>
-                    <div className={styles.user_name}>
-                        <input id="userNameTeamInput" type="text" />
-                    </div>
-                    <div className={`${styles.item} ${styles.add_level_btn}`}>
-                        <button
-                            id="add_level_btn"
-                            type="button"
-                            className={styles.add_level_button}
-                            onClick={handleAddUserClick}
-                        >
-                            Добавить члена команды
-                        </button>
-                    </div>
+                    {teamMembers.map((member, index) => (
+                        <React.Fragment key={`member-${index}`}>
+                            <div className={styles.user_login}>
+                                <input
+                                    type="text"
+                                    value={member.login}
+                                    onChange={(event) => {
+                                        const updatedMembers = [...teamMembers];
+                                        updatedMembers[index].login = event.target.value;
+                                        setTeamMembers(updatedMembers);
+                                    }}
+                                />
+                            </div>
+                            <div className={styles.user_name}>
+                                <input
+                                    type="text"
+                                    value={member.name}
+                                    onChange={(event) => {
+                                        const updatedMembers = [...teamMembers];
+                                        updatedMembers[index].name = event.target.value;
+                                        setTeamMembers(updatedMembers);
+                                    }}
+                                />
+                            </div>
+                        </React.Fragment>
+                    ))}
+                    {teamMembers.length < 14 && (
+                        <div className={`${styles.item} ${styles.add_level_btn}`}>
+                            <button
+                                id="add_level_btn"
+                                type="button"
+                                className={styles.add_level_button}
+                                onClick={handleAddUserClick}
+                            >
+                                Добавить члена команды
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className={styles.dialog_buttons}>

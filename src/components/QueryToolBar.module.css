@@ -89,19 +89,14 @@ ul {
 .gridContainer {
     font-size: 1rem;
     display: grid;
-    grid-template-rows: 28px 28px;
     grid-template-columns: 1fr 2fr;
     color: darkslategray;
     background-color: white;
     grid-auto-rows: 30px;
     justify-items: stretch;
     align-items: stretch;
-    grid-template-areas:
-    'jira_login_label jira_login'
-    'jira_password_label jira_password'
-    'user_login_label user_name_label'
-    'user_login user_name'
-    ;
+    gap: 8px;
+    padding: 10px 0px;
 }
 
 .item {
@@ -110,13 +105,12 @@ ul {
 }
 
 .jira_login_label {
-    grid-area: jira_login_label;
     text-align: right;
     padding: 0px 10px 0px 0px;
 }
 
 .jira_login {
-    grid-area: jira_login;
+    padding-left: 10px;
 }
 
 .jira_login input {
@@ -125,13 +119,12 @@ ul {
 }
 
 .jira_password_label {
-    grid-area: jira_password_label;
     text-align: right;
     padding: 0px 10px 0px 0px;
 }
 
 .jira_password {
-    grid-area: jira_password;
+    padding-left: 10px;
 }
 
 .jira_password input {
@@ -140,20 +133,16 @@ ul {
 }
 
 .user_login_label {
-    grid-area: user_login_label;
     text-align: center;
     padding: 10px 10px 0px 0px;
 }
 
 .user_name_label {
     padding: 10px 0px 0px 0px;
-    grid-area: user_name_label;
     text-align: center;
 }
 
 .user_login {
-    grid-area: user_login;
-    text-align: right;
     padding: 0px 10px 0px 0px;
 }
 
@@ -163,7 +152,7 @@ ul {
 }
 
 .user_name {
-    grid-area: user_name;
+    padding-left: 10px;
 }
 
 .user_name input {
@@ -173,6 +162,13 @@ ul {
 
 .add_level_btn {
     grid-column: 1 / -1;
-    grid-row: 5;
     width: 100%;
+    margin-top: 10px;
+}
+
+.team_members_header {
+    grid-column: 1 / -1;
+    font-weight: bold;
+    padding: 10px 0px 5px 0px;
+    margin-top: 10px;
 }
