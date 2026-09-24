@@ -78,8 +78,9 @@ ul {
 }
 
 .dialog p {
+    font-size: 1.3rem;   
     margin-bottom: 12px;
-    padding: 0px 20px 10px 20px;
+    padding: 0px 20px 10px 0px;
 }
 
 .query_name_input {
@@ -102,6 +103,13 @@ ul {
 .item {
     color: darkslategray;
     background-color: white;
+}
+
+.jira_creds_header {
+    grid-column: 1 / -1;
+    font-weight: bold;
+    padding: 0px 0px 0px 0px;
+    margin-top: 10px;
 }
 
 .jira_login_label {

@@ -35,6 +35,7 @@ const QueryToolBar = () => {
     const [queryTitle, setQueryTitle] = useState("");
     const [userLogin, setUserLogin] = useState("");
     const [userPassword, setUserPassword] = useState("");
+    const [jiraServer, setJiraServer] = useState("");
     const [teamMembers, setTeamMembers] = useState([]);
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
         useState(false);
@@ -349,6 +350,9 @@ const QueryToolBar = () => {
             >
                 <p>Настройки Jiraffe {VERSION}</p>
                 <div className={styles.gridContainer}>
+                    <div className={styles.jira_creds_header}>
+                        Учетные данные Jira
+                    </div>                    
                     <div className={styles.jira_login_label}>
                         <label htmlFor="userLoginInput"> Логин: </label>
                     </div>
@@ -375,6 +379,20 @@ const QueryToolBar = () => {
                             onChange={(event) =>
                                 setUserPassword(event.target.value)
                             }
+                        />
+                    </div>
+                    <div className={styles.jira_login_label}>
+                        <label htmlFor="userLoginInput"> Сервер Jira: </label>
+                    </div>
+                    <div className={styles.jira_login}>
+                        <input
+                            id="jiraServerInput"
+                            type="text"
+                            value={jiraServer}
+                            onChange={(event) =>
+                                setJiraServer(event.target.value)
+                            }
+                            autoFocus
                         />
                     </div>
                     <div className={styles.team_members_header}>
