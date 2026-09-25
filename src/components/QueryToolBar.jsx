@@ -21,23 +21,43 @@ import { selectOpenQuery, setQueryName } from "../redux/slices/openQuerySlice";
 import { useCallback, useRef, useState } from "react";
 import { setError } from "../redux/slices/errorSlice";
 import axios from "axios";
-import { BACKEND_URI, QUERIES_PATH_PART, VERSION } from "../modules/const";
+import {
+    BACKEND_URI,
+    QUERIES_PATH_PART,
+    SETTINGS_PATH_PART,
+    VERSION,
+} from "../modules/const";
+import {
+    selectSettings,
+    fetchSettings,
+    setJiraLogin,
+    selectJiraLogin,
+    setJiraPassword,
+    selectJiraPassword,
+    setJiraServer,
+    selectJiraServer,
+    setProject,
+    selectProject,
+    setTeamMembers,
+    selectTeamMembers,
+} from "../redux/slices/settingsSlice";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const isQueryChanged = useSelector(selectIsQueryChanged);
+    const settings = useSelector(selectSettings);
+    const jiraLogin = useSelector(selectJiraLogin);
+    const jiraPassword = useSelector(selectJiraPassword);
+    const jiraServer = useSelector(selectJiraServer);
+    const project = useSelector(selectProject);
+    const teamMembers = useSelector(selectTeamMembers);
     const createDialogRef = useRef(null);
     const saveAsDialogRef = useRef(null);
     const changeNameDialogRef = useRef(null);
     const settingsDialogRef = useRef(null);
     const discardChangesDialogRef = useRef(null);
     const [queryTitle, setQueryTitle] = useState("");
-    const [userLogin, setUserLogin] = useState("");
-    const [userPassword, setUserPassword] = useState("");
-    const [project, setProject] = useState("");
-    const [jiraServer, setJiraServer] = useState("");
-    const [teamMembers, setTeamMembers] = useState([]);
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
         useState(false);
 
@@ -60,6 +80,11 @@ const QueryToolBar = () => {
     };
 
     const handleSettingsClick = async (event) => {
+        console.log("handleSettingsClick executed");
+        const url = BACKEND_URI + SETTINGS_PATH_PART;
+        console.log("Fetching settings from url: " + url);
+        dispatch(fetchSettings({ url }));
+        console.log("Settings fetched");
         settingsDialogRef.current?.showModal();
     };
 
@@ -142,6 +167,31 @@ const QueryToolBar = () => {
         }
     }, [dispatch, openQuery]);
 
+    const updateSettings = useCallback(async () => {
+        console.log("updateSettings executed");
+        try {
+            dispatch(setIsLoading(true));
+            const updatedSettings = {
+                jiraLogin,
+                jiraPassword,
+                jiraServer,
+                project,
+                teamMembers,
+            };
+            console.log("PUT /settings");
+            await axios.put(
+                `${BACKEND_URI}${SETTINGS_PATH_PART}`,
+                updatedSettings,
+            );
+        } catch (error) {
+            dispatch(
+                setError(`Ошибка при подключении к серверу: ${error.message}`),
+            );
+        } finally {
+            dispatch(setIsLoading(false));
+        }
+    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, teamMembers]);
+
     const handleCreateSubmit = async (event) => {
         console.log("handleCreateSubmit executed");
         event.preventDefault();
@@ -178,19 +228,20 @@ const QueryToolBar = () => {
         dispatch(setIsQueryChanged(true));
     };
 
-    const handleSettingsSubmit = (event) => {
+    const handleSettingsSubmit = async (event) => {
         console.log("handleSettingsSubmit executed");
         event.preventDefault();
         event.stopPropagation();
-        
+
         settingsDialogRef.current?.close();
+        await updateSettings();
     };
 
     const handleAddUserClick = (event) => {
         event.preventDefault();
         event.stopPropagation();
         if (teamMembers.length < 14) {
-            setTeamMembers([...teamMembers, { login: "", name: "" }]);
+            dispatch(setTeamMembers([...teamMembers, { login: "", name: "" }]));
         }
     };
 
@@ -360,62 +411,56 @@ const QueryToolBar = () => {
                 <div className={styles.gridContainer}>
                     <div className={styles.settings_dialog_section_header}>
                         Учетные данные Jira
-                    </div>                    
+                    </div>
                     <div className={styles.settings_dialog_setting_label}>
-                        <label htmlFor="userLoginInput"> Логин: </label>
+                        <label> Логин: </label>
                     </div>
                     <div className={styles.settings_dialog_setting}>
                         <input
-                            id="userLoginInput"
                             type="text"
-                            value={userLogin}
+                            value={jiraLogin}
                             onChange={(event) =>
-                                setUserLogin(event.target.value)
+                                dispatch(setJiraLogin(event.target.value))
                             }
                             autoFocus
                         />
                     </div>
                     <div className={styles.settings_dialog_setting_label}>
-                        <label htmlFor="userPasswordInput"> Пароль: </label>
+                        <label> Пароль: </label>
                     </div>
                     <div className={styles.settings_dialog_setting}>
                         <input
-                            id="userPasswordInput"
                             type="password"
-                            value={userPassword}
+                            value={jiraPassword}
                             className={styles.query_name_input}
                             autoComplete="true"
                             onChange={(event) =>
-                                setUserPassword(event.target.value)
+                                dispatch(setJiraPassword(event.target.value))
                             }
                         />
                     </div>
                     <div className={styles.settings_dialog_setting_label}>
-                        <label htmlFor="jiraServerInput"> Сервер Jira: </label>
+                        <label> Сервер Jira: </label>
                     </div>
                     <div className={styles.settings_dialog_setting}>
                         <input
-                            id="jiraServerInput"
                             type="text"
                             value={jiraServer}
                             onChange={(event) =>
-                                setJiraServer(event.target.value)
+                                dispatch(setJiraServer(event.target.value))
                             }
                         />
                     </div>
                     <div className={styles.settings_dialog_setting_label}>
-                        <label htmlFor="projectInput"> Проект: </label>
+                        <label> Проект: </label>
                     </div>
                     <div className={styles.settings_dialog_setting}>
                         <input
-                            id="projectInput"
                             type="text"
                             value={project}
-                            onChange={(event) =>
-                                setProject(event.target.value)
-                            }
+                            onChange={(event) => dispatch(setProject(event.target.value))}
                         />
-                    </div>                    
+                    </div>
                     <div className={styles.settings_dialog_section_header}>
                         Члены команды
                     </div>
@@ -424,14 +469,22 @@ const QueryToolBar = () => {
                     {teamMembers.map((member, index) => (
                         <React.Fragment key={`member-${index}`}>
                             <div>
-                                <input 
+                                <input
                                     className={styles.team_member_input}
                                     type="text"
-                                    value={member.login}
+                                    value={member.login ?? ""} // Добавили защиту от null/undefined
                                     onChange={(event) => {
+                                        // Создаем новый массив
                                         const updatedMembers = [...teamMembers];
-                                        updatedMembers[index].login = event.target.value;
-                                        setTeamMembers(updatedMembers);
+                                        // Глубоко копируем объект и меняем в нем свойство login
+                                        updatedMembers[index] = {
+                                            ...updatedMembers[index],
+                                            login: event.target.value,
+                                        };
+                                        // Отправляем обновленный массив в Redux через dispatch
+                                        dispatch(
+                                            setTeamMembers(updatedMembers),
+                                        );
                                     }}
                                 />
                             </div>
@@ -439,18 +492,28 @@ const QueryToolBar = () => {
                                 <input
                                     className={styles.team_member_input}
                                     type="text"
-                                    value={member.name}
+                                    value={member.name ?? ""} // Добавили защиту от null/undefined
                                     onChange={(event) => {
+                                        // Создаем новый массив
                                         const updatedMembers = [...teamMembers];
-                                        updatedMembers[index].name = event.target.value;
-                                        setTeamMembers(updatedMembers);
+                                        // Глубоко копируем объект и меняем в нем свойство name
+                                        updatedMembers[index] = {
+                                            ...updatedMembers[index],
+                                            name: event.target.value,
+                                        };
+                                        // Отправляем обновленный массив в Redux через dispatch
+                                        dispatch(
+                                            setTeamMembers(updatedMembers),
+                                        );
                                     }}
                                 />
                             </div>
                         </React.Fragment>
                     ))}
                     {teamMembers.length < 14 && (
-                        <div className={`${styles.item} ${styles.add_level_btn}`}>
+                        <div
+                            className={`${styles.item} ${styles.add_level_btn}`}
+                        >
                             <button
                                 id="add_level_btn"
                                 type="button"

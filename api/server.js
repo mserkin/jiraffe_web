@@ -37,11 +37,11 @@ const queryShortInfoSchema = new Schema(
 
 const SettingsSchema = new Schema(
     {
-        login: String,
-        password: String,
-        jira_url: String,
+        jiraLogin: String,
+        jiraPassword: String,
+        jiraServer: String,
         project: String,
-        members: [member],        
+        teamMembers: [member],        
     },
     { collection: 'settings' },
 );
@@ -203,7 +203,7 @@ async function getSettings(res) {
     try {
         const settings = await Settings.findOne(
             {},
-            { _id: 0, "members._id": 0 },
+            { _id: 0, "teamMembers._id": 0 },
         );
         return res
             .status(200)

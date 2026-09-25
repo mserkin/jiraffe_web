@@ -51,7 +51,7 @@ const openQuerySlice = createSlice({
 });
 const { setQueryName, setQueryText, setEpicViewType, setLevelFilters } = openQuerySlice.actions;
 const selectOpenQuery = (state) => state.openQuery;
-const selectQueryName = (state) => state.name;
+const selectQueryName = (state) => state.openQuery.name;
 const selectEpicViewType = (state) => state.openQuery.epicViewType;
 const selectQueryText = (state) => state.openQuery.queryText;
 const selectLevelFilters = (state) => state.openQuery.levelFilters;

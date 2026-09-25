@@ -3,6 +3,7 @@ import statusReducer from './slices/statusSlice.js';
 import errorReducer from './slices/errorSlice.js';
 import queryListReducer from './slices/queryListSlice.js';
 import openQueryReducer from './slices/openQuerySlice.js';
+import settingsReducer from './slices/settingsSlice.js'
 
 const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
         openQuery: openQueryReducer,
         queryList: queryListReducer,
         status: statusReducer,
+        settings: settingsReducer
     },
 });
 
