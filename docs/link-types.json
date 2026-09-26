@@ -1,0 +1,47 @@
+db["link-types"].insertMany(
+[
+	{
+		"type": "Child", 
+		"inward": {
+			"id": "CHILD",
+			"name": "Child"
+		},
+		"outward": {
+			"id": "PARENT",
+			"name": "Parent"
+		}
+	},
+	{
+		"type": "Dependency", 
+		"inward": {
+			"id": "REQUIRED_BY",
+			"name": "Prevents implement"
+		},
+		"outward": {
+			"id": "DEPENDENCY",
+			"name": "Depends on"
+		}
+	},
+	{	
+		"type": "Зависимость", 
+		"inward": {
+			"id": "REQUIRED_BY_RUS",
+			"name": "Зависимая"
+		},
+		"outward": {
+			"id": "DEPENDENCY_RUS",
+			"name": "Зависит от"
+		}
+	},
+	{	
+		"type": "Blocks",
+		"inward": {
+			"id": "BLOCKED_BY",
+			"name": "is blocked by"
+		},
+		"outward": {
+			"id": "BLOCKS",
+			"name": "blocks"
+		}
+	}
+])

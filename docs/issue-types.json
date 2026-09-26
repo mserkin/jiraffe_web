@@ -1,0 +1,317 @@
+db["issue-types"].insertMany(
+[
+    {
+    	"id": "UNKNOWN",
+    	"name": "unknown",
+    	"icon": "unknown",
+        "statuses": [
+            {
+                "id": "UNKNOWN",
+                "name": "Unknown"
+            }
+        ]
+    },
+    {
+    	"id": "EPIC",
+    	"name": "epic",
+    	"icon": "epic",
+        "statuses": [
+            {
+                "id": "IDEA",
+                "name": "Idea"
+            },
+            {
+                "id": "DISCOVERY",
+                "name": "Discovery"
+            },
+            {
+                "id": "QUARTERLY BACKLOG",
+                "name": "Quarterly backlog"
+            },
+            {
+                "id": "IMPLEMENTING",
+                "name": "Implementing"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "STORY",
+    	"name": "Story",
+    	"icon": "story",
+        "statuses": [
+            {
+                "id": "СОЗДАНО",
+                "name": "Создано"
+            },
+            {
+                "id": "АНАЛИЗ",
+                "name": "Анализ"
+            },
+            {
+                "id": "ПРОЕКТИРОВАНИЕ",
+                "name": "Проектирование"
+            },
+            {
+                "id": "ГОТОВО К РАЗРАБОТКЕ",
+                "name": "Готово к разработке"
+            },
+            {
+                "id": "РАЗРАБОТКА",
+                "name": "Разработка"
+            },
+            {
+                "id": "ВНЕДРЕНИЕ",
+                "name": "Внедрение"
+            },
+            {
+                "id": "ЗАКРЫТО",
+                "name": "Закрыто"
+            }
+        ]
+    },
+    {
+    	"id": "TASK",
+    	"name": "Task",
+    	"icon": "task",
+        "statuses": [
+            {
+                "id": "PRODUCT BACKLOG",
+                "name": "Product backlog"
+            },
+            {
+                "id": "TEAM BACKLOG",
+                "name": "Team backlog"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "IN RELEASE",
+                "name": "In release"
+            },
+            {
+                "id": "OPEN TO TEAM BANK",
+                "name": "Open to team\\bank"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "SUB_TASK",
+    	"name": "Sub-task",
+    	"icon": "sub-task",
+        "statuses": [
+            {
+                "id": "SPRINT BACKLOG",
+                "name": "Sprint backlog"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "REVIEW",
+                "name": "Review"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "BUG",
+    	"name": "Bug",
+    	"icon": "bug",
+        "statuses": [
+            {
+                "id": "PRODUCT BACKLOG",
+                "name": "Product backlog"
+            },
+            {
+                "id": "TEAM BACKLOG",
+                "name": "Team backlog"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "IN RELEASE",
+                "name": "In release"
+            },
+            {
+                "id": "OPEN TO TEAM BANK",
+                "name": "Open to team\\bank"
+            },
+            {
+                "id": "OPEN TO CUSTOMERS",
+                "name": "Open to customers"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "SPIKE",
+    	"name": "Spike",
+    	"icon": "spike",
+        "statuses": [
+            {
+                "id": "PRODUCT BACKLOG",
+                "name": "Product backlog"
+            },
+            {
+                "id": "TEAM BACKLOG",
+                "name": "Team backlog"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "TESTING",
+    	"name": "Testing",
+    	"icon": "testing",
+        "statuses": [
+            {
+                "id": "SPRINT BACKLOG",
+                "name": "Sprint backlog"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "REVIEW",
+                "name": "Review"
+            },
+            {
+                "id": "TESTING",
+                "name": "Testing"
+            },
+            {
+                "id": "READY TO DEPLOY",
+                "name": "Ready to deploy"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "DEVELOPMENT_SUBTASK",
+    	"name": "Development",
+    	"icon": "development",
+        "statuses": [
+            {
+                "id": "SPRINT BACKLOG",
+                "name": "Sprint backlog"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "REVIEW",
+                "name": "Review"
+            },
+            {
+                "id": "TESTING",
+                "name": "Testing"
+            },
+            {
+                "id": "READY TO DEPLOY",
+                "name": "Ready to deploy"
+            },
+            {
+                "id": "CLOSED",
+                "name": "Closed"
+            }
+        ]
+    },
+    {
+    	"id": "DESIGN_CORP",
+    	"name": "Design Corp",
+    	"icon": "designCorp",
+        "statuses": [
+            {
+                "id": "BACKLOG",
+                "name": "Backlog"
+            },
+            {
+                "id": "TO DO",
+                "name": "To do"
+            },
+            {
+                "id": "ПРОЕКТИРОВАНИЕ",
+                "name": "Проектирование"
+            },
+            {
+                "id": "IN PROGRESS",
+                "name": "In progress"
+            },
+            {
+                "id": "DESIGN CHECK",
+                "name": "Design check"
+            },
+            {
+                "id": "В ОЖИДАНИИ РЕАЛИЗАЦИИ",
+                "name": "В ожидании реализации"
+            },
+            {
+                "id": "DESIGN REVIEW",
+                "name": "Design review"
+            },
+            {
+                "id": "DONE",
+                "name": "Done"
+            },
+            {
+                "id": "CANCELLED",
+                "name": "Cancelled"
+            }
+        ]
+    },
+    {
+    	"id": "FASTTRACK_TASK",
+    	"name": "FastTrack Task",
+    	"icon": "development",
+        "statuses": []
+    },
+    {
+    	"id": "QUARTERLY_TARGET",
+    	"name": "Квартальная цель",
+    	"icon": "quarterlyTargetRus",
+        "statuses": []
+    },
+    {
+    	"id": "PROD_BUG",
+    	"name": "Дефект промсреды",
+    	"icon": "ProdBugRus",
+        "statuses": []
+    },
+    {
+    	"id": "VULNERABILITY",
+    	"name": "Уязвимость",
+    	"icon": "vulnerabilityRus",
+        "statuses": []
+    }
+])
