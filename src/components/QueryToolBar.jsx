@@ -41,6 +41,7 @@ import {
     setTeamMembers,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
+import DiscardChangesDialog from "./DiscardChangesDialog";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
@@ -201,7 +202,7 @@ const QueryToolBar = () => {
         if (isQueryChanged) {
             console.log("isQueryChange==true");
             setIsCreateConfirmationPending(true);
-            discardChangesDialogRef.current?.showModal();
+            discardChangesDialogRef.current?.showModal({ requestName: openQuery.name });
             return;
         } else {
             console.log("isQueryChange==false");
@@ -245,17 +246,11 @@ const QueryToolBar = () => {
         }
     };
 
-    const handleDialogClose = (event) => {
-        event.stopPropagation();
-        discardChangesDialogRef.current?.close();
-        if (isCreateConfirmationPending) {
-            setIsCreateConfirmationPending(false);
-        }
+    const handleDiscardCancel = () => {
+        setIsCreateConfirmationPending(false);
     };
 
-    const handleDiscardChanges = async (event) => {
-        event.stopPropagation();
-        discardChangesDialogRef.current?.close();
+    const handleDiscardChanges = async (dataFromDialog) => {
         if (isCreateConfirmationPending) {
             setIsCreateConfirmationPending(false);
             await createQuery();
@@ -541,25 +536,11 @@ const QueryToolBar = () => {
                     </button>
                 </div>
             </dialog>
-            <dialog
+            <DiscardChangesDialog
                 ref={discardChangesDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                В текущий запрос внесены не сохраненные изменения. Нажмите Да,
-                чтобы отменить их, нажмите Нет, чтобы вернуться к текущему
-                запросу.
-                <br />
-                Отменить изменения?
-                <div className={styles.dialog_buttons}>
-                    <button type="button" onClick={handleDiscardChanges}>
-                        Да
-                    </button>
-                    <button type="button" onClick={handleDialogClose}>
-                        Нет
-                    </button>
-                </div>
-            </dialog>
+                onDiscard={handleDiscardChanges}
+                onClose={handleDiscardCancel}
+            />
         </header>
     );
 };

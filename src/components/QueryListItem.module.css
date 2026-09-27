@@ -133,6 +133,7 @@
   align-items: center;     /* Centers buttons vertically (if div has height) */
   gap: 10px;               /* Adds clean spacing between the buttons */
 }
+
 .dialog button {
     margin-top: 12px;
     margin-right: 10px;
