@@ -39,6 +39,7 @@ const QueryListItem = ({
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isInitialQueryOpened = useSelector(selectIsInitialQueryOpened);
     const openQuery = useSelector(selectOpenQuery);
+    const confirmDeleteDialogRef = useRef(null);
     const confirmationDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
@@ -77,7 +78,7 @@ const QueryListItem = ({
     };
 
     const handleDeleteClick = () => {
-        confirmationDialogRef.current?.showModal({
+        confirmDeleteDialogRef.current?.showModal({
             requestName: name,
             message: `Вы уверены, что хотите удалить запрос '${name}' ?`,
             confirmButtonText: "Да",
@@ -265,6 +266,27 @@ const QueryListItem = ({
         [dispatch],
     );
 
+    const handleConfirmDeleteAction = async (dataFromDialog) => {
+        console.log(`handleConfirmDeleteAction(${getEntriesWithValuesStr(dataFromDialog)}) executed`)
+        if (isQueryChanged) {
+            setIsDeleteConfirmationPending(true);
+            console.log('Calling confirmationDialog.showModal()...')
+            confirmationDialogRef.current?.showModal({
+                requestName: openQuery.name,
+                message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                question: "Отменить изменения?",
+                confirmButtonText: "Да",
+                rejectButtonText: "Нет",
+            });
+            return;
+        } else {
+            await deleteQuery();
+
+        }
+    };
+    
+    const handleRejectDeleteAction = async (dataFromDialog) => {};
+
     const handleConfirmAction = async (dataFromDialog) => {
         console.log(`handleConfirmAction(${getEntriesWithValuesStr(dataFromDialog)}) executed`)
         if (isCloneConfirmationPending) {
@@ -385,6 +407,11 @@ const QueryListItem = ({
                 onConfirm={handleConfirmAction}
                 onReject={handleRejectAction}
             />
+            <ConfirmationDialog
+                ref={confirmDeleteDialogRef}
+                onConfirm={handleConfirmDeleteAction}
+                onReject={handleRejectDeleteAction}
+            />            
         </div>
     );
 };
