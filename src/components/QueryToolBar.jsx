@@ -59,7 +59,6 @@ const QueryToolBar = () => {
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
 
-    const changeNameDialogRef = useRef(null);
     const settingsDialogRef = useRef(null);
     const [queryTitle, setQueryTitle] = useState("");
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
@@ -67,6 +66,7 @@ const QueryToolBar = () => {
     const PendingAction = Object.freeze({
         ADD_NEW: "ADD_NEW",
         SAVE_AS: "SAVE_AS",
+        CHANGE_NAME: "CHANGE_NAME",
     });
 
     const handleAddClick = (event) => {
@@ -90,7 +90,10 @@ const QueryToolBar = () => {
     };
 
     const handleEditNameClick = async (event) => {
-        changeNameDialogRef.current?.showModal();
+        textInputDialogRef.current?.showModal({
+            prompt: 'Введите новое название запроса:',
+            pendingAction: PendingAction.CHANGE_NAME,
+        });
     };
 
     const handleSettingsClick = async (event) => {
@@ -231,20 +234,18 @@ const QueryToolBar = () => {
                     await createQuery(nextQueryTitle);
                 }
                 break;
-        }
+            case PendingAction.CHANGE_NAME:
+                dispatch(setQueryName(nextQueryTitle));
+                dispatch(setIsQueryChanged(true));
+                break;
+            default:
+                console.error(
+                    `Unknown pendingAction: ${dialogData.pendingAction}`,
+                );
+        }      
     };
 
     const handleTextInputDialogCancel = (dialogData) => {};
-
-    const handleChangeNameSubmit = (event) => {
-        console.log("handleChangeNameSubmit executed");
-        event.preventDefault();
-        event.stopPropagation();
-        changeNameDialogRef.current?.close();
-
-        dispatch(setQueryName(queryTitle));
-        dispatch(setIsQueryChanged(true));
-    };
 
     const handleSettingsSubmit = async (event) => {
         console.log("handleSettingsSubmit executed");
@@ -329,40 +330,6 @@ const QueryToolBar = () => {
                 onOk={handleTextInputDialogSubmit}
                 onCancel={handleTextInputDialogCancel}
             />
-            <dialog
-                ref={changeNameDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Введите новое название запроса: </p>
-                <div>
-                    <input
-                        type="text"
-                        value={queryTitle}
-                        className={styles.query_name_input}
-                        onChange={(event) => {
-                            const nextValue = event.target.value;
-                            queryTitleRef.current = nextValue;
-                            setQueryTitle(nextValue);
-                        }}
-                        autoFocus
-                    />
-                    <div className={styles.dialog_buttons}>
-                        <button type="submit" onClick={handleChangeNameSubmit}>
-                            Ok
-                        </button>
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                changeNameDialogRef.current?.close();
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </dialog>
             <dialog
                 ref={settingsDialogRef}
                 className={styles.dialog}

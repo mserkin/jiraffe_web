@@ -14,6 +14,7 @@ import {
 } from "../redux/slices/statusSlice";
 import { setError } from "../redux/slices/errorSlice";
 import DiscardChangesDialog from "./DiscardChangesDialog";
+import TextInputDialog from "./TextInputDialog";
 
 const QueryListItem = ({
     id,
@@ -38,10 +39,16 @@ const QueryListItem = ({
     const isInitialQueryOpened = useSelector(selectIsInitialQueryOpened);
     const openQuery = useSelector(selectOpenQuery);
     const discardChangesDialogRef = useRef(null);
-    const cloneDialogRef = useRef(null);
-    const renameDialogRef = useRef(null);
+    const textInputDialogRef = useRef(null);
+    const queryTitleRef = useRef("");
+
     const deleteDialogRef = useRef(null);
     const menuRef = useRef(null);
+    const PendingAction = Object.freeze({
+        CLONE: "CLONE",
+        RENAME: "RENAME",
+        DELETE: "DELETE",
+    });
     const MENU_ITEMS = {
         menu_item_rename: "Переименовать",
         menu_item_clone: "Клонировать",
@@ -55,12 +62,18 @@ const QueryListItem = ({
 
     const handleCloneClick = () => {
         setQueryName(name);
-        cloneDialogRef.current?.showModal();
+        textInputDialogRef.current?.showModal({
+            prompt: "Введите название нового запроса:",
+            pendingAction: PendingAction.CLONE,
+        });
     };
 
     const handleRenameClick = () => {
         setQueryName(name);
-        renameDialogRef.current?.showModal();
+        textInputDialogRef.current?.showModal({
+            prompt: "Введите новое название запроса:",
+            pendingAction: PendingAction.RENAME,
+        });
     };
 
     const handleDeleteClick = () => {
@@ -68,7 +81,7 @@ const QueryListItem = ({
         deleteDialogRef.current?.showModal();
     };
 
-    const saveClonedQuery = useCallback(async () => {
+    const saveClonedQuery = useCallback(async (clonedQueryName) => {
         try {
             dispatch(setIsLoading(true));
             const sourceQuery = (
@@ -79,11 +92,11 @@ const QueryListItem = ({
             delete queryWithoutId.id;
             const clonedQuery = {
                 ...queryWithoutId,
-                name: queryName,
+                name: clonedQueryName,
             };
 
             await axios.post(BACKEND_URI + QUERIES_PATH_PART, clonedQuery);
-            await onQueryCloned(queryName);
+            await onQueryCloned(clonedQueryName);
             dispatch(setIsQueryChanged(false));
         } catch (error) {
             dispatch(
@@ -94,24 +107,49 @@ const QueryListItem = ({
         }
     }, [dispatch, id, onQueryCloned, queryName]);
 
-    const handleCloneSubmit = async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        cloneDialogRef.current?.close();
+    const handleTextInputDialogSubmit = async (dialogData) => {
+        const nextQueryTitle = dialogData.requestName ?? "";
+        console.log("handleTextInputDialogSubmit executed");
+        console.log(`dialogData.requestName: '${nextQueryTitle}'`);
 
-        if (isQueryChanged) {
-            setIsCloneConfirmationPending(true);
-            console.log(openQuery.name);
-            discardChangesDialogRef.current?.showModal({
-                requestName: openQuery.name,
-            });
-            return;
+        queryTitleRef.current = nextQueryTitle;
+        setQueryName(nextQueryTitle);
+
+        switch (dialogData.pendingAction) {
+            case PendingAction.CLONE:
+                if (isQueryChanged) {
+                    setIsCloneConfirmationPending(true);
+                    console.log(openQuery.name);
+                    discardChangesDialogRef.current?.showModal({
+                        requestName: openQuery.name,
+                        newRequestName: nextQueryTitle,
+                    });
+                    return;
+                }
+                await saveClonedQuery(nextQueryTitle);
+                break;
+
+            case PendingAction.RENAME:
+              if (isQueryChanged) {
+                  setIsRenameConfirmationPending(true);
+                  discardChangesDialogRef.current?.showModal({
+                      requestName: openQuery.name,
+                      newRequestName: nextQueryTitle,
+                  });
+                  return;
+              } else {
+                  await saveRenamedQuery(nextQueryTitle);
+              }
+            default:
+                console.error(
+                    `Unknown pendingAction: ${dialogData.pendingAction}`,
+                );
         }
-
-        await saveClonedQuery();
     };
 
-    const saveRenamedQuery = useCallback(async () => {
+    const handleTextInputDialogCancel = (dialogData) => {};
+    
+    const saveRenamedQuery = useCallback(async (newQueryName) => {
         try {
             dispatch(setIsLoading(true));
             const sourceQuery = (
@@ -119,14 +157,14 @@ const QueryListItem = ({
             ).data;
             const renamedQuery = {
                 ...sourceQuery,
-                name: queryName,
+                name: newQueryName,
             };
 
             await axios.put(
                 `${BACKEND_URI}${QUERIES_PATH_PART}/${id}`,
                 renamedQuery,
             );
-            await onQueryRenamed(queryName);
+            await onQueryRenamed(newQueryName);
             dispatch(setIsQueryChanged(false));
         } catch (error) {
             dispatch(
@@ -136,22 +174,6 @@ const QueryListItem = ({
             dispatch(setIsLoading(false));
         }
     }, [dispatch, id, onQueryRenamed, queryName]);
-
-    const handleRenameSubmit = async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        renameDialogRef.current?.close();
-
-        if (isQueryChanged) {
-            setIsRenameConfirmationPending(true);
-            discardChangesDialogRef.current?.showModal({
-                requestName: openQuery.name,
-            });
-            return;
-        } else {
-            await saveRenamedQuery();
-        }
-    };
 
     const deleteQuery = useCallback(async () => {
         try {
@@ -238,12 +260,12 @@ const QueryListItem = ({
     const handleDiscardChanges = async (dataFromDialog) => {
         if (isCloneConfirmationPending) {
             setIsCloneConfirmationPending(false);
-            await saveClonedQuery();
+            await saveClonedQuery(dataFromDialog.newRequestName);
             return;
         }
         if (isRenameConfirmationPending) {
             setIsRenameConfirmationPending(false);
-            await saveRenamedQuery();
+            await saveRenamedQuery(dataFromDialog.newRequestName);
             return;
         }
         if (isDeleteConfirmationPending) {
@@ -319,62 +341,12 @@ const QueryListItem = ({
                     </div>
                 )}
             </span>
-            <dialog
-                ref={cloneDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Введите название нового запроса:</p>
-                <form onSubmit={handleCloneSubmit}>
-                    <input
-                        type="text"
-                        value={queryName}
-                        onChange={(event) => setQueryName(event.target.value)}
-                        autoFocus
-                        className={styles.query_name_input}
-                    />
-                    <div className={styles.dialog_buttons}>
-                        <button type="submit">Ok</button>
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                cloneDialogRef.current?.close();
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </dialog>
-            <dialog
-                ref={renameDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Введите новое название запроса:</p>
-                <form onSubmit={handleRenameSubmit}>
-                    <input
-                        type="text"
-                        value={queryName}
-                        className={styles.query_name_input}
-                        onChange={(event) => setQueryName(event.target.value)}
-                        autoFocus
-                    />
-                    <div className={styles.dialog_buttons}>
-                        <button type="submit">Ok</button>
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                renameDialogRef.current?.close();
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </dialog>
+
+            <TextInputDialog
+                ref={textInputDialogRef}
+                onOk={handleTextInputDialogSubmit}
+                onCancel={handleTextInputDialogCancel}
+            />
             <dialog
                 ref={deleteDialogRef}
                 className={styles.dialog}
