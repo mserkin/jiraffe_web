@@ -15,6 +15,7 @@ import {
 import { setError } from "../redux/slices/errorSlice";
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
+import { getEntriesWithValuesStr } from "../modules/utils";
 
 const QueryListItem = ({
     id,
@@ -42,7 +43,6 @@ const QueryListItem = ({
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
 
-    const deleteDialogRef = useRef(null);
     const menuRef = useRef(null);
     const PendingAction = Object.freeze({
         CLONE: "CLONE",
@@ -55,7 +55,7 @@ const QueryListItem = ({
         menu_item_delete: "Удалить",
     };
 
-    const handleButtonClick = (event) => {
+    const handleMenuButtonClick = (event) => {
         event.stopPropagation();
         setIsMenuOpen((isOpen) => !isOpen);
     };
@@ -77,8 +77,13 @@ const QueryListItem = ({
     };
 
     const handleDeleteClick = () => {
-        setQueryName(name);
-        deleteDialogRef.current?.showModal();
+        confirmationDialogRef.current?.showModal({
+            requestName: name,
+            message: `Вы уверены, что хотите удалить запрос '${name}' ?`,
+            confirmButtonText: "Да",
+            rejectButtonText: "Нет",
+            pendingAction: PendingAction.DELETE,
+        });
     };
 
     const saveClonedQuery = useCallback(
@@ -153,6 +158,7 @@ const QueryListItem = ({
                 } else {
                     await saveRenamedQuery(nextQueryTitle);
                 }
+                break;
             default:
                 console.error(
                     `Unknown pendingAction: ${dialogData.pendingAction}`,
@@ -208,26 +214,6 @@ const QueryListItem = ({
         }
     }, [dispatch, id, onQueryDeleted]);
 
-    const handleDeleteSubmit = async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        deleteDialogRef.current?.close();
-
-        if (isQueryChanged) {
-            setIsDeleteConfirmationPending(true);
-            confirmationDialogRef.current?.showModal({
-                requestName: openQuery.name,
-                message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
-                question: "Отменить изменения?",
-                confirmButtonText: "Да",
-                rejectButtonText: "Нет",
-            });
-            return;
-        } else {
-            await deleteQuery();
-        }
-    };
-
     const handleMenuItemClick = (event) => {
         event.stopPropagation();
         setIsMenuOpen(false);
@@ -279,27 +265,47 @@ const QueryListItem = ({
         [dispatch],
     );
 
-    const handleConfirmDiscardChanges = async (dataFromDialog) => {
+    const handleConfirmAction = async (dataFromDialog) => {
+        console.log(`handleConfirmAction(${getEntriesWithValuesStr(dataFromDialog)}) executed`)
         if (isCloneConfirmationPending) {
+            console.log('isCloneConfirmationPending==true')
             setIsCloneConfirmationPending(false);
             await saveClonedQuery(dataFromDialog.newRequestName);
             return;
-        }
-        if (isRenameConfirmationPending) {
+        } else if (isRenameConfirmationPending) {
+            console.log('isRenameConfirmationPending==true')
             setIsRenameConfirmationPending(false);
             await saveRenamedQuery(dataFromDialog.newRequestName);
             return;
-        }
-        if (isDeleteConfirmationPending) {
+        } else if (isDeleteConfirmationPending) {
+            console.log('isDeleteConfirmationPending==true')
             setIsDeleteConfirmationPending(false);
             await deleteQuery();
             return;
+        } else if (dataFromDialog.pendingAction === PendingAction.DELETE) {
+            console.log('pandingAction==DELETE')
+            if (isQueryChanged) {
+                setIsDeleteConfirmationPending(true);
+                console.log('Calling confirmationDialog.showModal()...')
+                confirmationDialogRef.current?.showModal({
+                    requestName: openQuery.name,
+                    message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                    question: "Отменить изменения?",
+                    confirmButtonText: "Да",
+                    rejectButtonText: "Нет",
+                });
+                return;
+            } else {
+                await deleteQuery();
+
+            }
         }
+        console.log('handleConfirmAction - opening query')
         dispatch(setIsQueryChanged(false));
         await openQueryById(id);
     };
 
-    const handleRejectDiscardChanges = async (dataFromDialog) => {
+    const handleRejectAction = async (dataFromDialog) => {
         setIsCloneConfirmationPending(false);
         setIsRenameConfirmationPending(false);
         setIsDeleteConfirmationPending(false);
@@ -347,7 +353,7 @@ const QueryListItem = ({
                     id={`${MENU_BUTTON_ID_PREFIX}${id}`}
                     aria-expanded={isMenuOpen}
                     aria-haspopup="menu"
-                    onClick={handleButtonClick}
+                    onClick={handleMenuButtonClick}
                 >
                     ...
                 </button>
@@ -369,37 +375,15 @@ const QueryListItem = ({
                     </div>
                 )}
             </span>
-
             <TextInputDialog
                 ref={textInputDialogRef}
                 onOk={handleTextInputDialogSubmit}
                 onCancel={handleTextInputDialogCancel}
             />
-            <dialog
-                ref={deleteDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Вы уверены, что хотите удалить запрос '{queryName}' ?</p>
-                <form onSubmit={handleDeleteSubmit}>
-                    <div className={styles.dialog_buttons}>
-                        <button type="submit">Да</button>
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                deleteDialogRef.current?.close();
-                            }}
-                        >
-                            Нет
-                        </button>
-                    </div>
-                </form>
-            </dialog>
             <ConfirmationDialog
                 ref={confirmationDialogRef}
-                onConfirm={handleConfirmDiscardChanges}
-                onReject={handleRejectDiscardChanges}
+                onConfirm={handleConfirmAction}
+                onReject={handleRejectAction}
             />
         </div>
     );

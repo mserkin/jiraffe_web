@@ -1,5 +1,6 @@
 import { forwardRef, useRef, useImperativeHandle, useState } from 'react';
 import styles from './ConfirmationDialog.module.css';
+import { getEntriesWithValuesStr } from '../modules/utils';
 
 const ConfirmationDialog = forwardRef(({ onConfirm, onReject }, ref) => {
     const dialogRef = useRef(null);
@@ -14,7 +15,7 @@ const ConfirmationDialog = forwardRef(({ onConfirm, onReject }, ref) => {
         // rejectButtonText - текст на кнопке отказа
         
         showModal: (data) => {
-            console.log(`showModal(${data} executed`);
+            console.log(`showModal(${getEntriesWithValuesStr(data)}) executed`);
             setDialogData(data); // Сохраняем переданные данные
             dialogRef.current?.showModal();
         },
