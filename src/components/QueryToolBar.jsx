@@ -42,6 +42,7 @@ import {
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
 import DiscardChangesDialog from "./DiscardChangesDialog";
+import TextInputDialog from "./TextInputDialog";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
@@ -53,17 +54,25 @@ const QueryToolBar = () => {
     const jiraServer = useSelector(selectJiraServer);
     const project = useSelector(selectProject);
     const teamMembers = useSelector(selectTeamMembers);
-    const createDialogRef = useRef(null);
-    const saveAsDialogRef = useRef(null);
+
+    const discardChangesDialogRef = useRef(null);
+    const textInputDialogRef = useRef(null);
+
     const changeNameDialogRef = useRef(null);
     const settingsDialogRef = useRef(null);
-    const discardChangesDialogRef = useRef(null);
     const [queryTitle, setQueryTitle] = useState("");
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
         useState(false);
+    const PendingAction = Object.freeze({
+        ADD_NEW: "ADD_NEW",
+        SAVE_AS: "SAVE_AS",
+    });
 
     const handleAddClick = (event) => {
-        createDialogRef.current?.showModal();
+        textInputDialogRef.current?.showModal({
+            prompt: "Введите название нового запроса:",
+            pendingAction: PendingAction.ADD_NEW,
+        });
     };
 
     const handleSaveClick = async (event) => {
@@ -73,7 +82,10 @@ const QueryToolBar = () => {
     };
 
     const handleSaveAsClick = (event) => {
-        saveAsDialogRef.current?.showModal();
+        textInputDialogRef.current?.showModal({
+            prompt: "Под каким именем хотите сохранить запрос:",
+            pendingAction: PendingAction.SAVE_AS,
+        });
     };
 
     const handleEditNameClick = async (event) => {
@@ -117,6 +129,7 @@ const QueryToolBar = () => {
 
     const saveAsQuery = useCallback(async () => {
         console.log("saveAsQuery executed");
+        console.log(`queryTitle: '${queryTitle}'`);
         try {
             dispatch(setIsLoading(true));
             const newQuery = {
@@ -193,31 +206,31 @@ const QueryToolBar = () => {
         }
     }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, teamMembers]);
 
-    const handleCreateSubmit = async (event) => {
-        console.log("handleCreateSubmit executed");
-        event.preventDefault();
-        event.stopPropagation();
-        createDialogRef.current?.close();
+    const handleTextInputDialogSubmit = async (dialogData) => {
+        console.log("handleTextInputDialogSubmit executed");
+        console.log(`dialogData.requestName: '${dialogData.requestName}'`);
+        setQueryTitle(dialogData.requestName);
 
-        if (isQueryChanged) {
-            console.log("isQueryChange==true");
-            setIsCreateConfirmationPending(true);
-            discardChangesDialogRef.current?.showModal({ requestName: openQuery.name });
-            return;
-        } else {
-            console.log("isQueryChange==false");
-            await createQuery();
+        switch (dialogData.pendingAction) {
+            case PendingAction.SAVE_AS:
+                await saveAsQuery();
+                break;
+
+            case PendingAction.ADD_NEW:
+                if (isQueryChanged) {
+                    setIsCreateConfirmationPending(true);
+                    discardChangesDialogRef.current?.showModal({
+                        requestName: openQuery.name,
+                    });
+                    return;
+                } else {
+                    await createQuery();
+                }
+                break;
         }
     };
 
-    const handleSaveAsSubmit = async (event) => {
-        console.log("handleSaveAsSubmit executed");
-        event.preventDefault();
-        event.stopPropagation();
-        saveAsDialogRef.current?.close();
-
-        await saveAsQuery();
-    };
+    const handleTextInputDialogCancel = (dialogData) => {};
 
     const handleChangeNameSubmit = (event) => {
         console.log("handleChangeNameSubmit executed");
@@ -307,66 +320,11 @@ const QueryToolBar = () => {
                     </li>
                 </ul>
             </nav>
-            <dialog
-                ref={createDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Введите название нового запроса:</p>
-                <div>
-                    <input
-                        type="text"
-                        value={queryTitle}
-                        className={styles.query_name_input}
-                        onChange={(event) => setQueryTitle(event.target.value)}
-                        autoFocus
-                    />
-                    <div className={styles.dialog_buttons}>
-                        <button type="submit" onClick={handleCreateSubmit}>
-                            Ok
-                        </button>
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                createDialogRef.current?.close();
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </dialog>
-            <dialog
-                ref={saveAsDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Под каким именем хотите сохранить запрос: </p>
-                <div>
-                    <input
-                        type="text"
-                        value={queryTitle}
-                        className={styles.query_name_input}
-                        onChange={(event) => setQueryTitle(event.target.value)}
-                        autoFocus
-                    />
-                    <div className={styles.dialog_buttons}>
-                        <button type="submit" onClick={handleSaveAsSubmit}>
-                            Ok
-                        </button>
-                        <button
-                            type="button"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                saveAsDialogRef.current?.close();
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </dialog>
+            <TextInputDialog
+                ref={textInputDialogRef}
+                onOk={handleTextInputDialogSubmit}
+                onCancel={handleTextInputDialogCancel}
+            />
             <dialog
                 ref={changeNameDialogRef}
                 className={styles.dialog}
@@ -453,7 +411,9 @@ const QueryToolBar = () => {
                         <input
                             type="text"
                             value={project}
-                            onChange={(event) => dispatch(setProject(event.target.value))}
+                            onChange={(event) =>
+                                dispatch(setProject(event.target.value))
+                            }
                         />
                     </div>
                     <div className={styles.settings_dialog_section_header}>

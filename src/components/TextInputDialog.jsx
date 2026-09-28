@@ -42,17 +42,17 @@ const TextInputDialog = forwardRef(({ onOk, onCancel }, ref) => {
             <p>{dialogData?.prompt || ""}</p>
             <input
                 type="text"
-                value={queryName}
+                value={dialogData?.requestName || ""}
                 className={styles.query_name_input}
-                onChange={(event) => setQueryName(event.target.value)}
+                onChange={(event) => setDialogData({...dialogData, requestName: event.target.value})}
                 autoFocus
             />
             <div className={styles.dialog_buttons}>
                 <button type="button" onClick={handleConfirm}>
-                    Да
+                    Ok
                 </button>
                 <button type="button" onClick={handleDialogClose}>
-                    Нет
+                    Отмена
                 </button>
             </div>
         </dialog>

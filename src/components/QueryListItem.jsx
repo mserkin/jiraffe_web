@@ -383,7 +383,7 @@ const QueryListItem = ({
                 <p>Вы уверены, что хотите удалить запрос '{queryName}' ?</p>
                 <form onSubmit={handleDeleteSubmit}>
                     <div className={styles.dialog_buttons}>
-                        <button type="submit">Yes</button>
+                        <button type="submit">Да</button>
                         <button
                             type="button"
                             onClick={(event) => {
@@ -391,7 +391,7 @@ const QueryListItem = ({
                                 deleteDialogRef.current?.close();
                             }}
                         >
-                            No
+                            Нет
                         </button>
                     </div>
                 </form>
