@@ -54,9 +54,10 @@ const QueryToolBar = () => {
     const jiraServer = useSelector(selectJiraServer);
     const project = useSelector(selectProject);
     const teamMembers = useSelector(selectTeamMembers);
-
+    
     const discardChangesDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
+    const queryTitleRef = useRef("");
 
     const changeNameDialogRef = useRef(null);
     const settingsDialogRef = useRef(null);
@@ -101,12 +102,12 @@ const QueryToolBar = () => {
         settingsDialogRef.current?.showModal();
     };
 
-    const createQuery = useCallback(async () => {
+    const createQuery = useCallback(async (name = queryTitleRef.current) => {
         console.log("createQuery executed");
         try {
             dispatch(setIsLoading(true));
             const newQuery = {
-                name: queryTitle,
+                name,
                 queryText: null,
                 epicViewType: null,
                 levelFilters: [],
@@ -125,15 +126,15 @@ const QueryToolBar = () => {
         } finally {
             dispatch(setIsLoading(false));
         }
-    }, [dispatch, queryTitle]);
+    }, [dispatch]);
 
-    const saveAsQuery = useCallback(async () => {
+    const saveAsQuery = useCallback(async (name = queryTitleRef.current) => {
         console.log("saveAsQuery executed");
-        console.log(`queryTitle: '${queryTitle}'`);
+        console.log(`queryTitle: '${name}'`);
         try {
             dispatch(setIsLoading(true));
             const newQuery = {
-                name: queryTitle,
+                name,
                 queryText: openQuery.queryText,
                 epicViewType: openQuery.epicViewType,
                 levelFilters: openQuery.levelFilters,
@@ -152,7 +153,7 @@ const QueryToolBar = () => {
         } finally {
             dispatch(setIsLoading(false));
         }
-    }, [dispatch, queryTitle, openQuery]);
+    }, [dispatch, openQuery]);
 
     const saveQuery = useCallback(async () => {
         console.log("saveQuery executed");
@@ -207,13 +208,16 @@ const QueryToolBar = () => {
     }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, teamMembers]);
 
     const handleTextInputDialogSubmit = async (dialogData) => {
+        const nextQueryTitle = dialogData.requestName ?? "";
         console.log("handleTextInputDialogSubmit executed");
-        console.log(`dialogData.requestName: '${dialogData.requestName}'`);
-        setQueryTitle(dialogData.requestName);
+        console.log(`dialogData.requestName: '${nextQueryTitle}'`);
+
+        queryTitleRef.current = nextQueryTitle;
+        setQueryTitle(nextQueryTitle);
 
         switch (dialogData.pendingAction) {
             case PendingAction.SAVE_AS:
-                await saveAsQuery();
+                await saveAsQuery(nextQueryTitle);
                 break;
 
             case PendingAction.ADD_NEW:
@@ -224,7 +228,7 @@ const QueryToolBar = () => {
                     });
                     return;
                 } else {
-                    await createQuery();
+                    await createQuery(nextQueryTitle);
                 }
                 break;
         }
@@ -336,7 +340,11 @@ const QueryToolBar = () => {
                         type="text"
                         value={queryTitle}
                         className={styles.query_name_input}
-                        onChange={(event) => setQueryTitle(event.target.value)}
+                        onChange={(event) => {
+                            const nextValue = event.target.value;
+                            queryTitleRef.current = nextValue;
+                            setQueryTitle(nextValue);
+                        }}
                         autoFocus
                     />
                     <div className={styles.dialog_buttons}>
