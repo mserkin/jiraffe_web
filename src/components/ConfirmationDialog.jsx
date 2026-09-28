@@ -1,15 +1,20 @@
 import { forwardRef, useRef, useImperativeHandle, useState } from 'react';
-import styles from './DiscardChangesDialog.module.css';
+import styles from './ConfirmationDialog.module.css';
 
-const DiscardChangesDialog = forwardRef(({ onDiscard, onClose }, ref) => {
+const ConfirmationDialog = forwardRef(({ onConfirm, onReject }, ref) => {
     const dialogRef = useRef(null);
     // Локальное состояние диалога для хранения динамических данных
     const [dialogData, setDialogData] = useState(null);
 
     useImperativeHandle(ref, () => ({
-        // Теперь метод принимает данные из любого места, где вызывается
+        // Используемые поля data:
+        // message - текст сообщения
+        // question - вопрос
+        // confirmButtonText - текст на кнопке подтверждения
+        // rejectButtonText - текст на кнопке отказа
+        
         showModal: (data) => {
-            console.log(data);
+            console.log(`showModal(${data} executed`);
             setDialogData(data); // Сохраняем переданные данные
             dialogRef.current?.showModal();
         },
@@ -19,16 +24,16 @@ const DiscardChangesDialog = forwardRef(({ onDiscard, onClose }, ref) => {
         }
     }));
 
-    const handleDialogClose = (event) => {
+    const handleReject = (event) => {
         event.stopPropagation();
         dialogRef.current?.close();
         setDialogData(null);
-        onClose();
+        onReject();
     };
 
     const handleConfirm = () => {
         // Передаем данные обратно в родительский обработчик «Да»
-        onDiscard(dialogData); 
+        onConfirm(dialogData); 
         dialogRef.current?.close();
         setDialogData(null);
     };
@@ -39,23 +44,20 @@ const DiscardChangesDialog = forwardRef(({ onDiscard, onClose }, ref) => {
             className={styles.dialog}
             onClick={(event) => event.stopPropagation()}
         >
-            {/* Используем данные, если они пришли, или выводим дефолтный текст */}
-            В текущий запрос '{dialogData?.requestName || ''}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. 
-            Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.
+            {dialogData?.message || ''}
             <br />
-            Отменить изменения?
-            
+            {dialogData?.question || ''}
             <div className={styles.dialog_buttons}>
                 <button type="button" onClick={handleConfirm}>
-                    Да
+                    {dialogData?.confirmButtonText || 'Да'}
                 </button>
-                <button type="button" onClick={handleDialogClose}>
-                    Нет
+                <button type="button" onClick={handleReject}>
+                    {dialogData?.rejectButtonText || 'Нет'}
                 </button>
             </div>
         </dialog>
     );
 });
 
-DiscardChangesDialog.displayName = 'DiscardChangesDialog';
-export default DiscardChangesDialog;
+ConfirmationDialog.displayName = 'ConfirmationDialog';
+export default ConfirmationDialog;

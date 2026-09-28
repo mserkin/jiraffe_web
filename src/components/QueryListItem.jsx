@@ -13,8 +13,8 @@ import {
     setIsQueryChanged,
 } from "../redux/slices/statusSlice";
 import { setError } from "../redux/slices/errorSlice";
-import DiscardChangesDialog from "./DiscardChangesDialog";
 import TextInputDialog from "./TextInputDialog";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 const QueryListItem = ({
     id,
@@ -38,7 +38,7 @@ const QueryListItem = ({
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isInitialQueryOpened = useSelector(selectIsInitialQueryOpened);
     const openQuery = useSelector(selectOpenQuery);
-    const discardChangesDialogRef = useRef(null);
+    const confirmationDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
 
@@ -81,31 +81,36 @@ const QueryListItem = ({
         deleteDialogRef.current?.showModal();
     };
 
-    const saveClonedQuery = useCallback(async (clonedQueryName) => {
-        try {
-            dispatch(setIsLoading(true));
-            const sourceQuery = (
-                await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)
-            ).data;
-            const queryWithoutId = { ...sourceQuery };
+    const saveClonedQuery = useCallback(
+        async (clonedQueryName) => {
+            try {
+                dispatch(setIsLoading(true));
+                const sourceQuery = (
+                    await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)
+                ).data;
+                const queryWithoutId = { ...sourceQuery };
 
-            delete queryWithoutId.id;
-            const clonedQuery = {
-                ...queryWithoutId,
-                name: clonedQueryName,
-            };
+                delete queryWithoutId.id;
+                const clonedQuery = {
+                    ...queryWithoutId,
+                    name: clonedQueryName,
+                };
 
-            await axios.post(BACKEND_URI + QUERIES_PATH_PART, clonedQuery);
-            await onQueryCloned(clonedQueryName);
-            dispatch(setIsQueryChanged(false));
-        } catch (error) {
-            dispatch(
-                setError(`Ошибка при подключении к серверу: ${error.message}`),
-            );
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    }, [dispatch, id, onQueryCloned, queryName]);
+                await axios.post(BACKEND_URI + QUERIES_PATH_PART, clonedQuery);
+                await onQueryCloned(clonedQueryName);
+                dispatch(setIsQueryChanged(false));
+            } catch (error) {
+                dispatch(
+                    setError(
+                        `Ошибка при подключении к серверу: ${error.message}`,
+                    ),
+                );
+            } finally {
+                dispatch(setIsLoading(false));
+            }
+        },
+        [dispatch, id, onQueryCloned, queryName],
+    );
 
     const handleTextInputDialogSubmit = async (dialogData) => {
         const nextQueryTitle = dialogData.requestName ?? "";
@@ -120,9 +125,13 @@ const QueryListItem = ({
                 if (isQueryChanged) {
                     setIsCloneConfirmationPending(true);
                     console.log(openQuery.name);
-                    discardChangesDialogRef.current?.showModal({
+                    confirmationDialogRef.current?.showModal({
                         requestName: openQuery.name,
                         newRequestName: nextQueryTitle,
+                        message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                        question: "Отменить изменения?",
+                        confirmButtonText: "Да",
+                        rejectButtonText: "Нет",
                     });
                     return;
                 }
@@ -130,16 +139,20 @@ const QueryListItem = ({
                 break;
 
             case PendingAction.RENAME:
-              if (isQueryChanged) {
-                  setIsRenameConfirmationPending(true);
-                  discardChangesDialogRef.current?.showModal({
-                      requestName: openQuery.name,
-                      newRequestName: nextQueryTitle,
-                  });
-                  return;
-              } else {
-                  await saveRenamedQuery(nextQueryTitle);
-              }
+                if (isQueryChanged) {
+                    setIsRenameConfirmationPending(true);
+                    confirmationDialogRef.current?.showModal({
+                        requestName: openQuery.name,
+                        newRequestName: nextQueryTitle,
+                        message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                        question: "Отменить изменения?",
+                        confirmButtonText: "Да",
+                        rejectButtonText: "Нет",
+                    });
+                    return;
+                } else {
+                    await saveRenamedQuery(nextQueryTitle);
+                }
             default:
                 console.error(
                     `Unknown pendingAction: ${dialogData.pendingAction}`,
@@ -148,32 +161,37 @@ const QueryListItem = ({
     };
 
     const handleTextInputDialogCancel = (dialogData) => {};
-    
-    const saveRenamedQuery = useCallback(async (newQueryName) => {
-        try {
-            dispatch(setIsLoading(true));
-            const sourceQuery = (
-                await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)
-            ).data;
-            const renamedQuery = {
-                ...sourceQuery,
-                name: newQueryName,
-            };
 
-            await axios.put(
-                `${BACKEND_URI}${QUERIES_PATH_PART}/${id}`,
-                renamedQuery,
-            );
-            await onQueryRenamed(newQueryName);
-            dispatch(setIsQueryChanged(false));
-        } catch (error) {
-            dispatch(
-                setError(`Ошибка при подключении к серверу: ${error.message}`),
-            );
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    }, [dispatch, id, onQueryRenamed, queryName]);
+    const saveRenamedQuery = useCallback(
+        async (newQueryName) => {
+            try {
+                dispatch(setIsLoading(true));
+                const sourceQuery = (
+                    await axios.get(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`)
+                ).data;
+                const renamedQuery = {
+                    ...sourceQuery,
+                    name: newQueryName,
+                };
+
+                await axios.put(
+                    `${BACKEND_URI}${QUERIES_PATH_PART}/${id}`,
+                    renamedQuery,
+                );
+                await onQueryRenamed(newQueryName);
+                dispatch(setIsQueryChanged(false));
+            } catch (error) {
+                dispatch(
+                    setError(
+                        `Ошибка при подключении к серверу: ${error.message}`,
+                    ),
+                );
+            } finally {
+                dispatch(setIsLoading(false));
+            }
+        },
+        [dispatch, id, onQueryRenamed, queryName],
+    );
 
     const deleteQuery = useCallback(async () => {
         try {
@@ -197,8 +215,12 @@ const QueryListItem = ({
 
         if (isQueryChanged) {
             setIsDeleteConfirmationPending(true);
-            discardChangesDialogRef.current?.showModal({
+            confirmationDialogRef.current?.showModal({
                 requestName: openQuery.name,
+                message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                question: "Отменить изменения?",
+                confirmButtonText: "Да",
+                rejectButtonText: "Нет",
             });
             return;
         } else {
@@ -257,7 +279,7 @@ const QueryListItem = ({
         [dispatch],
     );
 
-    const handleDiscardChanges = async (dataFromDialog) => {
+    const handleConfirmDiscardChanges = async (dataFromDialog) => {
         if (isCloneConfirmationPending) {
             setIsCloneConfirmationPending(false);
             await saveClonedQuery(dataFromDialog.newRequestName);
@@ -277,7 +299,7 @@ const QueryListItem = ({
         await openQueryById(id);
     };
 
-    const handleDiscardCancel = async (dataFromDialog) => {
+    const handleRejectDiscardChanges = async (dataFromDialog) => {
         setIsCloneConfirmationPending(false);
         setIsRenameConfirmationPending(false);
         setIsDeleteConfirmationPending(false);
@@ -286,7 +308,13 @@ const QueryListItem = ({
     const handleItemClick = async (queryId) => {
         console.log(`handleItemClick(${queryId})`);
         if (isQueryChanged) {
-            discardChangesDialogRef.current?.showModal();
+            confirmationDialogRef.current?.showModal({
+                requestName: openQuery.name,
+                message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                question: "Отменить изменения?",
+                confirmButtonText: "Да",
+                rejectButtonText: "Нет",
+            });
             return;
         } else {
             await openQueryById(queryId);
@@ -368,10 +396,10 @@ const QueryListItem = ({
                     </div>
                 </form>
             </dialog>
-            <DiscardChangesDialog
-                ref={discardChangesDialogRef}
-                onDiscard={handleDiscardChanges}
-                onClose={handleDiscardCancel}
+            <ConfirmationDialog
+                ref={confirmationDialogRef}
+                onConfirm={handleConfirmDiscardChanges}
+                onReject={handleRejectDiscardChanges}
             />
         </div>
     );

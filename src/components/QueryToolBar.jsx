@@ -41,8 +41,8 @@ import {
     setTeamMembers,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
-import DiscardChangesDialog from "./DiscardChangesDialog";
 import TextInputDialog from "./TextInputDialog";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
@@ -54,8 +54,8 @@ const QueryToolBar = () => {
     const jiraServer = useSelector(selectJiraServer);
     const project = useSelector(selectProject);
     const teamMembers = useSelector(selectTeamMembers);
-    
-    const discardChangesDialogRef = useRef(null);
+
+    const confirmationDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
 
@@ -91,7 +91,7 @@ const QueryToolBar = () => {
 
     const handleEditNameClick = async (event) => {
         textInputDialogRef.current?.showModal({
-            prompt: 'Введите новое название запроса:',
+            prompt: "Введите новое название запроса:",
             pendingAction: PendingAction.CHANGE_NAME,
         });
     };
@@ -105,58 +105,74 @@ const QueryToolBar = () => {
         settingsDialogRef.current?.showModal();
     };
 
-    const createQuery = useCallback(async (name = queryTitleRef.current) => {
-        console.log("createQuery executed");
-        try {
-            dispatch(setIsLoading(true));
-            const newQuery = {
-                name,
-                queryText: null,
-                epicViewType: null,
-                levelFilters: [],
-            };
-            console.log("POST /queries");
-            const createdQuery = (
-                await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery)
-            ).data;
-            console.log(`createdQuery.id=${createdQuery.id}`);
-            dispatch(setIsQueryListRefreshPending(createdQuery.id));
-            dispatch(setIsQueryChanged(false));
-        } catch (error) {
-            dispatch(
-                setError(`Ошибка при подключении к серверу: ${error.message}`),
-            );
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    }, [dispatch]);
+    const createQuery = useCallback(
+        async (name = queryTitleRef.current) => {
+            console.log("createQuery executed");
+            try {
+                dispatch(setIsLoading(true));
+                const newQuery = {
+                    name,
+                    queryText: null,
+                    epicViewType: null,
+                    levelFilters: [],
+                };
+                console.log("POST /queries");
+                const createdQuery = (
+                    await axios.post(
+                        `${BACKEND_URI}${QUERIES_PATH_PART}`,
+                        newQuery,
+                    )
+                ).data;
+                console.log(`createdQuery.id=${createdQuery.id}`);
+                dispatch(setIsQueryListRefreshPending(createdQuery.id));
+                dispatch(setIsQueryChanged(false));
+            } catch (error) {
+                dispatch(
+                    setError(
+                        `Ошибка при подключении к серверу: ${error.message}`,
+                    ),
+                );
+            } finally {
+                dispatch(setIsLoading(false));
+            }
+        },
+        [dispatch],
+    );
 
-    const saveAsQuery = useCallback(async (name = queryTitleRef.current) => {
-        console.log("saveAsQuery executed");
-        console.log(`queryTitle: '${name}'`);
-        try {
-            dispatch(setIsLoading(true));
-            const newQuery = {
-                name,
-                queryText: openQuery.queryText,
-                epicViewType: openQuery.epicViewType,
-                levelFilters: openQuery.levelFilters,
-            };
-            console.log("POST /queries");
-            const createdQuery = (
-                await axios.post(`${BACKEND_URI}${QUERIES_PATH_PART}`, newQuery)
-            ).data;
-            console.log(`createdQuery.id=${createdQuery.id}`);
-            dispatch(setIsQueryListRefreshPending(createdQuery.id));
-            dispatch(setIsQueryChanged(false));
-        } catch (error) {
-            dispatch(
-                setError(`Ошибка при подключении к серверу: ${error.message}`),
-            );
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    }, [dispatch, openQuery]);
+    const saveAsQuery = useCallback(
+        async (name = queryTitleRef.current) => {
+            console.log("saveAsQuery executed");
+            console.log(`queryTitle: '${name}'`);
+            try {
+                dispatch(setIsLoading(true));
+                const newQuery = {
+                    name,
+                    queryText: openQuery.queryText,
+                    epicViewType: openQuery.epicViewType,
+                    levelFilters: openQuery.levelFilters,
+                };
+                console.log("POST /queries");
+                const createdQuery = (
+                    await axios.post(
+                        `${BACKEND_URI}${QUERIES_PATH_PART}`,
+                        newQuery,
+                    )
+                ).data;
+                console.log(`createdQuery.id=${createdQuery.id}`);
+                dispatch(setIsQueryListRefreshPending(createdQuery.id));
+                dispatch(setIsQueryChanged(false));
+            } catch (error) {
+                dispatch(
+                    setError(
+                        `Ошибка при подключении к серверу: ${error.message}`,
+                    ),
+                );
+            } finally {
+                dispatch(setIsLoading(false));
+            }
+        },
+        [dispatch, openQuery],
+    );
 
     const saveQuery = useCallback(async () => {
         console.log("saveQuery executed");
@@ -226,8 +242,12 @@ const QueryToolBar = () => {
             case PendingAction.ADD_NEW:
                 if (isQueryChanged) {
                     setIsCreateConfirmationPending(true);
-                    discardChangesDialogRef.current?.showModal({
+                    confirmationDialogRef.current?.showModal({
                         requestName: openQuery.name,
+                        message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
+                        question: "Отменить изменения?",
+                        confirmButtonText: "Да",
+                        rejectButtonText: "Нет",
                     });
                     return;
                 } else {
@@ -242,7 +262,7 @@ const QueryToolBar = () => {
                 console.error(
                     `Unknown pendingAction: ${dialogData.pendingAction}`,
                 );
-        }      
+        }
     };
 
     const handleTextInputDialogCancel = (dialogData) => {};
@@ -264,11 +284,11 @@ const QueryToolBar = () => {
         }
     };
 
-    const handleDiscardCancel = () => {
+    const handleRejectDiscardChanges = () => {
         setIsCreateConfirmationPending(false);
     };
 
-    const handleDiscardChanges = async (dataFromDialog) => {
+    const handleConfirmDiscardChanges = async (dataFromDialog) => {
         if (isCreateConfirmationPending) {
             setIsCreateConfirmationPending(false);
             await createQuery();
@@ -471,10 +491,10 @@ const QueryToolBar = () => {
                     </button>
                 </div>
             </dialog>
-            <DiscardChangesDialog
-                ref={discardChangesDialogRef}
-                onDiscard={handleDiscardChanges}
-                onClose={handleDiscardCancel}
+            <ConfirmationDialog
+                ref={confirmationDialogRef}
+                onConfirm={handleConfirmDiscardChanges}
+                onReject={handleRejectDiscardChanges}
             />
         </header>
     );
