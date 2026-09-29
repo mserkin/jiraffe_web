@@ -44,7 +44,6 @@ const openQuerySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(fetchQuery.fulfilled, (state, action) => {
-            console.log(action.payload);
             return action.payload;
         });
     },

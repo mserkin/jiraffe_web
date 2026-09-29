@@ -1,4 +1,3 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     VscAdd,
@@ -25,35 +24,15 @@ import {
     BACKEND_URI,
     QUERIES_PATH_PART,
     SETTINGS_PATH_PART,
-    VERSION,
 } from "../modules/const";
-import {
-    selectSettings,
-    fetchSettings,
-    setJiraLogin,
-    selectJiraLogin,
-    setJiraPassword,
-    selectJiraPassword,
-    setJiraServer,
-    selectJiraServer,
-    setProject,
-    selectProject,
-    setTeamMembers,
-    selectTeamMembers,
-} from "../redux/slices/settingsSlice";
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
+import SettingsDialog from "./SettingsDialog";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const isQueryChanged = useSelector(selectIsQueryChanged);
-    const settings = useSelector(selectSettings);
-    const jiraLogin = useSelector(selectJiraLogin);
-    const jiraPassword = useSelector(selectJiraPassword);
-    const jiraServer = useSelector(selectJiraServer);
-    const project = useSelector(selectProject);
-    const teamMembers = useSelector(selectTeamMembers);
 
     const confirmationDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
@@ -97,12 +76,7 @@ const QueryToolBar = () => {
     };
 
     const handleSettingsClick = async (event) => {
-        console.log("handleSettingsClick executed");
-        const url = BACKEND_URI + SETTINGS_PATH_PART;
-        console.log("Fetching settings from url: " + url);
-        dispatch(fetchSettings({ url }));
-        console.log("Settings fetched");
-        settingsDialogRef.current?.showModal();
+        settingsDialogRef.current?.showModal({});
     };
 
     const createQuery = useCallback(
@@ -201,31 +175,6 @@ const QueryToolBar = () => {
         }
     }, [dispatch, openQuery]);
 
-    const updateSettings = useCallback(async () => {
-        console.log("updateSettings executed");
-        try {
-            dispatch(setIsLoading(true));
-            const updatedSettings = {
-                jiraLogin,
-                jiraPassword,
-                jiraServer,
-                project,
-                teamMembers,
-            };
-            console.log("PUT /settings");
-            await axios.put(
-                `${BACKEND_URI}${SETTINGS_PATH_PART}`,
-                updatedSettings,
-            );
-        } catch (error) {
-            dispatch(
-                setError(`Ошибка при подключении к серверу: ${error.message}`),
-            );
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, teamMembers]);
-
     const handleTextInputDialogSubmit = async (dialogData) => {
         const nextQueryTitle = dialogData.requestName ?? "";
         console.log("handleTextInputDialogSubmit executed");
@@ -266,23 +215,8 @@ const QueryToolBar = () => {
     };
 
     const handleTextInputDialogCancel = (dialogData) => {};
-
-    const handleSettingsSubmit = async (event) => {
-        console.log("handleSettingsSubmit executed");
-        event.preventDefault();
-        event.stopPropagation();
-
-        settingsDialogRef.current?.close();
-        await updateSettings();
-    };
-
-    const handleAddUserClick = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (teamMembers.length < 14) {
-            dispatch(setTeamMembers([...teamMembers, { login: "", name: "" }]));
-        }
-    };
+    const handleSettingsDialogSubmit = (dialogData) => {};
+    const handleSettingsDialogCancel = (dialogData) => {};
 
     const handleRejectDiscardChanges = () => {
         setIsCreateConfirmationPending(false);
@@ -345,152 +279,16 @@ const QueryToolBar = () => {
                     </li>
                 </ul>
             </nav>
+            <SettingsDialog
+                ref={settingsDialogRef}
+                onOk={handleSettingsDialogSubmit}
+                onCancel={handleSettingsDialogCancel}
+            />
             <TextInputDialog
                 ref={textInputDialogRef}
                 onOk={handleTextInputDialogSubmit}
                 onCancel={handleTextInputDialogCancel}
             />
-            <dialog
-                ref={settingsDialogRef}
-                className={styles.dialog}
-                onClick={(event) => event.stopPropagation()}
-            >
-                <p>Настройки Jiraffe {VERSION}</p>
-                <div className={styles.gridContainer}>
-                    <div className={styles.settings_dialog_section_header}>
-                        Учетные данные Jira
-                    </div>
-                    <div className={styles.settings_dialog_setting_label}>
-                        <label> Логин: </label>
-                    </div>
-                    <div className={styles.settings_dialog_setting}>
-                        <input
-                            type="text"
-                            value={jiraLogin}
-                            onChange={(event) =>
-                                dispatch(setJiraLogin(event.target.value))
-                            }
-                            autoFocus
-                        />
-                    </div>
-                    <div className={styles.settings_dialog_setting_label}>
-                        <label> Пароль: </label>
-                    </div>
-                    <div className={styles.settings_dialog_setting}>
-                        <input
-                            type="password"
-                            value={jiraPassword}
-                            className={styles.query_name_input}
-                            autoComplete="true"
-                            onChange={(event) =>
-                                dispatch(setJiraPassword(event.target.value))
-                            }
-                        />
-                    </div>
-                    <div className={styles.settings_dialog_setting_label}>
-                        <label> Сервер Jira: </label>
-                    </div>
-                    <div className={styles.settings_dialog_setting}>
-                        <input
-                            type="text"
-                            value={jiraServer}
-                            onChange={(event) =>
-                                dispatch(setJiraServer(event.target.value))
-                            }
-                        />
-                    </div>
-                    <div className={styles.settings_dialog_setting_label}>
-                        <label> Проект: </label>
-                    </div>
-                    <div className={styles.settings_dialog_setting}>
-                        <input
-                            type="text"
-                            value={project}
-                            onChange={(event) =>
-                                dispatch(setProject(event.target.value))
-                            }
-                        />
-                    </div>
-                    <div className={styles.settings_dialog_section_header}>
-                        Члены команды
-                    </div>
-                    <div className={styles.team_members_label}>Логин</div>
-                    <div className={styles.team_members_label}>Имя</div>
-                    {teamMembers.map((member, index) => (
-                        <React.Fragment key={`member-${index}`}>
-                            <div>
-                                <input
-                                    className={styles.team_member_input}
-                                    type="text"
-                                    value={member.login ?? ""} // Добавили защиту от null/undefined
-                                    onChange={(event) => {
-                                        // Создаем новый массив
-                                        const updatedMembers = [...teamMembers];
-                                        // Глубоко копируем объект и меняем в нем свойство login
-                                        updatedMembers[index] = {
-                                            ...updatedMembers[index],
-                                            login: event.target.value,
-                                        };
-                                        // Отправляем обновленный массив в Redux через dispatch
-                                        dispatch(
-                                            setTeamMembers(updatedMembers),
-                                        );
-                                    }}
-                                />
-                            </div>
-                            <div>
-                                <input
-                                    className={styles.team_member_input}
-                                    type="text"
-                                    value={member.name ?? ""} // Добавили защиту от null/undefined
-                                    onChange={(event) => {
-                                        // Создаем новый массив
-                                        const updatedMembers = [...teamMembers];
-                                        // Глубоко копируем объект и меняем в нем свойство name
-                                        updatedMembers[index] = {
-                                            ...updatedMembers[index],
-                                            name: event.target.value,
-                                        };
-                                        // Отправляем обновленный массив в Redux через dispatch
-                                        dispatch(
-                                            setTeamMembers(updatedMembers),
-                                        );
-                                    }}
-                                />
-                            </div>
-                        </React.Fragment>
-                    ))}
-                    {teamMembers.length < 14 && (
-                        <div
-                            className={`${styles.item} ${styles.add_level_btn}`}
-                        >
-                            <button
-                                id="add_level_btn"
-                                type="button"
-                                className={styles.add_level_button}
-                                onClick={handleAddUserClick}
-                            >
-                                Добавить члена команды
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                <div className={styles.dialog_buttons}>
-                    <button type="submit" onClick={handleSettingsSubmit}>
-                        Ok
-                    </button>
-                    <button
-                        type="button"
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            settingsDialogRef.current?.close();
-                        }}
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </dialog>
             <ConfirmationDialog
                 ref={confirmationDialogRef}
                 onConfirm={handleConfirmDiscardChanges}

@@ -1,5 +1,6 @@
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import { useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { setIsQueryChanged } from "../redux/slices/statusSlice";
 import styles from "./QueryForm.module.css";
@@ -8,6 +9,7 @@ import {
     selectOpenQuery,
     setQueryText,
     setEpicViewType,
+    selectLevelFilters,
     setLevelFilters,
 } from "../redux/slices/openQuerySlice";
 import LevelSettingsDialog from "./LevelSettingsDialog";
@@ -15,19 +17,20 @@ import LevelSettingsDialog from "./LevelSettingsDialog";
 const QueryForm = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
+    const levelFilters = useSelector(selectLevelFilters);
     const levelSettingsDialogRef = useRef(null);
 
     const handleSubmit = (event) => {
         event.preventDefault();
     };
 
-    const handleSetupLevelClick = (event) => {
+    const handleSetupLevelClick = (levelIndex) => {
         console.log("handleSetupLevelClick");
-        event.preventDefault();
-        event.stopPropagation();
 
-        // Метод вызовется точно так же, как и раньше
-        levelSettingsDialogRef.current?.showModal();
+        levelSettingsDialogRef.current?.showModal({
+            levelIndex,
+            levelFilters: levelFilters[levelIndex],
+        });
     };
 
     const handleAddLevelClick = () => {
@@ -40,15 +43,15 @@ const QueryForm = () => {
         dispatch(setIsQueryChanged(true));
     };
 
-    const handleEpicChoiceChanged = () => {
+    const handleEpicChoiceChanged = (event) => {
         console.log("handleEpicChoiceChanged");
-        dispatch(setEpicViewType(document.getElementById("epic_choice").value));
+        dispatch(setEpicViewType(event.target.value));
         dispatch(setIsQueryChanged(true));
     };
 
-    const handleQueryTextChanged = () => {
+    const handleQueryTextChanged = (event) => {
         console.log("handleQueryChanged");
-        dispatch(setQueryText(document.getElementById("query_input").value));
+        dispatch(setQueryText(event.target.value));
         dispatch(setIsQueryChanged(true));
     };
 
@@ -99,24 +102,34 @@ const QueryForm = () => {
                             </option>
                         </select>
                     </div>
-                    <div className={`${styles.item} ${styles.level_label}`}>
-                        Уровень 1
-                    </div>
-                    <div className={`${styles.item} ${styles.level_settings}`}>
-                        <textarea
-                            id="level_settings"
-                            onChange={handleLevelSettingsChanged}
-                        ></textarea>
-                    </div>
-                    <div className={`${styles.item} ${styles.level_setup_btn}`}>
-                        <button
-                            id="level_setup_btn"
-                            type="button"
-                            onClick={handleSetupLevelClick}
-                        >
-                            Настроить
-                        </button>
-                    </div>
+                    {levelFilters ? levelFilters.map((filters, index) => (
+                        <React.Fragment key={`level-${index}`}>
+                            <div
+                                className={`${styles.item} ${styles.level_label}`}
+                            >
+                                Уровень {index}
+                            </div>
+                            <div
+                                className={`${styles.item} ${styles.level_settings}`}
+                            >
+                                <textarea 
+                                    id={"level_settings-"+index}
+                                    onChange={handleLevelSettingsChanged}
+                                ></textarea>
+                            </div>
+                            <div
+                                className={`${styles.item} ${styles.level_setup_btn}`}
+                            >
+                                <button
+                                    id={"level_setup_btn-" + (index + 1)}
+                                    type="button"
+                                    onClick={() => handleSetupLevelClick(index)}
+                                >
+                                    Настроить
+                                </button>
+                            </div>
+                        </React.Fragment>
+                    )) : ''}
                     <div className={`${styles.item} ${styles.add_level_btn}`}>
                         <button
                             id="add_level_btn"

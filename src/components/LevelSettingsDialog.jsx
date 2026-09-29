@@ -1,5 +1,7 @@
 import { forwardRef, useRef, useImperativeHandle, useState } from 'react';
+
 import styles from './LevelSettingsDialog.module.css'; 
+import { fetchJiraMetadata } from '../redux/slices/jiraMetadata';
 
 const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const dialogRef = useRef(null);
@@ -9,6 +11,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     useImperativeHandle(ref, () => ({
         showModal: (data) => {
             setDialogData(data);
+            dispatch(fetchJiraMetadata());
             dialogRef.current?.showModal();
         },
         close: () => {
@@ -37,7 +40,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             className={styles.dialog}
             onClick={(event) => event.stopPropagation()}
         >
-            Пока это пустышка, но тут будет окно с настройками уровня
+            Настройки {dialogData.levelIndex + 1}-ого уровня
             <br />
             <div className={styles.dialog_buttons}>
                 <button type="button" onClick={handleConfirm}>

@@ -7,7 +7,6 @@ const initialState = [];
 const fetchQueryList = createAsyncThunk(
     'queries',
     async (url, thunkAPI) => {
-        console.log(thunkAPI);
         try {
             const res = await axios.get(url);
             return res.data;
@@ -34,7 +33,6 @@ const queryListSlice = createSlice({
                     id: query.id,
                     name: query.name,
                 }));
-            console.log(filtered_queries);
             return filtered_queries;
         });
     },
