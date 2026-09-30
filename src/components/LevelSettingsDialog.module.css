@@ -179,7 +179,7 @@
 } 
 
 .link_types_label {
-    grid-area: link_types;
+    grid-area: link_types_label;
     text-align: right;
     padding: 0px 10px 0px 0px;    
 } 
@@ -197,10 +197,12 @@
 }
 
 textarea {
+    display: block;
     font-size: 1rem;
     width: 100%;
     line-height: 1.5;
     height: 2lh;
+    border: 1px solid #767676;
 }
 
 button {
