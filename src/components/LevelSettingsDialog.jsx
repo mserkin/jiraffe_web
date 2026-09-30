@@ -67,126 +67,111 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                         : ""}
                 </div>
                 <div className={styles.summary_label}>Название:</div>
-                <div>
+                <div className={styles.summary_textarea}>
                     <textarea
                         id="SummaryTextarea"
-                        className={styles.summary_textarea}
                     ></textarea>
                 </div>
                 <div className={styles.type_label}>Тип:</div>
-                <div>
+                <div className={styles.type_textarea}>
                     <textarea
                         id="TypeTextarea"
-                        className={styles.type_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.type_change_button}>
                     <button
                         id="changeTypeFilterButton"
-                        className={styles.type_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
                     </button>
                 </div>
                 <div className={styles.status_label}>Статус:</div>
-                <div>
+                <div className={styles.status_textarea}>
                     <textarea
                         id="StatusTextarea"
-                        className={styles.status_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.status_change_button}>
                     <button
                         id="changeStatusFilterButton"
-                        className={styles.status_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
                     </button>
                 </div>
                 <div className={styles.sprint_label}>Спринт:</div>
-                <div>
+                <div className={styles.sprint_textarea}>
                     <textarea
                         id="SprintTextarea"
-                        className={styles.sprint_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.sprint_change_button}>
                     <button
                         id="changeSprintFilterButton"
-                        className={styles.sprint_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
                     </button>
                 </div>
                 <div className={styles.creator_label}>Создатель:</div>
-                <div>
+                <div className={styles.creator_textarea}    >
                     <textarea
                         id="CreatorTextarea"
-                        className={styles.creator_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.creator_change_button}>
                     <button
                         id="changeCreatorFilterButton"
-                        className={styles.creator_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
                     </button>
                 </div>
                 <div className={styles.assignee_label}>Исполнитель:</div>
-                <div>
+                <div className={styles.assignee_textarea}>
                     <textarea
                         id="AssigneeTextarea"
-                        className={styles.assignee_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.assignee_change_button}>
                     <button
                         id="changeAssigneeFilterButton"
-                        className={styles.assignee_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
                     </button>
                 </div>
                 <div className={styles.reporter_label}>Ответственный:</div>
-                <div>
+                <div className={styles.reporter_textarea}>
                     <textarea
                         id="ReporterTextarea"
-                        className={styles.reporter_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.reporter_change_button}>
                     <button
                         id="changeReporterFilterButton"
-                        className={styles.reporter_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
                     </button>
                 </div>
                 <div className={styles.link_types_label}>Связана:</div>
-                <div>
+                <div className={styles.link_types_textarea}>
                     <textarea
                         id="LinkTypesTextarea"
-                        className={styles.link_types_textarea}
                         readOnly
                     ></textarea>
                 </div>
-                <div>
+                <div className={styles.link_types_change_button}>
                     <button
                         id="changeLinkTypesFilterButton"
-                        className={styles.link_types_change_button}
                         onClick={changeFilterButtonOnClick}
                     >
                         Изменить
