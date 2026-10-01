@@ -23,16 +23,7 @@ const MemberSchema = new Schema({
     name: String,
 });
 
-const LevelFilterSchema = new Schema({
-    summaryFilter: String,
-    issueTypeFilter: [String],
-    statusFilter: [String],
-    sprintFilter: [String],
-    creatorLoginFilter: [String],
-    assigneeLoginFilter: [String],
-    reporterLoginFilter: [String],
-    linkTypeFilter: String,
-}, { _id: false });
+const LevelFilterSchema = new Schema({}, { _id: false, strict: false });
 
 const queryShortInfoSchema = new Schema(
     {
@@ -105,7 +96,7 @@ async function getQueryList(res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при поиске запросов" });
+            .json({ error: `Ошибка сервера при поиске запросов: ${error}` });
     }
 }
 
@@ -123,7 +114,7 @@ async function getQueryById(req, res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при поиске запроса" });
+            .json({ error: `Ошибка сервера при поиске запроса: ${error}`});
     }
 }
 
@@ -157,7 +148,7 @@ async function insertQuery(req, res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при сохранении запроса" });
+            .json({ error: `Ошибка сервера при сохранении запроса: ${error}` });
     }
 }
 
@@ -204,7 +195,7 @@ async function updateQueryById(req, res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при обновлении запроса" });
+            .json({ error: `Ошибка сервера при обновлении запроса: ${error}` });
     }
 }
 
@@ -228,7 +219,7 @@ async function deleteQueryById(req, res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при обновлении запроса" });
+            .json({ error: `Ошибка сервера при обновлении запроса: ${error}` });
     }
 }
 
@@ -243,7 +234,7 @@ async function getSettings(res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при поиске запросов" });
+            .json({ error: `Ошибка сервера при поиске настроек: ${error}` });
     }
 }
 
@@ -280,7 +271,7 @@ async function updateSettings(req, res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при обновлении настроек" });
+            .json({ error: `Ошибка сервера при обновлении настроек: ${error}` });
     }
 }
 
@@ -295,7 +286,7 @@ async function getLinkTypes(res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при поиске запросов" });
+            .json({ error: `Ошибка сервера при поиске типов связей: ${error}` });
     }
 }
 
@@ -310,7 +301,7 @@ async function getIssueTypes(res) {
         console.error(error);
         return res
             .status(500)
-            .json({ error: "Ошибка сервера при поиске запросов" });
+            .json({ error: `Ошибка сервера при поиске типов рабочих элементов: ${error}` });
     }
 }
 
