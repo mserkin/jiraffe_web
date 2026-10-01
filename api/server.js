@@ -23,12 +23,24 @@ const MemberSchema = new Schema({
     name: String,
 });
 
+const LevelFilterSchema = new Schema({
+    summaryFilter: String,
+    issueTypeFilter: [String],
+    statusFilter: [String],
+    sprintFilter: [String],
+    creatorLoginFilter: [String],
+    assigneeLoginFilter: [String],
+    reporterLoginFilter: [String],
+    linkTypeFilter: String,
+}, { _id: false });
+
 const queryShortInfoSchema = new Schema(
     {
         id: String,
         name: String,
         queryText: String,
         epicViewType: String,
+        levelFilters: [LevelFilterSchema],
     },
     { collection: "queries" },
 );
