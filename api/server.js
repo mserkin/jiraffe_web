@@ -167,13 +167,17 @@ async function updateQueryById(req, res) {
             ...req.body,
             id,
         };
+        
+        console.log(`updatedQuery: ${JSON.stringify(updatedQuery)}`);
 
         const query = await QueryShortInfo.findOneAndUpdate(
             { id },
             { $set: updatedQuery },
             { returnDocument: "after", runValidators: true },
         );
-
+        
+        console.log(`query: ${JSON.stringify(query)}`);
+        
         if (!query) {
             return res
                 .status(404)

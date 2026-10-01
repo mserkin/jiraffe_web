@@ -31,7 +31,11 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     };
 
     const handleConfirm = () => {
-        // Передаем данные обратно в родительский обработчик «Да»
+        if (!dialogData) {
+            dialogRef.current?.close();
+            return;
+        }
+
         onApply(dialogData);
         dialogRef.current?.close();
         setDialogData(null);
@@ -72,14 +76,22 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 <div className={styles.summary_textarea}>
                     <textarea
                         id="SummaryTextarea"
-                        value={dialogData ? dialogData.levelFilters.summaryFilter : ""}
-                        onChange={(event) => {dispatch(setDialogData({
-                            ...dialogData,
-                            levelFilters: {
-                                ...dialogData.levelFilters,
-                                summaryFilter: event.target.value
-                            }
-                        }));}}
+                        value={dialogData?.levelFilters?.summaryFilter ?? ""}
+                        onChange={(event) => {
+                            setDialogData((prev) => {
+                                if (!prev) {
+                                    return prev;
+                                }
+
+                                return {
+                                    ...prev,
+                                    levelFilters: {
+                                        ...(prev.levelFilters ?? {}),
+                                        summaryFilter: event.target.value,
+                                    },
+                                };
+                            });
+                        }}
                     ></textarea>
                 </div>
                 <div className={styles.type_label}>Тип:</div>

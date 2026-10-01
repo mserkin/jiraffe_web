@@ -18,6 +18,7 @@ const QueryForm = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const levelFilters = useSelector(selectLevelFilters);
+    const levelFiltersList = Array.isArray(levelFilters) ? levelFilters : [];
     const levelSettingsDialogRef = useRef(null);
 
     const handleSubmit = (event) => {
@@ -26,12 +27,12 @@ const QueryForm = () => {
 
     const handleSetupLevelClick = (levelIndex) => {
         console.log("handleSetupLevelClick");
-        console.log(`levelIndex: ${levelIndex}`)
+        console.log(`levelIndex: ${levelIndex}`);
         const dialogData = {
             levelIndex,
-            levelFilters: levelFilters[levelIndex],
-        }
-        console.log(`dialogData=${JSON.stringify(dialogData)}`)
+            levelFilters: levelFiltersList[levelIndex] ?? {},
+        };
+        console.log(`dialogData=${JSON.stringify(dialogData)}`);
         levelSettingsDialogRef.current?.showModal(dialogData);
     };
 
@@ -58,8 +59,15 @@ const QueryForm = () => {
     };
 
     const handleLevelSettingsApply = (dialogData) => {
+        if (!dialogData || dialogData.levelIndex === undefined) {
+            return;
+        }
+
+        const nextLevelFilters = [...levelFiltersList];
+        nextLevelFilters[dialogData.levelIndex] = dialogData.levelFilters ?? {};
+
         console.log(`handleLevelSettingsApply(${JSON.stringify(dialogData)}) executed` );
-        dispatch(setLevelFilters(dialogData.levelFilters));
+        dispatch(setLevelFilters(nextLevelFilters));
         console.log(`levelFilters have been set`);
         dispatch(setIsQueryChanged(true));
     };
@@ -106,7 +114,7 @@ const QueryForm = () => {
                             </option>
                         </select>
                     </div>
-                    {levelFilters ? levelFilters.map((filters, index) => (
+                    {levelFiltersList.map((filters, index) => (
                         <React.Fragment key={`level-${index}`}>
                             <div
                                 className={`${styles.item} ${styles.level_label}`}
@@ -133,7 +141,7 @@ const QueryForm = () => {
                                 </button>
                             </div>
                         </React.Fragment>
-                    )) : ''}
+                    ))}
                     <div className={`${styles.item} ${styles.add_level_btn}`}>
                         <button
                             id="add_level_btn"
