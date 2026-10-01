@@ -23,7 +23,22 @@ const MemberSchema = new Schema({
     name: String,
 });
 
-const LevelFilterSchema = new Schema({}, { _id: false, strict: false });
+const LinkSchema = new Schema({
+    linkType: String,
+    direction: String,
+    displayName: String
+}, { _id: false });
+
+const LevelFilterSchema = new Schema({
+    summaryFilter: String,
+    issueTypeFilter: [String],
+    statusFilter: [String],
+    sprintFilter: [String],
+    creatorLoginFilter: [String],
+    assigneeLoginFilter: [String],
+    reporterLoginFilter: [String],
+    linkTypeFilter: [LinkSchema],
+}, { _id: false });
 
 const queryShortInfoSchema = new Schema(
     {
