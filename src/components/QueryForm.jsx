@@ -26,11 +26,13 @@ const QueryForm = () => {
 
     const handleSetupLevelClick = (levelIndex) => {
         console.log("handleSetupLevelClick");
-
-        levelSettingsDialogRef.current?.showModal({
+        console.log(`levelIndex: ${levelIndex}`)
+        const dialogData = {
             levelIndex,
             levelFilters: levelFilters[levelIndex],
-        });
+        }
+        console.log(`dialogData=${JSON.stringify(dialogData)}`)
+        levelSettingsDialogRef.current?.showModal(dialogData);
     };
 
     const handleAddLevelClick = () => {
@@ -55,9 +57,11 @@ const QueryForm = () => {
         dispatch(setIsQueryChanged(true));
     };
 
-    const handleLevelSettingsApply = () => {
-        // Ваша логика сброса изменений
-        levelSettingsDialogRef.current?.close();
+    const handleLevelSettingsApply = (dialogData) => {
+        console.log(`handleLevelSettingsApply(${JSON.stringify(dialogData)}) executed` );
+        dispatch(setLevelFilters(dialogData.levelFilters));
+        console.log(`levelFilters have been set`);
+        dispatch(setIsQueryChanged(true));
     };
 
     return (

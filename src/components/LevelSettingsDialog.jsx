@@ -12,7 +12,9 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     // Передаем методы showModal и close в родительский компонент
     useImperativeHandle(ref, () => ({
         showModal: (data) => {
+            console.log(`LevelSettingsDialog.showModal(${JSON.stringify(data)}) executed`)
             setDialogData(data);
+            console.log(`dialogData=${dialogData}`)
             dispatch(fetchJiraMetadata());
             dialogRef.current?.showModal();
         },
@@ -70,6 +72,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 <div className={styles.summary_textarea}>
                     <textarea
                         id="SummaryTextarea"
+                        value={dialogData ? dialogData.levelFilters.summaryFilter : ""}
+                        onChange={(event) => {dispatch(setDialogData({
+                            ...dialogData,
+                            levelFilters: {
+                                ...dialogData.levelFilters,
+                                summaryFilter: event.target.value
+                            }
+                        }));}}
                     ></textarea>
                 </div>
                 <div className={styles.type_label}>Тип:</div>
