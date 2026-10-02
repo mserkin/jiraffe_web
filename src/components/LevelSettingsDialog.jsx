@@ -1,20 +1,26 @@
 import { forwardRef, useRef, useImperativeHandle, useState } from "react";
 
 import styles from "./LevelSettingsDialog.module.css";
-import { fetchJiraMetadata } from "../redux/slices/jiraMetadata";
-import { useDispatch } from "react-redux";
+import {
+    fetchJiraMetadata,
+    selectIssueTypes,
+} from "../redux/slices/jiraMetadata";
+import { useDispatch, useSelector } from "react-redux";
 
 const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const dispatch = useDispatch();
     const dialogRef = useRef(null);
     const [dialogData, setDialogData] = useState(null);
+    const issueTypes = useSelector(selectIssueTypes);
 
     // Передаем методы showModal и close в родительский компонент
     useImperativeHandle(ref, () => ({
         showModal: (data) => {
-            console.log(`LevelSettingsDialog.showModal(${JSON.stringify(data)}) executed`)
+            console.log(
+                `LevelSettingsDialog.showModal(${JSON.stringify(data)}) executed`,
+            );
             setDialogData(data);
-            console.log(`dialogData=${dialogData}`)
+            console.log(`dialogData=${dialogData}`);
             dispatch(fetchJiraMetadata());
             dialogRef.current?.showModal();
         },
@@ -60,6 +66,13 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
         }
     };
 
+    function getIssueTypeDisplayList() {
+        return (dialogData?.levelFilters?.issueTypeFilter ?? [])
+            .map((it) => issueTypes.find((t) => t.id === it)?.name ?? "")
+            .filter((n) => !!n)
+            .join(", ");
+    }
+
     return (
         <dialog
             ref={dialogRef}
@@ -75,7 +88,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 <div className={styles.summary_label}>Название:</div>
                 <div className={styles.summary_textarea}>
                     <textarea
-                        id="SummaryTextarea"
+                        id="summaryTextarea"
                         value={dialogData?.levelFilters?.summaryFilter ?? ""}
                         onChange={(event) => {
                             setDialogData((prev) => {
@@ -97,7 +110,8 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 <div className={styles.type_label}>Тип:</div>
                 <div className={styles.type_textarea}>
                     <textarea
-                        id="TypeTextarea"
+                        id="typeTextarea"
+                        value={getIssueTypeDisplayList()}
                         readOnly
                     ></textarea>
                 </div>
@@ -111,10 +125,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 </div>
                 <div className={styles.status_label}>Статус:</div>
                 <div className={styles.status_textarea}>
-                    <textarea
-                        id="StatusTextarea"
-                        readOnly
-                    ></textarea>
+                    <textarea id="statusTextarea" readOnly></textarea>
                 </div>
                 <div className={styles.status_change_button}>
                     <button
@@ -126,10 +137,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 </div>
                 <div className={styles.sprint_label}>Спринт:</div>
                 <div className={styles.sprint_textarea}>
-                    <textarea
-                        id="SprintTextarea"
-                        readOnly
-                    ></textarea>
+                    <textarea id="sprintTextarea" readOnly></textarea>
                 </div>
                 <div className={styles.sprint_change_button}>
                     <button
@@ -140,11 +148,8 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     </button>
                 </div>
                 <div className={styles.creator_label}>Создатель:</div>
-                <div className={styles.creator_textarea}    >
-                    <textarea
-                        id="CreatorTextarea"
-                        readOnly
-                    ></textarea>
+                <div className={styles.creator_textarea}>
+                    <textarea id="creatorTextarea" readOnly></textarea>
                 </div>
                 <div className={styles.creator_change_button}>
                     <button
@@ -156,10 +161,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 </div>
                 <div className={styles.assignee_label}>Исполнитель:</div>
                 <div className={styles.assignee_textarea}>
-                    <textarea
-                        id="AssigneeTextarea"
-                        readOnly
-                    ></textarea>
+                    <textarea id="assigneeTextarea" readOnly></textarea>
                 </div>
                 <div className={styles.assignee_change_button}>
                     <button
@@ -171,10 +173,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 </div>
                 <div className={styles.reporter_label}>Ответственный:</div>
                 <div className={styles.reporter_textarea}>
-                    <textarea
-                        id="ReporterTextarea"
-                        readOnly
-                    ></textarea>
+                    <textarea id="reporterTextarea" readOnly></textarea>
                 </div>
                 <div className={styles.reporter_change_button}>
                     <button
@@ -186,10 +185,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 </div>
                 <div className={styles.link_types_label}>Связана:</div>
                 <div className={styles.link_types_textarea}>
-                    <textarea
-                        id="LinkTypesTextarea"
-                        readOnly
-                    ></textarea>
+                    <textarea id="linkTypesTextarea" readOnly></textarea>
                 </div>
                 <div className={styles.link_types_change_button}>
                     <button

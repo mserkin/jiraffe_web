@@ -78,8 +78,13 @@
 .type_textarea {
     grid-area: type_textarea;
     width: 100%;
-    padding: 0px 10px 0px 0px;  
+    padding: 0px 10px 0px 0px;
 } 
+
+.type_textarea textarea {
+    color: darkslategray;
+    font-style: italic;
+}
 
 .type_change_button{
     grid-area: type_change_button;
