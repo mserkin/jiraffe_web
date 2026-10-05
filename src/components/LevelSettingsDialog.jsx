@@ -237,6 +237,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             </dialog>
             <MultipleSelectDialog
                 ref={multipleSelectDialogRef}
+                issueTypes={issueTypes}
                 onApply={handleMultipleSelectApply}
             />
         </>

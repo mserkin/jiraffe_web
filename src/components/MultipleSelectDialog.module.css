@@ -42,4 +42,6 @@
     border: 1px solid #d0d5dd;
     border-radius: 4px;
     box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
 }

@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import styles from "./MultipleSelectDialog.module.css";
 
-const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
+const MultipleSelectDialog = forwardRef(({ issueTypes, onApply }, ref) => {
     const dialogRef = useRef(null);
     const [dialogData, setDialogData] = useState(null);
 
@@ -33,7 +33,7 @@ const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
             return;
         }
 
-        onApply(dialogData);
+        onApply(dialogData.selectedIssueTypes ?? []);
         dialogRef.current?.close();
         setDialogData(null);
     };
@@ -48,9 +48,46 @@ const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
                 <div className={styles.dialog_header}>
                     {dialogData ? dialogData.dialogHeader : ""}
                 </div>
-                <div>Выберите элементы (Ctrl - снять выбор)</div>
+                <div>Выберите элементы (Ctrl - выбрать / снять выбор)</div>
                 <div>
-                    <select name="options" id="options" className={styles.select} multiple size="5">
+                    <select
+                        name="options"
+                        id="options"
+                        className={styles.select}
+                        multiple
+                        size="15"
+                        value={(dialogData?.selectedIssueTypes ?? []).map(String)}
+                        onChange={(event) => {
+                            const selectedIds = Array.from(
+                                event.target.selectedOptions,
+                                (option) => option.value,
+                            );
+                            setDialogData((prev) => {
+                                if (!prev) {
+                                    return prev;
+                                }
+
+                                return {
+                                    ...prev,
+                                    selectedIssueTypes: issueTypes
+                                        .filter((issueType) =>
+                                            selectedIds.includes(
+                                                String(issueType.id),
+                                            ),
+                                        )
+                                        .map((issueType) => issueType.id),
+                                };
+                            });
+                        }}
+                    >
+                        {issueTypes.filter((issueType) => issueType.id != "UNKNOWN").map((issueType) => (
+                            <option
+                                key={issueType.id}
+                                value={String(issueType.id)}
+                            >
+                                {issueType.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>
