@@ -66,15 +66,17 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     };
 
     const changeFilterButtonOnClick = (event) => {
+        console.log(`event.target.id=${event.target.id}`);
         switch (event.target.id) {
             case "changeTypeFilterButton":
-                const dialogData = {
+                console.log(`changeTypeFilterButton clicked`);
+                const newDialogData = {
                     dialogHeader: "Фильтр по типам задач",
                     levelIndex: dialogData?.levelIndex,
                     selectedIssueTypes: dialogData?.levelFilters?.issueTypeFilter ?? [],
                 };
-                console.log(`dialogData=${JSON.stringify(dialogData)}`);
-                multipleSelectDialogRef.current?.showModal(dialogData);
+                console.log(`newDialogData=${JSON.stringify(newDialogData)}`);
+                multipleSelectDialogRef.current?.showModal(newDialogData);
                 break;
             case "changeStatusFilterButton":
                 break;

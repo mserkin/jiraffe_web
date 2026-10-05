@@ -1,10 +1,8 @@
-import { forwardRef, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 import styles from "./MultipleSelectDialog.module.css";
 
 const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
-    const dispatch = useDispatch();
     const dialogRef = useRef(null);
     const [dialogData, setDialogData] = useState(null);
 
@@ -52,12 +50,7 @@ const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
                 </div>
                 <div>Выберите элементы (Ctrl - снять выбор)</div>
                 <div>
-                    <select name="fruits" id="fruits" multiple size="5">
-                        <option value="apple">Яблоко</option>
-                        <option value="banana">Банан</option>
-                        <option value="orange">Апельсин</option>
-                        <option value="cherry">Вишня</option>
-                        <option value="kiwi">Киви</option>
+                    <select name="options" id="options" className={styles.select} multiple size="5">
                     </select>
                 </div>
             </div>
