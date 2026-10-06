@@ -70,16 +70,40 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
         switch (event.target.id) {
             case "changeTypeFilterButton":
                 console.log(`changeTypeFilterButton clicked`);
-                const newDialogData = {
+                const data = {
                     dialogHeader: "Фильтр по типам задач",
                     levelIndex: dialogData?.levelIndex,
-                    selectedIssueTypes:
+                    options: issueTypes.map((it) => {
+                        return { id: it.id, name: it.name };
+                    }),
+                    selectedOptions:
                         dialogData?.levelFilters?.issueTypeFilter ?? [],
                 };
-                console.log(`newDialogData=${JSON.stringify(newDialogData)}`);
-                multipleSelectDialogRef.current?.showModal(newDialogData);
+                console.log(`data=${JSON.stringify(data)}`);
+                multipleSelectDialogRef.current?.showModal(data);
                 break;
             case "changeStatusFilterButton":
+                console.log(`changeTypeFilterButton clicked`);
+                const data2 = {
+                    dialogHeader: "Фильтр по статусам",
+                    levelIndex: dialogData?.levelIndex,
+                    options: issueTypes
+                        .filter(
+                            (it) =>
+                                it.id in
+                                dialogData?.levelFilters?.issueTypeFilter,
+                        )
+                        .map((it) =>
+                            it.statuses.map((st) => {
+                                return { id: it.id + "$" + st.id };
+                            }),
+                        ),
+                    selectedOptions: (
+                        dialogData?.levelFilters?.statusFilter ?? []
+                    ).map((st) => st.issueType + "$" + st.statusId),
+                };
+                console.log(`data2=${JSON.stringify(data2)}`);
+                multipleSelectDialogRef.current?.showModal(data2);
                 break;
             case "changeSprintFilterButton":
                 break;
@@ -102,20 +126,20 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     }
 
     function getStatusDisplayList() {
-        // return (dialogData?.levelFilters?.statusFilter ?? [])
-        //     .map(
-        //         (st) =>
-        //             issueTypes
-        //                 .find((t) => t.id === st.issueType)
-        //                 ?.statuses.find((s) => s.id === st.statusId)?.name ??
-        //             "",
-        //     )
-        //     .filter((n) => !!n)
-        //     .join(", ");
         console.log("getStatusDisplayList executed");
-        // return (dialogData?.levelFilters?.statusFilter ?? []).map((st) =>
-        //     console.log(JSON.stringify(st))
-        // );
+        return (dialogData?.levelFilters?.statusFilter ?? [])
+            .map(
+                (st) =>
+                    (issueTypes.find((t) => t.id === st.issueType)?.name ??
+                        "") +
+                        " - " +
+                        issueTypes
+                            .find((t) => t.id === st.issueType)
+                            ?.statuses.find((s) => s.id === st.statusId)
+                            ?.name ?? "",
+            )
+            .filter((n) => !!n)
+            .join(", ");
     }
 
     return (
@@ -175,7 +199,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     <div className={styles.status_textarea}>
                         <textarea
                             id="statusTextarea"
-                            value={getStatusDisplayList}
+                            value={getStatusDisplayList()}
                             readOnly
                         ></textarea>
                     </div>
@@ -259,7 +283,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             </dialog>
             <MultipleSelectDialog
                 ref={multipleSelectDialogRef}
-                issueTypes={issueTypes}
                 onApply={handleMultipleSelectApply}
             />
         </>
