@@ -14,18 +14,13 @@ const fetchJiraMetadata = createAsyncThunk(
     async (_, thunkAPI) => {
         console.log("fetchJiraMetadata executed")
         try {
-            console.log("GET /issue_types ...")
             const issueTypes = (await axios.get(`${BACKEND_URI}${ISSUE_TYPES_PATH_PART}`)).data;
-            console.log("GET /link_types ...")
             const linkTypes = (await axios.get(`${BACKEND_URI}${LINK_TYPES_PATH_PART}`)).data;
-            console.log("Preparing result object...")
             const result = {
                 issueTypes,
                 linkTypes,
                 sprints: []
             }
-            console.log(`Existing result object:${JSON.stringify(result)}`)
-            console.log("fetchJiraMetadata finished")
             return result;
         } catch (error) {
             thunkAPI.dispatch(

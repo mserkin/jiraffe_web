@@ -29,10 +29,15 @@ const LinkSchema = new Schema({
     displayName: String
 }, { _id: false });
 
+const StatusDescriptor = new Schema({
+    issueType: String,
+    statusId: String
+})
+
 const LevelFilterSchema = new Schema({
     summaryFilter: String,
     issueTypeFilter: [String],
-    statusFilter: [String],
+    statusFilter: [StatusDescriptor],
     sprintFilter: [String],
     creatorLoginFilter: [String],
     assigneeLoginFilter: [String],

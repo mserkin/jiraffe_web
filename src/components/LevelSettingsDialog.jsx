@@ -73,7 +73,8 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 const newDialogData = {
                     dialogHeader: "Фильтр по типам задач",
                     levelIndex: dialogData?.levelIndex,
-                    selectedIssueTypes: dialogData?.levelFilters?.issueTypeFilter ?? [],
+                    selectedIssueTypes:
+                        dialogData?.levelFilters?.issueTypeFilter ?? [],
                 };
                 console.log(`newDialogData=${JSON.stringify(newDialogData)}`);
                 multipleSelectDialogRef.current?.showModal(newDialogData);
@@ -98,6 +99,23 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             .map((it) => issueTypes.find((t) => t.id === it)?.name ?? "")
             .filter((n) => !!n)
             .join(", ");
+    }
+
+    function getStatusDisplayList() {
+        // return (dialogData?.levelFilters?.statusFilter ?? [])
+        //     .map(
+        //         (st) =>
+        //             issueTypes
+        //                 .find((t) => t.id === st.issueType)
+        //                 ?.statuses.find((s) => s.id === st.statusId)?.name ??
+        //             "",
+        //     )
+        //     .filter((n) => !!n)
+        //     .join(", ");
+        console.log("getStatusDisplayList executed");
+        // return (dialogData?.levelFilters?.statusFilter ?? []).map((st) =>
+        //     console.log(JSON.stringify(st))
+        // );
     }
 
     return (
@@ -155,7 +173,11 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     </div>
                     <div className={styles.status_label}>Статус:</div>
                     <div className={styles.status_textarea}>
-                        <textarea id="statusTextarea" readOnly></textarea>
+                        <textarea
+                            id="statusTextarea"
+                            value={getStatusDisplayList}
+                            readOnly
+                        ></textarea>
                     </div>
                     <div className={styles.status_change_button}>
                         <button
