@@ -22,7 +22,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 `LevelSettingsDialog.showModal(${JSON.stringify(data)}) executed`,
             );
             setDialogData(data);
-            console.log(`dialogData=${dialogData}`);
             dispatch(fetchJiraMetadata());
             dialogRef.current?.showModal();
         },
@@ -49,19 +48,38 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
         setDialogData(null);
     };
 
-    const handleMultipleSelectApply = (selectedIssueTypes) => {
+    const handleMultipleSelectApply = (data) => {
+        console.log(JSON.stringify(data));
         setDialogData((prev) => {
             if (!prev) {
                 return prev;
             }
 
-            return {
-                ...prev,
-                levelFilters: {
-                    ...(prev.levelFilters ?? {}),
-                    issueTypeFilter: selectedIssueTypes,
-                },
-            };
+            switch (data.mode) {
+                case "selectIssueTypes":
+                    return {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            issueTypeFilter: data.selectedOptions,
+                        },
+                    };
+                case "selectStatuses":
+                    const newVal = {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            statusFilter: data.selectedOptions.map((s) =>
+                                (([issueType, statusId]) => ({
+                                    issueType,
+                                    statusId,
+                                }))(s.split("$")),
+                            ),
+                        },
+                    };
+                    console.log(`newVal=${JSON.stringify(newVal)}`);
+                    return newVal;
+            }
         });
     };
 
@@ -71,6 +89,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             case "changeTypeFilterButton":
                 console.log(`changeTypeFilterButton clicked`);
                 const data = {
+                    mode: "selectIssueTypes",
                     dialogHeader: "Фильтр по типам задач",
                     levelIndex: dialogData?.levelIndex,
                     options: issueTypes.map((it) => {
@@ -85,16 +104,21 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             case "changeStatusFilterButton":
                 console.log(`changeTypeFilterButton clicked`);
                 const data2 = {
+                    mode: "selectStatuses",
                     dialogHeader: "Фильтр по статусам",
                     levelIndex: dialogData?.levelIndex,
                     options: issueTypes
-                        .filter(
-                            (it) =>
-                                dialogData?.levelFilters?.issueTypeFilter.includes(it.id)
+                        .filter((it) =>
+                            dialogData?.levelFilters?.issueTypeFilter.includes(
+                                it.id,
+                            ),
                         )
                         .map((it) =>
                             it.statuses.map((st) => {
-                                return { id: it.id + "$" + st.id, name: it.name + " - " + st.name };
+                                return {
+                                    id: it.id + "$" + st.id,
+                                    name: it.name + " - " + st.name,
+                                };
                             }),
                         )
                         .flat(),

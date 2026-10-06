@@ -32,7 +32,7 @@ const LinkSchema = new Schema({
 const StatusDescriptor = new Schema({
     issueType: String,
     statusId: String
-})
+}, { _id: false })
 
 const LevelFilterSchema = new Schema({
     summaryFilter: String,

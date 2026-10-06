@@ -35,7 +35,7 @@ const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
             return;
         }
 
-        onApply(dialogData.selectedOptions ?? []);
+        onApply(dialogData ?? []);
         dialogRef.current?.close();
         setDialogData(null);
     };
