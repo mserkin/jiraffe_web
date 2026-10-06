@@ -90,14 +90,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     options: issueTypes
                         .filter(
                             (it) =>
-                                it.id in
-                                dialogData?.levelFilters?.issueTypeFilter,
+                                dialogData?.levelFilters?.issueTypeFilter.includes(it.id)
                         )
                         .map((it) =>
                             it.statuses.map((st) => {
-                                return { id: it.id + "$" + st.id };
+                                return { id: it.id + "$" + st.id, name: it.name + " - " + st.name };
                             }),
-                        ),
+                        )
+                        .flat(),
                     selectedOptions: (
                         dialogData?.levelFilters?.statusFilter ?? []
                     ).map((st) => st.issueType + "$" + st.statusId),

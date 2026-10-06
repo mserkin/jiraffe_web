@@ -5,6 +5,8 @@ import styles from "./MultipleSelectDialog.module.css";
 const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
     const dialogRef = useRef(null);
     const [dialogData, setDialogData] = useState(null);
+    const options = dialogData?.options ?? [];
+    const selectedOptions = dialogData?.selectedOptions ?? [];
 
     // Передаем методы showModal и close в родительский компонент
     useImperativeHandle(ref, () => ({
@@ -56,7 +58,7 @@ const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
                         className={styles.select}
                         multiple
                         size="15"
-                        value={(dialogData?.selectedOptions ?? []).map(String)}
+                        value={selectedOptions.map(String)}
                         onChange={(event) => {
                             const selectedIds = Array.from(
                                 event.target.selectedOptions,
@@ -74,9 +76,9 @@ const MultipleSelectDialog = forwardRef(({ onApply }, ref) => {
                             });
                         }}
                     >
-                        {dialogData.options.map((o) => (
+                        {options.map((o) => (
                             <option
-                                key={o.id}
+                                key={String(o.id)}
                                 value={String(o.id)}
                             >
                                 {o.name}
