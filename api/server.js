@@ -3,6 +3,7 @@ import { connect, Schema, model } from "mongoose";
 import cors from "cors";
 import { randomUUID } from "node:crypto";
 import { MONGO_LOGIN, MONGO_PASSWORD } from "./credits.js";
+import JiraClient from "./jira_client.js";
 
 const app = express();
 app.use(cors());
@@ -62,6 +63,7 @@ const SettingsSchema = new Schema(
         jiraPassword: String,
         jiraServer: String,
         project: String,
+        boardId: Number,
         teamMembers: [MemberSchema],
     },
     { collection: "settings" },
@@ -325,6 +327,37 @@ async function getIssueTypes(res) {
     }
 }
 
+async function getSprints(res) {
+    try {
+        const settings = await Settings.findOne(
+            {},
+            { _id: 0, "teamMembers._id": 0 },
+        );
+
+        const config = {
+            baseUrl: settings.jiraServer,
+            username: settings.jiraLogin,
+            password: settings.jiraPassword
+        };
+
+        // Устанавливает соединение и проверяет credentials через /myself
+        console.log(`Вызов 1: Инициализация(${JSON.stringify(config)})`);
+        const jira1 = await JiraClient.getConnection(config);
+    
+        // Запрашиваем спринты, используя метод созданного подключения
+        const boardId = settings.boardId;
+        const sprints = await jira1.request(`/rest/agile/1.0/board/${boardId}/sprint?state=active,future`);
+        console.log("Спринты получены:", sprints.values);
+
+        return res.status(200).json(sprints.values);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: `Ошибка сервера при получении информации о спринтах: ${error}` });
+    }
+}
+
 app.get("/queries", async (req, res) => {
     getQueryList(res);
 });
@@ -359,6 +392,10 @@ app.get("/issue-types", async (req, res) => {
 
 app.get("/link-types", async (req, res) => {
     getLinkTypes(res);
+});
+
+app.get("/sprints", async (req, res) => {
+    getSprints(res);
 });
 
 app.listen(PORT, () => {

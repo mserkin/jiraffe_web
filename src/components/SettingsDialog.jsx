@@ -20,6 +20,8 @@ import {
     selectJiraServer,
     setProject,
     selectProject,
+    setBoardId,
+    selectBoardId,
     setTeamMembers,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
@@ -33,6 +35,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
     const jiraPassword = useSelector(selectJiraPassword);
     const jiraServer = useSelector(selectJiraServer);
     const project = useSelector(selectProject);
+    const boardId = useSelector(selectBoardId);
     const teamMembers = useSelector(selectTeamMembers);
 
     // Локальное состояние диалога для хранения динамических данных
@@ -72,6 +75,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 jiraPassword,
                 jiraServer,
                 project,
+                boardId,
                 teamMembers: teamMembers.filter((m) => m.login && m.name),
             };
             console.log("PUT /settings");
@@ -84,7 +88,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 setError(`Ошибка при подключении к серверу: ${error.message}`),
             );
         }
-    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, teamMembers]);
+    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, teamMembers]);
 
     const handleConfirm = async () => {
         // Передаем данные обратно в родительский обработчик «Да»
@@ -161,6 +165,18 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                         value={project}
                         onChange={(event) =>
                             dispatch(setProject(event.target.value))
+                        }
+                    />
+                </div>
+                <div className={styles.settings_dialog_setting_label}>
+                    <label> Доска: </label>
+                </div>
+                <div className={styles.settings_dialog_setting}>
+                    <input
+                        type="text"
+                        value={boardId}
+                        onChange={(event) =>
+                            dispatch(setBoardId(event.target.value))
                         }
                     />
                 </div>
