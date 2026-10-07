@@ -4,6 +4,7 @@ import styles from "./LevelSettingsDialog.module.css";
 import {
     fetchJiraMetadata,
     selectIssueTypes,
+    selectSprints,
 } from "../redux/slices/jiraMetadata";
 import { useDispatch, useSelector } from "react-redux";
 import MultipleSelectDialog from "./MultipleSelectDialog";
@@ -14,6 +15,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const multipleSelectDialogRef = useRef(null);
     const [dialogData, setDialogData] = useState(null);
     const issueTypes = useSelector(selectIssueTypes);
+    const sprints = useSelector(selectSprints);
 
     // Передаем методы showModal и close в родительский компонент
     useImperativeHandle(ref, () => ({
@@ -166,6 +168,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             .join(", ");
     }
 
+    function getSprintDisplayList() {
+        console.log("getSprintDisplayList executed");
+        return (dialogData?.levelFilters?.sprintFilter ?? [])
+            .map((sp) => sprints.find((s) => s.id === sp)?.name ?? "")
+            .filter((n) => !!n)
+            .join(", ");
+    }
+
     return (
         <>
             <dialog
@@ -203,6 +213,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             }}
                         ></textarea>
                     </div>
+
                     <div className={styles.type_label}>Тип:</div>
                     <div className={styles.type_textarea}>
                         <textarea
@@ -219,6 +230,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
+
                     <div className={styles.status_label}>Статус:</div>
                     <div className={styles.status_textarea}>
                         <textarea
@@ -235,9 +247,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
+
                     <div className={styles.sprint_label}>Спринт:</div>
                     <div className={styles.sprint_textarea}>
-                        <textarea id="sprintTextarea" readOnly></textarea>
+                        <textarea
+                            id="sprintTextarea"
+                            value={getSprintDisplayList()}
+                            readOnly
+                        ></textarea>
                     </div>
                     <div className={styles.sprint_change_button}>
                         <button
@@ -247,6 +264,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
+
                     <div className={styles.creator_label}>Создатель:</div>
                     <div className={styles.creator_textarea}>
                         <textarea id="creatorTextarea" readOnly></textarea>

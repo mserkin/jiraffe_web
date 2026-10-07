@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { setError } from './errorSlice';
-import { BACKEND_URI, ISSUE_TYPES_PATH_PART, LINK_TYPES_PATH_PART } from '../../modules/const';
+import { BACKEND_URI, ISSUE_TYPES_PATH_PART, LINK_TYPES_PATH_PART, SPRINTS_PATH_PART } from '../../modules/const';
 
 const initialState = {
     issueTypes: [],
@@ -16,10 +16,11 @@ const fetchJiraMetadata = createAsyncThunk(
         try {
             const issueTypes = (await axios.get(`${BACKEND_URI}${ISSUE_TYPES_PATH_PART}`)).data;
             const linkTypes = (await axios.get(`${BACKEND_URI}${LINK_TYPES_PATH_PART}`)).data;
+            const sprints = (await axios.get(`${BACKEND_URI}${SPRINTS_PATH_PART}`)).data;
             const result = {
                 issueTypes,
                 linkTypes,
-                sprints: []
+                sprints
             }
             return result;
         } catch (error) {

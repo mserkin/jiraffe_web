@@ -39,7 +39,7 @@ const LevelFilterSchema = new Schema({
     summaryFilter: String,
     issueTypeFilter: [String],
     statusFilter: [StatusDescriptor],
-    sprintFilter: [String],
+    sprintFilter: [Number],
     creatorLoginFilter: [String],
     assigneeLoginFilter: [String],
     reporterLoginFilter: [String],
