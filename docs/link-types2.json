@@ -1,0 +1,50 @@
+[
+    {
+        "id": "REQUIRED_BY",
+        "name": "Prevents implement",
+        "direction": "INWARD",
+        "type": "DEPENDENCY"
+    },
+    {
+        "id": "DEPENDENCY",
+        "name": "Depends on",
+        "direction": "OUTWARD",
+        "type": "DEPENDENCY"
+    },
+    {
+        "id": "CHILD",
+        "name": "Child",
+        "direction": "INWARD",
+        "type": "CHILD"
+    },
+    {
+        "id": "PARENT",
+        "name": "Parent",
+        "direction": "OUTWARD",
+        "type": "CHILD"
+    },
+    {
+        "id": "BLOCKED_BY",
+        "name": "is blocked by",
+        "direction": "INWARD",
+        "type": "BLOCKS"
+    },
+    {
+        "id": "BLOCKS",
+        "name": "blocks",
+        "direction": "OUTWARD",
+        "type": "BLOCKS"
+    },
+    {
+        "id": "REQUIRED_BY_RUS",
+        "name": "Зависимая",
+        "direction": "INWARD",
+        "type": "ЗАВИСИМОСТЬ"
+    },
+    {
+        "id": "DEPENDENCY_RUS",
+        "name": "Зависит от",
+        "direction": "OUTWARD",
+        "type": "ЗАВИСИМОСТЬ"
+    }
+]

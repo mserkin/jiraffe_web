@@ -4,6 +4,7 @@ import styles from "./LevelSettingsDialog.module.css";
 import {
     fetchJiraMetadata,
     selectIssueTypes,
+    selectLinkTypes,
     selectSprints,
 } from "../redux/slices/jiraMetadata";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,6 +21,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const multipleSelectDialogRef = useRef(null);
     const [dialogData, setDialogData] = useState(null);
     const issueTypes = useSelector(selectIssueTypes);
+    const linkTypes = useSelector(selectLinkTypes);
     const sprints = useSelector(selectSprints);
     const teamMembers = useSelector(selectTeamMembers);
 
@@ -129,6 +131,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     };
                     console.log(`newReporters=${newReporters}`);
                     return newReporters;
+                case "selectLinkTypes":
+                    return {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            linkTypeFilter: data.selectedOptions,
+                        },
+                    };
                 default:
                     return prev;
             }
@@ -270,6 +280,26 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 );
                 break;
             case "changeLinkTypeFilterButton":
+                console.log(`changeLinkTypeFilterButton clicked`);
+                console.log(`linkTypes=${JSON.stringify(linkTypes)}`);
+                const selectLinkTypeDialogData = {
+                    mode: "selectLinkTypes",
+                    dialogHeader: "Фильтр по типам связей",
+                    levelIndex: dialogData?.levelIndex,
+                    options: linkTypes.map((lt) => {
+                        return { id: lt.id, name: lt.name };
+                    }),
+                    selectedOptions:
+                        dialogData?.levelFilters?.linkTypeFilter ?? [],
+                };
+                console.log(
+                    `selectLinkTypeDialogData=${JSON.stringify(selectLinkTypeDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectLinkTypeDialogData,
+                );
+                break;
+            default:
                 break;
         }
     };
@@ -310,9 +340,21 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
         console.log("getTeamMemberDisplayList executed");
         const propName = `${role}LoginFilter`;
         const filter = dialogData?.levelFilters?.[propName];
-        console.log(`role=${role}, filter=${JSON.stringify(filter)}, teamMembers=${JSON.stringify(teamMembers)}, propName=${propName}`);
+        console.log(
+            `role=${role}, filter=${JSON.stringify(filter)}, teamMembers=${JSON.stringify(teamMembers)}, propName=${propName}`,
+        );
         return (filter ?? [])
-            .map((tmid) => teamMembers.find((s) => s.login === tmid)?.name ?? "")
+            .map(
+                (tmid) => teamMembers.find((s) => s.login === tmid)?.name ?? "",
+            )
+            .filter((n) => !!n)
+            .join(", ");
+    }
+
+    function getLinkTypeDisplayList() {
+        console.log("getLinkTypeDisplayList executed");
+        return (dialogData?.levelFilters?.linkTypeFilter ?? [])
+            .map((lt) => linkTypes.find((s) => s.id === lt)?.name ?? "")
             .filter((n) => !!n)
             .join(", ");
     }
@@ -456,19 +498,28 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
-
-                    <div className={styles.link_types_label}>Связана:</div>
-                    <div className={styles.link_types_textarea}>
-                        <textarea id="linkTypesTextarea" readOnly></textarea>
-                    </div>
-                    <div className={styles.link_types_change_button}>
-                        <button
-                            id="changeLinkTypesFilterButton"
-                            onClick={changeFilterButtonOnClick}
-                        >
-                            Изменить
-                        </button>
-                    </div>
+                    {dialogData?.levelIndex > 0 && (
+                        <>
+                            <div className={styles.link_types_label}>
+                                Связана:
+                            </div>
+                            <div className={styles.link_types_textarea}>
+                                <textarea
+                                    id="linkTypesTextarea"
+                                    value={getLinkTypeDisplayList()}
+                                    readOnly
+                                ></textarea>
+                            </div>
+                            <div className={styles.link_types_change_button}>
+                                <button
+                                    id="changeLinkTypeFilterButton"
+                                    onClick={changeFilterButtonOnClick}
+                                >
+                                    Изменить
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
                 <div className={styles.dialog_buttons}>
                     <button type="button" onClick={handleConfirm}>

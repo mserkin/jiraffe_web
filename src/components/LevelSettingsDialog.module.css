@@ -230,6 +230,12 @@
     padding: 0px 10px 0px 0px;  
 } 
 
+.link_types_textarea textarea {
+    color: darkslategray;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
 .link_types_change_button {
     grid-area: link_types_change_button;
     width: 100%;

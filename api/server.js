@@ -24,12 +24,6 @@ const MemberSchema = new Schema({
     name: String,
 });
 
-const LinkSchema = new Schema({
-    linkType: String,
-    direction: String,
-    displayName: String
-}, { _id: false });
-
 const StatusDescriptor = new Schema({
     issueType: String,
     statusId: String
@@ -43,7 +37,7 @@ const LevelFilterSchema = new Schema({
     creatorLoginFilter: [String],
     assigneeLoginFilter: [String],
     reporterLoginFilter: [String],
-    linkTypeFilter: [LinkSchema],
+    linkTypeFilter: [String],
 }, { _id: false });
 
 const queryShortInfoSchema = new Schema(
@@ -69,16 +63,12 @@ const SettingsSchema = new Schema(
     { collection: "settings" },
 );
 
-const LinkDirectionSchema= new Schema({
-    id: String,
-    name: String,
-});
-
 const LinkTypeSchema = new Schema({
+    id: String,
     type: String,
-    inward: [LinkDirectionSchema],
-    outward: [LinkDirectionSchema],
-});
+    direction: String,
+    name: String
+}, { _id: false });
 
 const LinkTypesSchema = new Schema([LinkTypeSchema], { collection: "link-types" });
 
