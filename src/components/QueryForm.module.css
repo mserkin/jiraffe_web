@@ -12,17 +12,14 @@
 .gridContainer {
     font-size: 1rem;
     display: grid;
-    grid-template-rows: 28px 28px 56px;
     grid-template-columns: 1fr 1fr 5fr 1fr;
+    grid-auto-rows: minmax(20px, auto);
+    row-gap: 4px;
+    column-gap: 10px;
     color: darkslategray;
     background-color: #d0d2d5;
-    grid-auto-rows: 30px;
     justify-items: stretch;
     align-items: stretch;
-    grid-template-areas:
-        'query_label query_label query query'
-        'epic_label epic_label epic_choice epic_choice'
-        'delete_btn level_label level_settings level_setup_btn';
 }
 
 .item {
@@ -31,13 +28,13 @@
 }
 
 .query_label {
-    grid-area: query_label;
+    grid-column: 1 / span 2;
     text-align: right;
     padding: 0px 10px 0px 0px;
 }
 
 .query {
-    grid-area: query;
+    grid-column: 3 / span 2;
 }
 
 .query input {
@@ -46,13 +43,13 @@
 }
 
 .epic_label {
-    grid-area: epic_label;
+    grid-column: 1 / span 2;
     text-align: right;
     padding: 0px 10px 0px 0px;
 }
 
 .epic_choice {
-    grid-area: epic_choice;
+    grid-column: 3 / span 2;
 }
 
 .epic_choice select {
@@ -61,7 +58,7 @@
 }
 
 .delete_btn {
-    grid-area: delete_btn;
+    grid-column: 1;
     margin-bottom: 20px;
     margin-right: 10px;
 }
@@ -73,13 +70,13 @@
 }
 
 .level_label {
-    grid-area: level_label;
+    grid-column: 2;
     text-align: right;
     padding: 10px 10px 0px 0px;
 }
 
 .level_settings {
-    grid-area: level_settings;
+    grid-column: 3;
     margin-right: 10px;
 }
 
@@ -91,14 +88,13 @@
 }
 
 .level_setup_btn {
-    grid-area: level_setup_btn;
-    margin-bottom: 20px;
+    grid-column: 4;
+    margin-bottom: 0;
     height: 2.3lh;
 }
 
 .level_setup_btn {
-    grid-area: level_setup_btn;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .level_setup_btn button {
@@ -114,6 +110,6 @@
 
 .add_level_btn {
     grid-column: 1 / -1;
-    grid-row: 4;
     width: 100%;
+    margin-top: 2px;
 }

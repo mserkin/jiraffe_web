@@ -38,6 +38,7 @@ const QueryForm = () => {
 
     const handleAddLevelClick = () => {
         console.log("handleAddLevelClick");
+        dispatch(setLevelFilters([...levelFiltersList, {}]));
         dispatch(setIsQueryChanged(true));
     };
 
@@ -144,16 +145,20 @@ const QueryForm = () => {
                             </div>
                         </React.Fragment>
                     ))}
-                    <div className={`${styles.item} ${styles.add_level_btn}`}>
-                        <button
-                            id="add_level_btn"
-                            type="button"
-                            className={styles.addLevelButton}
-                            onClick={handleAddLevelClick}
+                    {levelFiltersList.length < 4 && (
+                        <div
+                            className={`${styles.item} ${styles.add_level_btn}`}
                         >
-                            Добавить уровень
-                        </button>
-                    </div>
+                            <button
+                                id="add_level_btn"
+                                type="button"
+                                className={styles.addLevelButton}
+                                onClick={handleAddLevelClick}
+                            >
+                                Добавить уровень
+                            </button>
+                        </div>
+                    )}
                 </div>
             </form>
             <LevelSettingsDialog
