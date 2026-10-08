@@ -8,6 +8,11 @@ import {
 } from "../redux/slices/jiraMetadata";
 import { useDispatch, useSelector } from "react-redux";
 import MultipleSelectDialog from "./MultipleSelectDialog";
+import {
+    fetchSettings,
+    selectTeamMembers,
+} from "../redux/slices/settingsSlice";
+import { BACKEND_URI, SETTINGS_PATH_PART } from "../modules/const";
 
 const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const dispatch = useDispatch();
@@ -16,6 +21,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const [dialogData, setDialogData] = useState(null);
     const issueTypes = useSelector(selectIssueTypes);
     const sprints = useSelector(selectSprints);
+    const teamMembers = useSelector(selectTeamMembers);
 
     // Передаем методы showModal и close в родительский компонент
     useImperativeHandle(ref, () => ({
@@ -86,21 +92,56 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                         ...prev,
                         levelFilters: {
                             ...(prev.levelFilters ?? {}),
-                            sprintFilter: data.selectedOptions.map(spid => parseInt(spid)),
+                            sprintFilter: data.selectedOptions.map((spid) =>
+                                parseInt(spid),
+                            ),
                         },
                     };
-                    console.log(`newSprints=${newSprints}`)
+                    console.log(`newSprints=${newSprints}`);
                     return newSprints;
+                case "selectCreators":
+                    const newCreators = {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            creatorLoginFilter: data.selectedOptions,
+                        },
+                    };
+                    console.log(`newCreators=${newCreators}`);
+                    return newCreators;
+                case "selectAssignees":
+                    const newAssignees = {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            assigneeLoginFilter: data.selectedOptions,
+                        },
+                    };
+                    console.log(`newAssignees=${newAssignees}`);
+                    return newAssignees;
+                case "selectReporters":
+                    const newReporters = {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            reporterLoginFilter: data.selectedOptions,
+                        },
+                    };
+                    console.log(`newReporters=${newReporters}`);
+                    return newReporters;
+                default:
+                    return prev;
             }
         });
     };
 
     const changeFilterButtonOnClick = (event) => {
+        const url = BACKEND_URI + SETTINGS_PATH_PART;
         console.log(`event.target.id=${event.target.id}`);
         switch (event.target.id) {
             case "changeTypeFilterButton":
                 console.log(`changeTypeFilterButton clicked`);
-                const data = {
+                const selectIssueTypeDialogData = {
                     mode: "selectIssueTypes",
                     dialogHeader: "Фильтр по типам задач",
                     levelIndex: dialogData?.levelIndex,
@@ -110,12 +151,16 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     selectedOptions:
                         dialogData?.levelFilters?.issueTypeFilter ?? [],
                 };
-                console.log(`data=${JSON.stringify(data)}`);
-                multipleSelectDialogRef.current?.showModal(data);
+                console.log(
+                    `selectIssueTypeDialogData=${JSON.stringify(selectIssueTypeDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectIssueTypeDialogData,
+                );
                 break;
             case "changeStatusFilterButton":
                 console.log(`changeTypeFilterButton clicked`);
-                const data2 = {
+                const selectStatusDialogData = {
                     mode: "selectStatuses",
                     dialogHeader: "Фильтр по статусам",
                     levelIndex: dialogData?.levelIndex,
@@ -138,12 +183,16 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                         dialogData?.levelFilters?.statusFilter ?? []
                     ).map((st) => st.issueType + "$" + st.statusId),
                 };
-                console.log(`data2=${JSON.stringify(data2)}`);
-                multipleSelectDialogRef.current?.showModal(data2);
+                console.log(
+                    `selectStatusDialogData=${JSON.stringify(selectStatusDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectStatusDialogData,
+                );
                 break;
             case "changeSprintFilterButton":
                 console.log(`changeSprintFilterButton clicked`);
-                const data3 = {
+                const selectSprintDialogData = {
                     mode: "selectSprints",
                     dialogHeader: "Фильтр по спринтам",
                     levelIndex: dialogData?.levelIndex,
@@ -153,14 +202,72 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     selectedOptions:
                         dialogData?.levelFilters?.sprintFilter ?? [],
                 };
-                console.log(`data=${JSON.stringify(data3)}`);
-                multipleSelectDialogRef.current?.showModal(data3);
+                console.log(
+                    `selectSprintDialogData=${JSON.stringify(selectSprintDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectSprintDialogData,
+                );
                 break;
             case "changeCreatorFilterButton":
+                console.log(`changeCreatorFilterButton clicked`);
+                dispatch(fetchSettings({ url }));
+                const selectCreatorDialogData = {
+                    mode: "selectCreators",
+                    dialogHeader: "Фильтр по создателю",
+                    levelIndex: dialogData?.levelIndex,
+                    options: teamMembers.map((tm) => {
+                        return { id: tm.login, name: tm.name };
+                    }),
+                    selectedOptions:
+                        dialogData?.levelFilters?.creatorLoginFilter ?? [],
+                };
+                console.log(
+                    `selectCreatorDialogData=${JSON.stringify(selectCreatorDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectCreatorDialogData,
+                );
                 break;
             case "changeAssigneeFilterButton":
+                console.log(`changeAssigneeFilterButton clicked`);
+                dispatch(fetchSettings({ url }));
+                const selectAssigneeDialogData = {
+                    mode: "selectAssignees",
+                    dialogHeader: "Фильтр по исполнителю",
+                    levelIndex: dialogData?.levelIndex,
+                    options: teamMembers.map((tm) => {
+                        return { id: tm.login, name: tm.name };
+                    }),
+                    selectedOptions:
+                        dialogData?.levelFilters?.assingeeLoginFilter ?? [],
+                };
+                console.log(
+                    `selectAssigneeDialogData=${JSON.stringify(selectAssigneeDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectAssigneeDialogData,
+                );
                 break;
             case "changeReporterFilterButton":
+                console.log(`changeReporterFilterButton clicked`);
+                dispatch(fetchSettings({ url }));
+                const selectReporterDialogData = {
+                    mode: "selectReporters",
+                    dialogHeader: "Фильтр по ответственному",
+                    levelIndex: dialogData?.levelIndex,
+                    options: teamMembers.map((tm) => {
+                        return { id: tm.login, name: tm.name };
+                    }),
+                    selectedOptions:
+                        dialogData?.levelFilters?.reporterLoginFilter ?? [],
+                };
+                console.log(
+                    `selectReporterDialogData=${JSON.stringify(selectReporterDialogData)}`,
+                );
+                multipleSelectDialogRef.current?.showModal(
+                    selectReporterDialogData,
+                );
                 break;
             case "changeLinkTypeFilterButton":
                 break;
@@ -195,6 +302,17 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
         console.log("getSprintDisplayList executed");
         return (dialogData?.levelFilters?.sprintFilter ?? [])
             .map((sp) => sprints.find((s) => s.id === sp)?.name ?? "")
+            .filter((n) => !!n)
+            .join(", ");
+    }
+
+    function getTeamMemberDisplayList(role) {
+        console.log("getTeamMemberDisplayList executed");
+        const propName = `${role}LoginFilter`;
+        const filter = dialogData?.levelFilters?.[propName];
+        console.log(`role=${role}, filter=${JSON.stringify(filter)}, teamMembers=${JSON.stringify(teamMembers)}, propName=${propName}`);
+        return (filter ?? [])
+            .map((tmid) => teamMembers.find((s) => s.login === tmid)?.name ?? "")
             .filter((n) => !!n)
             .join(", ");
     }
@@ -290,7 +408,11 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
 
                     <div className={styles.creator_label}>Создатель:</div>
                     <div className={styles.creator_textarea}>
-                        <textarea id="creatorTextarea" readOnly></textarea>
+                        <textarea
+                            id="creatorTextarea"
+                            value={getTeamMemberDisplayList("creator")}
+                            readOnly
+                        ></textarea>
                     </div>
                     <div className={styles.creator_change_button}>
                         <button
@@ -300,9 +422,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
+
                     <div className={styles.assignee_label}>Исполнитель:</div>
                     <div className={styles.assignee_textarea}>
-                        <textarea id="assigneeTextarea" readOnly></textarea>
+                        <textarea
+                            id="assigneeTextarea"
+                            value={getTeamMemberDisplayList("assignee")}
+                            readOnly
+                        ></textarea>
                     </div>
                     <div className={styles.assignee_change_button}>
                         <button
@@ -312,9 +439,14 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
+
                     <div className={styles.reporter_label}>Ответственный:</div>
                     <div className={styles.reporter_textarea}>
-                        <textarea id="reporterTextarea" readOnly></textarea>
+                        <textarea
+                            id="reporterTextarea"
+                            value={getTeamMemberDisplayList("reporter")}
+                            readOnly
+                        ></textarea>
                     </div>
                     <div className={styles.reporter_change_button}>
                         <button
@@ -324,6 +456,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                             Изменить
                         </button>
                     </div>
+
                     <div className={styles.link_types_label}>Связана:</div>
                     <div className={styles.link_types_textarea}>
                         <textarea id="linkTypesTextarea" readOnly></textarea>

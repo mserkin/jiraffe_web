@@ -158,6 +158,12 @@
     padding: 0px 10px 0px 0px;  
 } 
 
+.creator_textarea textarea {
+    color: darkslategray;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
 .creator_change_button{
     grid-area: creator_change_button;
     width: 100%;
@@ -176,6 +182,12 @@
     padding: 0px 10px 0px 0px;  
 } 
 
+.assignee_textarea textarea {
+    color: darkslategray;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
 .assignee_change_button{
     grid-area: assignee_change_button;
     width: 100%;
@@ -193,6 +205,12 @@
     width: 100%;
     padding: 0px 10px 0px 0px;  
 } 
+
+.reporter_textarea textarea {
+    color: darkslategray;
+    font-style: italic;
+    font-size: 0.9rem;
+}
 
 .reporter_change_button{
     grid-area: reporter_change_button;
