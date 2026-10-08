@@ -66,7 +66,9 @@ const QueryForm = () => {
         const nextLevelFilters = [...levelFiltersList];
         nextLevelFilters[dialogData.levelIndex] = dialogData.levelFilters ?? {};
 
-        console.log(`handleLevelSettingsApply(${JSON.stringify(dialogData)}) executed` );
+        console.log(
+            `handleLevelSettingsApply(${JSON.stringify(dialogData)}) executed`,
+        );
         dispatch(setLevelFilters(nextLevelFilters));
         console.log(`levelFilters have been set`);
         dispatch(setIsQueryChanged(true));
@@ -119,13 +121,13 @@ const QueryForm = () => {
                             <div
                                 className={`${styles.item} ${styles.level_label}`}
                             >
-                                Уровень {index}
+                                Уровень {index + 1}
                             </div>
                             <div
                                 className={`${styles.item} ${styles.level_settings}`}
                             >
-                                <textarea 
-                                    id={"level_settings-"+index}
+                                <textarea
+                                    id={"level_settings-" + index}
                                     onChange={handleLevelSettingsChanged}
                                 ></textarea>
                             </div>

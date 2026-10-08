@@ -51,7 +51,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     };
 
     const handleMultipleSelectApply = (data) => {
-        console.log(JSON.stringify(data));
+        console.log(`handleMultipleSelectApply(${JSON.stringify(data)})`);
         setDialogData((prev) => {
             if (!prev) {
                 return prev;
@@ -81,6 +81,16 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     };
                     console.log(`newVal=${JSON.stringify(newVal)}`);
                     return newVal;
+                case "selectSprints":
+                    const newSprints = {
+                        ...prev,
+                        levelFilters: {
+                            ...(prev.levelFilters ?? {}),
+                            sprintFilter: data.selectedOptions.map(spid => parseInt(spid)),
+                        },
+                    };
+                    console.log(`newSprints=${newSprints}`)
+                    return newSprints;
             }
         });
     };
@@ -132,6 +142,19 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 multipleSelectDialogRef.current?.showModal(data2);
                 break;
             case "changeSprintFilterButton":
+                console.log(`changeSprintFilterButton clicked`);
+                const data3 = {
+                    mode: "selectSprints",
+                    dialogHeader: "Фильтр по спринтам",
+                    levelIndex: dialogData?.levelIndex,
+                    options: sprints.map((sp) => {
+                        return { id: sp.id, name: sp.name };
+                    }),
+                    selectedOptions:
+                        dialogData?.levelFilters?.sprintFilter ?? [],
+                };
+                console.log(`data=${JSON.stringify(data3)}`);
+                multipleSelectDialogRef.current?.showModal(data3);
                 break;
             case "changeCreatorFilterButton":
                 break;
