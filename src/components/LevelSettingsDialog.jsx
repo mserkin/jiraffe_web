@@ -33,6 +33,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
             );
             setDialogData(data);
             dispatch(fetchJiraMetadata());
+            dispatch(fetchSettings({ url: BACKEND_URI + SETTINGS_PATH_PART }));
             dialogRef.current?.showModal();
         },
         close: () => {
@@ -146,7 +147,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     };
 
     const changeFilterButtonOnClick = (event) => {
-        const url = BACKEND_URI + SETTINGS_PATH_PART;
         console.log(`event.target.id=${event.target.id}`);
         switch (event.target.id) {
             case "changeTypeFilterButton":
@@ -221,7 +221,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 break;
             case "changeCreatorFilterButton":
                 console.log(`changeCreatorFilterButton clicked`);
-                dispatch(fetchSettings({ url }));
                 const selectCreatorDialogData = {
                     mode: "selectCreators",
                     dialogHeader: "Фильтр по создателю",
@@ -241,7 +240,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 break;
             case "changeAssigneeFilterButton":
                 console.log(`changeAssigneeFilterButton clicked`);
-                dispatch(fetchSettings({ url }));
                 const selectAssigneeDialogData = {
                     mode: "selectAssignees",
                     dialogHeader: "Фильтр по исполнителю",
@@ -261,7 +259,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 break;
             case "changeReporterFilterButton":
                 console.log(`changeReporterFilterButton clicked`);
-                dispatch(fetchSettings({ url }));
                 const selectReporterDialogData = {
                     mode: "selectReporters",
                     dialogHeader: "Фильтр по ответственному",

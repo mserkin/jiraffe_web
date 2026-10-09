@@ -13,6 +13,17 @@ import {
     setLevelFilters,
 } from "../redux/slices/openQuerySlice";
 import LevelSettingsDialog from "./LevelSettingsDialog";
+import {
+    fetchJiraMetadata,
+    selectIssueTypes,
+    selectLinkTypes,
+    selectSprints,
+} from "../redux/slices/jiraMetadata";
+import { BACKEND_URI, SETTINGS_PATH_PART } from "../modules/const";
+import {
+    fetchSettings,
+    selectTeamMembers,
+} from "../redux/slices/settingsSlice";
 
 const QueryForm = () => {
     const dispatch = useDispatch();
@@ -20,6 +31,97 @@ const QueryForm = () => {
     const levelFilters = useSelector(selectLevelFilters);
     const levelFiltersList = Array.isArray(levelFilters) ? levelFilters : [];
     const levelSettingsDialogRef = useRef(null);
+    const issueTypes = useSelector(selectIssueTypes);
+    const linkTypes = useSelector(selectLinkTypes);
+    const teamMembers = useSelector(selectTeamMembers);
+    const sprints = useSelector(selectSprints);
+    const ROLE_DISPLAY_NAME = {
+        creator: "созд.",
+        assignee: "исполн.",
+        reporter: "отв.",
+    };
+
+    function getSummaryFilterDisplayString(index) {
+        const summary = levelFilters?.[index]?.summaryFilter;
+        if (!summary) return "";
+        return `имя ~ ${summary}`;
+    }
+    function getIssueTypeFilterDisplayString(index) {
+        const types = levelFilters?.[index]?.issueTypeFilter ?? [];
+        return types.length > 0
+            ? `тип: ${types
+                  .map((it) => issueTypes.find((t) => t.id === it)?.name ?? "")
+                  .filter((t) => !!t)
+                  .join(", ")}`
+            : "";
+    }
+
+    function getStatusFilterDisplayString(index) {
+        const statuses = levelFilters?.[index]?.statusFilter ?? [];
+        return statuses.length > 0
+            ? `статус: ${statuses
+                  .map(
+                      (st) =>
+                          (issueTypes.find((t) => t.id === st.issueType)
+                              ?.name ?? "") +
+                              " - " +
+                              issueTypes
+                                  .find((t) => t.id === st.issueType)
+                                  ?.statuses.find((s) => s.id === st.statusId)
+                                  ?.name ?? "",
+                  )
+                  .join(", ")}`
+            : "";
+    }
+
+    function getSprintFilterDisplayString(index) {
+        const sprints_filter = levelFilters?.[index]?.sprintFilter ?? [];
+        return sprints_filter.length > 0
+            ? `спринт: ${sprints_filter
+                  .map((sp) => sprints.find((s) => s.id === sp)?.name ?? "")
+                  .filter((t) => !!t)
+                  .join(", ")}`
+            : "";
+    }
+
+    function getTeamMemberFilterDisplayString(role, index) {
+        const propName = `${role}LoginFilter`;
+        console.log(`propName=${propName}`);
+        const members = levelFilters?.[index]?.[propName] ?? [];
+        return members.length > 0
+            ? `${ROLE_DISPLAY_NAME[role]}: ${(members ?? [])
+                  .map(
+                      (tmid) =>
+                          teamMembers.find((s) => s.login === tmid)?.name ?? "",
+                  )
+                  .filter((t) => !!t)
+                  .join(", ")}`
+            : "";
+    }
+
+    function getLintTypeFilterDisplayString(index) {
+        const types = levelFilters?.[index]?.linkTypeFilter ?? [];
+        return types.length > 0
+            ? `связаны: ${types
+                  .map((lt) => linkTypes.find((s) => s.id === lt)?.name ?? "")
+                  .filter((t) => !!t)
+                  .join(", ")}`
+            : "";
+    }
+
+    const getFilterDisplayString = (index) =>
+        [
+            getSummaryFilterDisplayString(index),
+            getIssueTypeFilterDisplayString(index),
+            getStatusFilterDisplayString(index),
+            getSprintFilterDisplayString(index),
+            getTeamMemberFilterDisplayString("creator", index),
+            getTeamMemberFilterDisplayString("assignee", index),
+            getTeamMemberFilterDisplayString("reporter", index),
+            index > 0 ? getLintTypeFilterDisplayString(index) : "",
+        ]
+            .filter((s) => !!s)
+            .join("; ");
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -129,6 +231,7 @@ const QueryForm = () => {
                             >
                                 <textarea
                                     id={"level_settings-" + index}
+                                    value={getFilterDisplayString(index)}
                                     onChange={handleLevelSettingsChanged}
                                 ></textarea>
                             </div>
