@@ -348,6 +348,36 @@ async function getSprints(res) {
     }
 }
 
+async function getIssuesByJql(req, res) {
+    try {
+        const { jql } = req.query;
+
+        if (!jql) {
+            return res.status(400).json({ error: "Параметр 'jql' обязателен в query-строке запроса." });
+        }
+
+        const jira = await JiraClient.getConnection();
+
+        const maxResults = 50; // Ограничение на кол-во задач
+
+        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}`;
+
+        console.log(`Запрос задач по JQL: ${jql}`);
+        const searchResult = await jira.request(endpoint);
+        
+        console.log("Задачи получены. Всего найдено:", searchResult.total);
+
+        return res.status(200).json(searchResult.issues);
+
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: `Ошибка сервера при получении задач по JQL: ${error.message}` });
+    }
+}
+
+
 app.get("/queries", async (req, res) => {
     getQueryList(res);
 });
@@ -386,6 +416,10 @@ app.get("/link-types", async (req, res) => {
 
 app.get("/sprints", async (req, res) => {
     getSprints(res);
+});
+
+app.get("/search", async (req, res) => {
+    getIssuesByJql(req, res);
 });
 
 app.listen(PORT, () => {
