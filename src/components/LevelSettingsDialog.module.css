@@ -50,6 +50,19 @@
         'link_types_label link_types_textarea link_types_change_button';
 }
 
+.gridContainerWithoutLinkTypes {
+    grid-template-rows: repeat(8, 60px);
+    grid-template-areas:
+        'level_filters_label level_filters_label level_filters_label'
+        'summary_label summary_textarea summary_textarea'
+        'type_label type_textarea type_change_button'
+        'status_label status_textarea status_change_button'
+        'sprint_label sprint_textarea sprint_change_button'
+        'creator_label creator_textarea creator_change_button'
+        'assignee_label assignee_textarea assignee_change_button'
+        'reporter_label reporter_textarea reporter_change_button';
+}
+
 .level_filters_label{
     grid-area: level_filters_label;
     text-align: center;

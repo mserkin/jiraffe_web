@@ -358,7 +358,13 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 className={styles.dialog}
                 onClick={(event) => event.stopPropagation()}
             >
-                <div className={styles.gridContainer}>
+                <div
+                    className={`${styles.gridContainer} ${
+                        dialogData?.levelIndex === 0
+                            ? styles.gridContainerWithoutLinkTypes
+                            : ""
+                    }`}
+                >
                     <div className={styles.level_filters_label}>
                         {dialogData
                             ? `Настройки фильтра ${dialogData.levelIndex + 1}-ого уровня`
