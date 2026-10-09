@@ -15,7 +15,6 @@ import {
 import { setError } from "../redux/slices/errorSlice";
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
-import { getEntriesWithValuesStr } from "../modules/utils";
 
 const QueryListItem = ({
     id,
@@ -267,7 +266,7 @@ const QueryListItem = ({
     );
 
     const handleConfirmDeleteAction = async (dataFromDialog) => {
-        console.log(`handleConfirmDeleteAction(${getEntriesWithValuesStr(dataFromDialog)}) executed`)
+        console.log(`handleConfirmDeleteAction(${JSON.stringify(dataFromDialog)}) executed`)
         if (isQueryChanged) {
             setIsDeleteConfirmationPending(true);
             console.log('Calling confirmationDialog.showModal()...')

@@ -2,7 +2,6 @@ import { forwardRef, useRef, useImperativeHandle, useState } from "react";
 
 import styles from "./LevelSettingsDialog.module.css";
 import {
-    fetchJiraMetadata,
     selectIssueTypes,
     selectLinkTypes,
     selectSprints,
@@ -10,10 +9,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import MultipleSelectDialog from "./MultipleSelectDialog";
 import {
-    fetchSettings,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
-import { BACKEND_URI, SETTINGS_PATH_PART } from "../modules/const";
 
 const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
     const dispatch = useDispatch();
@@ -32,8 +29,6 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                 `LevelSettingsDialog.showModal(${JSON.stringify(data)}) executed`,
             );
             setDialogData(data);
-            dispatch(fetchJiraMetadata());
-            dispatch(fetchSettings({ url: BACKEND_URI + SETTINGS_PATH_PART }));
             dialogRef.current?.showModal();
         },
         close: () => {

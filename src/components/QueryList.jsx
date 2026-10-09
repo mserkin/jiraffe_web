@@ -13,7 +13,6 @@ import styles from "./QueryList.module.css";
 import QueryListItem from "./QueryListItem";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
 import { fetchQuery, selectOpenQuery } from "../redux/slices/openQuerySlice";
-import { getEntriesWithValuesStr } from "../modules/utils";
 
 const QueryList = () => {
   const dispatch = useDispatch();
@@ -101,7 +100,7 @@ const QueryList = () => {
 
   const handleQueryDeleted = useCallback(async () => {
     console.log(`handleQueryDeleted executed`);
-    console.log(`openQuery: ${getEntriesWithValuesStr(openQuery)}`)
+    console.log(`openQuery: ${JSON.stringify(openQuery)}`)
     const id = openQuery.id;
     console.log(`id=${id}`);
     const refreshedQueryList = await refreshQueryList();
@@ -109,7 +108,7 @@ const QueryList = () => {
       ? refreshedQueryList
       : [refreshedQueryList];
     const openQueryFound = queries.find((query) => query?.id === id);
-    console.log(`openQueryFound=${getEntriesWithValuesStr(openQueryFound)}`);
+    console.log(`openQueryFound=${JSON.stringify(openQueryFound)}`);
     if (!openQueryFound) {
       console.log("Setting setIsInitialQueryOpened=false");
       dispatch(setIsInitialQueryOpened(false));
@@ -138,7 +137,7 @@ const handleIsQueryListRefreshPending = useCallback(async (queryId) => {
       ? refreshedQueryList
       : [refreshedQueryList];
     const openQueryFound = queries.find((query) => query?.id === queryId);
-    console.log(`openQueryFound=${getEntriesWithValuesStr(openQueryFound)}`);
+    console.log(`openQueryFound=${JSON.stringify(openQueryFound)}`);
 
     dispatch(setIsLoading(true));
     try {

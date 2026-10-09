@@ -1,5 +1,4 @@
-import React from "react";
-import { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { setIsQueryChanged } from "../redux/slices/statusSlice";
@@ -27,6 +26,7 @@ import {
 
 const QueryForm = () => {
     const dispatch = useDispatch();
+    const metadataFetchStarted = useRef(false);
     const openQuery = useSelector(selectOpenQuery);
     const levelFilters = useSelector(selectLevelFilters);
     const levelFiltersList = Array.isArray(levelFilters) ? levelFilters : [];
@@ -40,6 +40,14 @@ const QueryForm = () => {
         assignee: "исполн.",
         reporter: "отв.",
     };
+
+    useEffect(() => {
+        if (metadataFetchStarted.current) return;
+
+        metadataFetchStarted.current = true;
+        dispatch(fetchJiraMetadata());
+        dispatch(fetchSettings({ url: BACKEND_URI + SETTINGS_PATH_PART }));
+    }, [dispatch]);
 
     function getSummaryFilterDisplayString(index) {
         const summary = levelFilters?.[index]?.summaryFilter;

@@ -44,8 +44,8 @@ const settingsSlice = createSlice({
             state.project = action.payload;
         },
         setBoardId: (state, action) => {
-            state.project = action.payload;
-        },        
+            state.boardId = action.payload;
+        },
         setTeamMembers: (state, action) => {
             state.teamMembers = action.payload;
         },        
