@@ -1,4 +1,5 @@
-import styles from './QueryList.module.css'
+import styles from './Results.module.css'
+
 const Results = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -6,6 +7,8 @@ const Results = () => {
 
     return (
         <form className={styles.formContainer} onSubmit={handleSubmit}>
+            <div className={styles.leftPane}></div>
+            <div className={styles.rightPane}></div>
         </form>
     )
 }

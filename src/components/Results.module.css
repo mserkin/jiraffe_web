@@ -1,0 +1,13 @@
+.formContainer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    width: 100%;
+}
+
+.leftPane {
+    min-width: 0;
+}
+
+.rightPane {
+    width: 400px;
+}
