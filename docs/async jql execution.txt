@@ -1,0 +1,138 @@
+﻿import { v4 as uuidv4 } from 'uuid'; // Установите через npm i uuid для генерации ID задач
+
+// Хранилище для фоновых задач
+const activeTasks = new Map();
+Используйте код с осторожностью.
+
+2. Три эндпоинта Express
+
+javascript
+// 1. ЗАПУСК ЗАДАЧИ
+app.post("/search/start", async (req, res) => {
+    try {
+        const { jql } = req.body; // или req.query
+        if (!jql) return res.status(400).json({ error: "Параметр 'jql' обязателен." });
+
+        const taskId = uuidv4(); // Генерируем уникальный ID для этой сессии
+
+        // Инициализируем состояние задачи в памяти
+        activeTasks.set(taskId, {
+            status: "processing",
+            issues: [],
+            total: 0,
+            isCancelled: false,
+            error: null
+        });
+
+        // Запускаем тяжелый процесс В ФОНЕ (без await!)
+        runJiraBackgroundSearch(taskId, jql);
+
+        // МГНОВЕННО возвращаем клиенту ID задачи
+        return res.status(202).json({ taskId });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+// 2. ПРОВЕРКА СТАТУСА И ПОЛУЧЕНИЕ ДАННЫХ (Опрос фронтендом)
+app.get("/search/status/:taskId", (req, res) => {
+    const { taskId } = req.params;
+    const task = activeTasks.get(taskId);
+
+    if (!task) {
+        return res.status(404).json({ error: "Задача не найдена или устарела" });
+    }
+
+    // Возвращаем текущее состояние (фронтенд увидит статус и сколько задач уже скачано)
+    return res.status(200).json({
+        status: task.status,
+        progress: task.issues.length,
+        total: task.total,
+        error: task.error,
+        issues: task.issues // Можно отдавать накопленный массив
+    });
+    
+    // Идея: Если статус "completed" или "cancelled", после этого ответа можно сделать activeTasks.delete(taskId), чтобы очистить память
+});
+
+// 3. ПРИНУДИТЕЛЬНАЯ ОТМЕНА ЗАДАЧИ ПОЛЬЗОВАТЕЛЕМ
+app.post("/search/cancel/:taskId", (req, res) => {
+    const { taskId } = req.params;
+    const task = activeTasks.get(taskId);
+
+    if (!task) {
+        return res.status(404).json({ error: "Задача не найдена" });
+    }
+
+    if (task.status === "processing") {
+        task.isCancelled = true; // Выставляем флаг отмены. Фоновый цикл увидит его на следующей итерации.
+        task.status = "cancelled";
+        console.log(`[Task ${taskId}] Пользователь запросил отмену.`);
+        return res.status(200).json({ message: "Запрос на отмену принят." });
+    }
+
+    return res.status(400).json({ message: `Нельзя отменить задачу в статусе ${task.status}` });
+});
+Используйте код с осторожностью.
+
+3. Фоновая функция (Сердце логики)
+
+Эта функция работает «сама по себе», она не связана с res (ответом пользователю). Она порциями обновляет данные в activeTasks.
+javascript
+async function runJiraBackgroundSearch(taskId, jql) {
+    const task = activeTasks.get(taskId);
+    
+    try {
+        const settings = await Settings.findOne({}, { _id: 0, "teamMembers._id": 0 });
+        const config = { baseUrl: settings.jiraServer, username: settings.jiraLogin, password: settings.jiraPassword };
+        const jira = await JiraClient.getConnection(config);
+
+        const pageSize = 100;
+        let startAt = 0;
+        let totalIssuesInJira = 0;
+
+        do {
+            // ПРОВЕРКА НА ИТЕРАЦИИ: Не отменил ли пользователь задачу, пока мы ждали прошлую порцию?
+            if (task.isCancelled) {
+                console.log(`[Task ${taskId}] Цикл остановлен по требованию пользователя.`);
+                return; // Просто выходим, статус уже изменен на "cancelled" в эндпоинте отмены
+            }
+
+            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}`;
+            const searchResult = await jira.request(endpoint);
+            
+            const chunk = searchResult.issues || [];
+            totalIssuesInJira = searchResult.total;
+
+            if (chunk.length === 0) break;
+
+            // Наполняем задачу данными прямо в памяти
+            task.total = totalIssuesInJira;
+            task.issues = task.issues.concat(chunk);
+
+            startAt += chunk.length;
+
+            // Небольшая пауза (опционально), чтобы не спамить Jira (например, 100мс)
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+        } while (startAt < totalIssuesInJira);
+
+        // Если дошли сюда и никто не отменил — задача успешно выполнена
+        if (!task.isCancelled) {
+            task.status = "completed";
+            console.log(`[Task ${taskId}] Успешно завершена. Собрано задач: ${task.issues.length}`);
+        }
+
+    } catch (error) {
+        console.error(`[Task ${taskId}] Ошибка выполнения:`, error);
+        task.status = "failed";
+        task.error = error.message;
+    }
+}
+Используйте код с осторожностью.
+
+Как это работает для пользователя на Фронтенде:
+
+1. Пользователь нажимает «Поиск». Фронтенд делает POST /search/start и получает { taskId: "xyz" }. На экране появляется лоадер и кнопка «Отменить операцию».
+2. Фронтенд запускает setInterval каждые 1.5–2 секунды на эндпоинт GET /search/status/xyz. Из ответа он может красиво выводить на экран: "Загружено 300 из 1500 задач...".
+3. Если пользователь нажимает «Отменить операцию», фронтенд шлет POST /search/cancel/xyz. На бэкенде флаг isCancelled становится true. Фоновый цикл прерывается. При следующем опросе статуса фронтенд увидит status: "cancelled" и покажет пользователю те задачи, которые сервер успел выкачать до момента отмены.

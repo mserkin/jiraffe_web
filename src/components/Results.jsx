@@ -6,7 +6,6 @@ const Results = () => {
 
     return (
         <form className={styles.formContainer} onSubmit={handleSubmit}>
-            <h2>Запросы</h2>
         </form>
     )
 }
