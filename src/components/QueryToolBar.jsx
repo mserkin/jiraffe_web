@@ -43,6 +43,9 @@ const QueryToolBar = () => {
     const confirmationDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
+    const taskIdRef = useRef(null);
+    const isStopRequestedRef = useRef(false);
+    const searchRunIdRef = useRef(0);
 
     const settingsDialogRef = useRef(null);
     const [queryTitle, setQueryTitle] = useState("");
@@ -239,11 +242,11 @@ const QueryToolBar = () => {
     };
 
     const constructJQLQuery = () => {
-        const query_text = openQuery.queryText.trim();
+        const query_text = (openQuery.queryText ?? "").trim();
         const order_pos = query_text.toUpperCase().indexOf("ORDER BY");
         const order_clause = order_pos > 0 ? query_text.slice(order_pos) : "";
         const where_clause = order_pos > 0 ? query_text.slice(0, order_pos - 1) : query_text;
-        const level0 = openQuery.levelFilters[0];
+        const level0 = openQuery.levelFilters[0] ?? {};
         let query_filters = [];
         if (level0.summaryFilter) {
             query_filters.push(`summary ~ "${level0.summaryFilter}"`);
@@ -255,9 +258,16 @@ const QueryToolBar = () => {
         }
         if (level0.statusFilter) {
             const statusFilterList = level0.statusFilter.map(
-                s => 
-                    `issuetype = "${issueTypes.find(it => it.id === s.issueType)?.name}" AND ` + 
-                    `status = "${issueType.find(it => it.id === s.issueType).statuses.find(st => st.id === s.statusId)?.name}"` 
+                (status) => {
+                    const selectedIssueType = issueTypes.find(
+                        (issueTypeOption) =>
+                            issueTypeOption.id === status.issueType,
+                    );
+                    const statusName = selectedIssueType?.statuses?.find(
+                        (statusOption) => statusOption.id === status.statusId,
+                    )?.name;
+                    return `issuetype = "${selectedIssueType?.name}" AND status = "${statusName}"`;
+                },
             ).join(" OR ")
             query_filters.push(`(${statusFilterList})`);
         }
@@ -268,15 +278,15 @@ const QueryToolBar = () => {
             query_filters.push(`creator in [${level0.creatorLoginFilter.join(', ')}]`);
         }
         if (level0.assigneeLoginFilter) {
-            query_filters.push(`assignee in [${level0.creatorLoginFilter.join(', ')}]`);
+            query_filters.push(`assignee in [${level0.assigneeLoginFilter.join(', ')}]`);
         }
         if (level0.reporterLoginFilter) {
             query_filters.push(`reporter in [${level0.reporterLoginFilter.join(', ')}]`);
         }
 
         let query = '';
-        if (!!where_clause) {
-            if (!!query_filters) {
+        if (where_clause) {
+            if (query_filters.length > 0) {
                 query = query_filters.join(' AND ') + ` AND (${where_clause}) ${order_clause}`
             }
             else {
@@ -284,32 +294,109 @@ const QueryToolBar = () => {
             }
         }
         else {
-            if (!!query_filters) {
+            if (query_filters.length > 0) {
                 query = query_filters.join(' AND ') + order_clause
             }
         }
+        return query;
     }
 
-    const handlePlayClick = async (event) => {
-        dispatch(setIsQueryExecuting(true))
+    const handlePlayClick = async () => {
+        const runId = ++searchRunIdRef.current;
+        dispatch(setIsQueryExecuting(true));
+        taskIdRef.current = null;
+        isStopRequestedRef.current = false;
+
         try {
-            const jql = constructJQLQuery()
-            //TODO: Call POST http://localhost:3010/search/start
-            //TODO: Get :taskId from response
-            //TODO: One time per second call GET http://localhost:3010/search/status/:taskId
-            //TODO: Continue while "status": "processing" 
-            //TODO: If got { "error": "<any value>"} interrupt
-            //TODO: ALso interrupt if "status": "completed"
-        }
-        finally {
-            dispatch(setIsQueryExecuting(false))
-        }
-    }
+            const jql = constructJQLQuery();
+            const { data: startResponse } = await axios.post(
+                `${BACKEND_URI}search/start`,
+                { jql },
+            );
+            const taskId = startResponse?.taskId;
+            if (!taskId) {
+                throw new Error("Сервер не вернул ID задачи поиска.");
+            }
 
-    const handleStopClick = async (event) => {
-        //TODO: Call POST http://localhost:3010/search/cancel/:taskId
-        dispatch(setIsQueryExecuting(false))
-    }
+            if (
+                runId !== searchRunIdRef.current ||
+                isStopRequestedRef.current
+            ) {
+                await axios.post(`${BACKEND_URI}search/cancel/${taskId}`);
+                return;
+            }
+
+            taskIdRef.current = taskId;
+
+            while (
+                runId === searchRunIdRef.current &&
+                !isStopRequestedRef.current
+            ) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                if (
+                    runId !== searchRunIdRef.current ||
+                    isStopRequestedRef.current
+                ) {
+                    break;
+                }
+
+                const { data: statusResponse } = await axios.get(
+                    `${BACKEND_URI}search/status/${taskId}`,
+                );
+                if (
+                    statusResponse.error !== null &&
+                    statusResponse.error !== undefined
+                ) {
+                    const errorMessage =
+                        typeof statusResponse.error === "string"
+                            ? statusResponse.error
+                            : JSON.stringify(statusResponse.error);
+                    dispatch(setError(errorMessage));
+                    break;
+                }
+                if (statusResponse.status !== "processing") {
+                    break;
+                }
+            }
+        } catch (error) {
+            const responseError = error.response?.data?.error;
+            dispatch(
+                setError(
+                    `Ошибка при подключении к серверу: ${
+                        responseError ?? error.message
+                    }`,
+                ),
+            );
+        } finally {
+            if (runId === searchRunIdRef.current) {
+                taskIdRef.current = null;
+                dispatch(setIsQueryExecuting(false));
+            }
+        }
+    };
+
+    const handleStopClick = async () => {
+        isStopRequestedRef.current = true;
+        searchRunIdRef.current += 1;
+        const taskId = taskIdRef.current;
+        taskIdRef.current = null;
+        try {
+            if (taskId) {
+                await axios.post(`${BACKEND_URI}search/cancel/${taskId}`);
+            }
+        } catch (error) {
+            const responseError = error.response?.data?.error;
+            dispatch(
+                setError(
+                    `Ошибка при подключении к серверу: ${
+                        responseError ?? error.message
+                    }`,
+                ),
+            );
+        } finally {
+            dispatch(setIsQueryExecuting(false));
+        }
+    };
 
     return (
         <header>
