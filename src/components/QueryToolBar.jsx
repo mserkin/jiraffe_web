@@ -306,7 +306,7 @@ const QueryToolBar = () => {
         }
     }
 
-    const handlePlayStop = async (event) => {
+    const handleStopClick = async (event) => {
         //TODO: Call POST http://localhost:3010/search/cancel/:taskId
         dispatch(setIsQueryExecuting(false))
     }
@@ -358,7 +358,7 @@ const QueryToolBar = () => {
                         <VscPlay size={32} />
                     </li>
                     <li
-                        onClick={handlePlayStop}
+                        onClick={handleStopClick}
                         className={
                             isQueryExecuting
                                 ? styles.toolbarIconItem
