@@ -1,3 +1,4 @@
+import { useCallback, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
     VscAdd,
@@ -17,9 +18,9 @@ import {
     setIsLoading,
     setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
+import { selectIssueTypes, selectSprints } from "../redux/slices/jiraMetadata";
 import styles from "./QueryToolBar.module.css";
 import { selectOpenQuery, setQueryName } from "../redux/slices/openQuerySlice";
-import { useCallback, useRef, useState } from "react";
 import { setError } from "../redux/slices/errorSlice";
 import axios from "axios";
 import {
@@ -34,6 +35,8 @@ import SettingsDialog from "./SettingsDialog";
 const QueryToolBar = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
+    const issueTypes = useSelector(selectIssueTypes);
+    const sprints = useSelector(selectSprints);
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isQueryExecuting = useSelector(selectIsQueryExecuting);
 
@@ -235,10 +238,62 @@ const QueryToolBar = () => {
         //await openQuery(id);
     };
 
+    const constructJQLQuery = () => {
+        const query_text = openQuery.queryText.trim();
+        const order_pos = query_text.toUpperCase().indexOf("ORDER BY");
+        const order_clause = order_pos > 0 ? query_text.slice(order_pos) : "";
+        const where_clause = order_pos > 0 ? query_text.slice(0, order_pos - 1) : query_text;
+        const level0 = openQuery.levelFilters[0];
+        let query_filters = [];
+        if (level0.summaryFilter) {
+            query_filters.push(`summary ~ "${level0.summaryFilter}"`);
+        }
+        if (level0.issueTypeFilter) {
+            const issueTypeList = level0.issueTypeFilter.map(
+                itf => issueTypes.find(it => it.id === itf)?.name).filter(v => !!v).join(", ");
+            query_filters.push(`issuetype in (${issueTypeList})`);
+        }
+        if (level0.statusFilter) {
+            const statusFilterList = level0.statusFilter.map(
+                s => 
+                    `issuetype = "${issueTypes.find(it => it.id === s.issueType)?.name}" AND ` + 
+                    `status = "${issueType.find(it => it.id === s.issueType).statuses.find(st => st.id === s.statusId)?.name}"` 
+            ).join(" OR ")
+            query_filters.push(`(${statusFilterList})`);
+        }
+        if (level0.sprintFilter) {
+            query_filters.push(`sprint in [${level0.sprintFilter.join(', ')}]`);
+        }
+        if (level0.creatorLoginFilter) {
+            query_filters.push(`creator in [${level0.creatorLoginFilter.join(', ')}]`);
+        }
+        if (level0.assigneeLoginFilter) {
+            query_filters.push(`assignee in [${level0.creatorLoginFilter.join(', ')}]`);
+        }
+        if (level0.reporterLoginFilter) {
+            query_filters.push(`reporter in [${level0.reporterLoginFilter.join(', ')}]`);
+        }
+
+        let query = '';
+        if (!!where_clause) {
+            if (!!query_filters) {
+                query = query_filters.join(' AND ') + ` AND (${where_clause}) ${order_clause}`
+            }
+            else {
+                query = `${where_clause} ${order_clause}`
+            }
+        }
+        else {
+            if (!!query_filters) {
+                query = query_filters.join(' AND ') + order_clause
+            }
+        }
+    }
+
     const handlePlayClick = async (event) => {
         dispatch(setIsQueryExecuting(true))
         try {
-            //TODO: Construct JQL query
+            const jql = constructJQLQuery()
             //TODO: Call POST http://localhost:3010/search/start
             //TODO: Get :taskId from response
             //TODO: One time per second call GET http://localhost:3010/search/status/:taskId
