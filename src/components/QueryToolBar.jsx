@@ -238,11 +238,22 @@ const QueryToolBar = () => {
     const handlePlayClick = async (event) => {
         dispatch(setIsQueryExecuting(true))
         try {
-
+            //TODO: Construct JQL query
+            //TODO: Call POST http://localhost:3010/search/start
+            //TODO: Get :taskId from response
+            //TODO: One time per second call GET http://localhost:3010/search/status/:taskId
+            //TODO: Continue while "status": "processing" 
+            //TODO: If got { "error": "<any value>"} interrupt
+            //TODO: ALso interrupt if "status": "completed"
         }
         finally {
             dispatch(setIsQueryExecuting(false))
         }
+    }
+
+    const handlePlayStop = async (event) => {
+        //TODO: Call POST http://localhost:3010/search/cancel/:taskId
+        dispatch(setIsQueryExecuting(false))
     }
 
     return (
@@ -282,7 +293,6 @@ const QueryToolBar = () => {
                         {openQuery.name ? openQuery.name : "Jiraffe in the Web"}
                     </li>
                     <li
-                        className={styles.toolbarIconItem}
                         onClick={handlePlayClick}
                         className={
                             isQueryExecuting
@@ -293,6 +303,7 @@ const QueryToolBar = () => {
                         <VscPlay size={32} />
                     </li>
                     <li
+                        onClick={handlePlayStop}
                         className={
                             isQueryExecuting
                                 ? styles.toolbarIconItem
