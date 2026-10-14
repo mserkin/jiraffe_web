@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   isLoading: false,
   isQueryChanged: false,
+  isQueryExecuting: false,
   isInitialQueryOpened: false,
   isQueryListRefreshPending: false
 };
@@ -17,6 +18,9 @@ const statusSlice = createSlice({
     setIsQueryChanged: (state, action) => {
       state.isQueryChanged = action.payload;
     },
+    setIsQueryExecuting: (state, action) => {
+      state.isQueryExecuting = action.payload;
+    },    
     setIsInitialQueryOpened: (state, action) => {
       state.isInitialQueryOpened = action.payload;
     },
@@ -26,9 +30,10 @@ const statusSlice = createSlice({
   },
 });
 
-const { setIsLoading, setIsQueryChanged, setIsInitialQueryOpened, setIsQueryListRefreshPending } = statusSlice.actions;
+const { setIsLoading, setIsQueryChanged, setIsQueryExecuting, setIsInitialQueryOpened, setIsQueryListRefreshPending } = statusSlice.actions;
 const selectIsLoading = (state) => state.status.isLoading;
 const selectIsQueryChanged = (state) => state.status.isQueryChanged;
+const selectIsQueryExecuting = (state) => state.status.isQueryExecuting;
 const selectIsInitialQueryOpened = (state) => state.status.isInitialQueryOpened;
 const selectIsQueryListRefreshPending = (state) => state.status.isQueryListRefreshPending;
 
@@ -37,6 +42,8 @@ export {
   selectIsLoading,
   setIsQueryChanged,
   selectIsQueryChanged,
+  setIsQueryExecuting,
+  selectIsQueryExecuting,
   setIsInitialQueryOpened,
   selectIsInitialQueryOpened,
   setIsQueryListRefreshPending,

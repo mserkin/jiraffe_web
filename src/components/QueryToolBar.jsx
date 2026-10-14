@@ -11,7 +11,9 @@ import {
 
 import {
     selectIsQueryChanged,
+    selectIsQueryExecuting,
     setIsQueryChanged,
+    setIsQueryExecuting,
     setIsLoading,
     setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
@@ -33,6 +35,7 @@ const QueryToolBar = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const isQueryChanged = useSelector(selectIsQueryChanged);
+    const isQueryExecuting = useSelector(selectIsQueryExecuting);
 
     const confirmationDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
@@ -232,6 +235,16 @@ const QueryToolBar = () => {
         //await openQuery(id);
     };
 
+    const handlePlayClick = async (event) => {
+        dispatch(setIsQueryExecuting(true))
+        try {
+
+        }
+        finally {
+            dispatch(setIsQueryExecuting(false))
+        }
+    }
+
     return (
         <header>
             <nav>
@@ -268,10 +281,24 @@ const QueryToolBar = () => {
                     <li className={styles.toolbarTextItem}>
                         {openQuery.name ? openQuery.name : "Jiraffe in the Web"}
                     </li>
-                    <li className={styles.toolbarIconItem}>
+                    <li
+                        className={styles.toolbarIconItem}
+                        onClick={handlePlayClick}
+                        className={
+                            isQueryExecuting
+                                ? styles.toolbarIconItemDisabled
+                                : styles.toolbarIconItem
+                        }                        
+                    >
                         <VscPlay size={32} />
                     </li>
-                    <li className={styles.toolbarIconItem}>
+                    <li
+                        className={
+                            isQueryExecuting
+                                ? styles.toolbarIconItem
+                                : styles.toolbarIconItemDisabled
+                        }
+                    >
                         <VscDebugStop size={32} />
                     </li>
                     <li className={styles.toolbarIconItem}>
