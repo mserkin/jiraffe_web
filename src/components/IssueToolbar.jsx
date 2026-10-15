@@ -1,7 +1,22 @@
-import styles from './IssueToolbar.module.css';
+import { VscOpenInWindow } from "react-icons/vsc";
+
+import styles from "./IssueToolbar.module.css";
 
 const IssueToolbar = () => {
-    return (<h1>IssueToolbar</h1>);
-}
+    const handleOpenInBrowserClick = (event) => {
+        event.preventDefault();
+    }
+
+    return (
+        <ul className={styles.toolbar}>
+            <li
+                className={styles.toolbarIconItem}
+                onClick={handleOpenInBrowserClick}
+            >
+                <VscOpenInWindow size={32} />
+            </li>
+        </ul>
+    );
+};
 
 export default IssueToolbar;
