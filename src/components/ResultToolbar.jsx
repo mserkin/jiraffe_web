@@ -1,5 +1,5 @@
 import { VscCollapseAll, VscDownload, VscExpandAll } from 'react-icons/vsc';
-import styles from './ResultToolbar.mobile.css';
+import styles from './ResultToolbar.module.css';
 
 const ResultToolbar = () => {
 
@@ -29,3 +29,5 @@ const ResultToolbar = () => {
         </ul>
     );
 };
+
+export default ResultToolbar;
