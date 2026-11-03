@@ -31,6 +31,10 @@ import {
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
 import SettingsDialog from "./SettingsDialog";
+import {
+    clearSearchResults,
+    setSearchResults,
+} from "../redux/slices/searchResultsSlice";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
@@ -248,15 +252,15 @@ const QueryToolBar = () => {
         const where_clause = order_pos > 0 ? query_text.slice(0, order_pos - 1) : query_text;
         const level0 = openQuery.levelFilters[0] ?? {};
         let query_filters = [];
-        if (level0.summaryFilter) {
+        if (level0.summaryFilter != "") {
             query_filters.push(`summary ~ "${level0.summaryFilter}"`);
         }
-        if (level0.issueTypeFilter) {
+        if (level0.issueTypeFilter.length > 0) {
             const issueTypeList = level0.issueTypeFilter.map(
                 itf => issueTypes.find(it => it.id === itf)?.name).filter(v => !!v).join(", ");
             query_filters.push(`issuetype in (${issueTypeList})`);
         }
-        if (level0.statusFilter) {
+        if (level0.statusFilter.length > 0) {
             const statusFilterList = level0.statusFilter.map(
                 (status) => {
                     const selectedIssueType = issueTypes.find(
@@ -271,17 +275,17 @@ const QueryToolBar = () => {
             ).join(" OR ")
             query_filters.push(`(${statusFilterList})`);
         }
-        if (level0.sprintFilter) {
-            query_filters.push(`sprint in [${level0.sprintFilter.join(', ')}]`);
+        if (level0.sprintFilter.length > 0) {
+            query_filters.push(`sprint in (${level0.sprintFilter.join(', ')})`);
         }
-        if (level0.creatorLoginFilter) {
-            query_filters.push(`creator in [${level0.creatorLoginFilter.join(', ')}]`);
+        if (level0.creatorLoginFilter.length > 0) {
+            query_filters.push(`creator in (${level0.creatorLoginFilter.join(', ')})`);
         }
-        if (level0.assigneeLoginFilter) {
-            query_filters.push(`assignee in [${level0.assigneeLoginFilter.join(', ')}]`);
+        if (level0.assigneeLoginFilter.length > 0) {
+            query_filters.push(`assignee in (${level0.assigneeLoginFilter.join(', ')})`);
         }
-        if (level0.reporterLoginFilter) {
-            query_filters.push(`reporter in [${level0.reporterLoginFilter.join(', ')}]`);
+        if (level0.reporterLoginFilter.length > 0) {
+            query_filters.push(`reporter in (${level0.reporterLoginFilter.join(', ')})`);
         }
 
         let query = '';
@@ -304,6 +308,7 @@ const QueryToolBar = () => {
     const handlePlayClick = async () => {
         const runId = ++searchRunIdRef.current;
         dispatch(setIsQueryExecuting(true));
+        dispatch(clearSearchResults());
         taskIdRef.current = null;
         isStopRequestedRef.current = false;
 
@@ -354,6 +359,18 @@ const QueryToolBar = () => {
                     dispatch(setError(errorMessage));
                     break;
                 }
+                if (!Array.isArray(statusResponse.issues)) {
+                    throw new Error(
+                        "Сервер вернул некорректный список результатов поиска.",
+                    );
+                }
+                dispatch(
+                    setSearchResults({
+                        issues: statusResponse.issues,
+                        progress: statusResponse.progress,
+                        total: statusResponse.total,
+                    }),
+                );
                 if (statusResponse.status !== "processing") {
                     break;
                 }

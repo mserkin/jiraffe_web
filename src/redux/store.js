@@ -5,6 +5,7 @@ import queryListReducer from './slices/queryListSlice.js';
 import openQueryReducer from './slices/openQuerySlice.js';
 import settingsReducer from './slices/settingsSlice.js';
 import jiraMetadataReducer from './slices/jiraMetadata.js';
+import searchResultsReducer from './slices/searchResultsSlice.js';
 
 const store = configureStore({
     reducer: {
@@ -13,7 +14,8 @@ const store = configureStore({
         queryList: queryListReducer,
         status: statusReducer,
         settings: settingsReducer,
-        jiraMetadata: jiraMetadataReducer
+        jiraMetadata: jiraMetadataReducer,
+        searchResults: searchResultsReducer,
     },
 });
 

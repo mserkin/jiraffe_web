@@ -27,3 +27,4 @@ dist-ssr
 *.sw?
 
 credits.js
+docs/issue.json

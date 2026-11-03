@@ -1,7 +1,6 @@
 import IssuePropertyEditor from './IssuePropertyEditor';
 import IssueToolbar from './IssueToolbar';
 import styles from './Results.module.css'
-import ResultToolbar from './ResultToolbar';
 import ResultTreePane from './ResultTreePane';
 
 
@@ -13,7 +12,6 @@ const Results = () => {
     return (
         <form className={styles.formContainer} onSubmit={handleSubmit}>
             <div className={styles.leftPane}>
-                <ResultToolbar />
                 <ResultTreePane />
             </div>
             <div className={styles.rightPane}>

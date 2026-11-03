@@ -1,0 +1,21 @@
+.resultTreePane {
+    min-width: 0;
+    color: #263238;
+}
+
+.progress {
+    margin: 8px 10px;
+    color: #455a64;
+    font-size: 0.875rem;
+}
+
+.tree {
+    margin: 0;
+    padding: 8px;
+    list-style: none;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #e1e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(31, 51, 73, 0.06);
+}

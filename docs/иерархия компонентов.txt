@@ -1,0 +1,20 @@
+Иерархия компонентов проекта (сейчас):
+
+src/App.jsx
+    App
+        leftColumn
+            QueryList
+                QueryListItem
+        rightColumn
+            QueryForm
+                QueryToolBar
+                LevelSettingsDialog
+            Results
+                ResultTreePane
+                    ResultToolbar
+                    WorkItemsTree
+                IssueToolbar
+                IssuePropertyEditor
+Дополнительно:
+dialog-компоненты: ConfirmationDialog, MultipleSelectDialog, SettingsDialog, TextInputDialog
+Redux state slices: queryListSlice, openQuerySlice, jiraMetadata, settingsSlice, statusSlice, searchResultsSlice
