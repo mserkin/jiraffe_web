@@ -171,9 +171,9 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                     levelIndex: dialogData?.levelIndex,
                     options: issueTypes
                         .filter((it) =>
-                            dialogData?.levelFilters?.issueTypeFilter.includes(
-                                it.id,
-                            ),
+                            (
+                                dialogData?.levelFilters?.issueTypeFilter ?? []
+                            ).includes(it.id),
                         )
                         .map((it) =>
                             it.statuses.map((st) => {
@@ -243,7 +243,7 @@ const LevelSettingsDialog = forwardRef(({ onApply }, ref) => {
                         return { id: tm.login, name: tm.name };
                     }),
                     selectedOptions:
-                        dialogData?.levelFilters?.assingeeLoginFilter ?? [],
+                        dialogData?.levelFilters?.assigneeLoginFilter ?? [],
                 };
                 console.log(
                     `selectAssigneeDialogData=${JSON.stringify(selectAssigneeDialogData)}`,

@@ -363,7 +363,7 @@ async function getIssuesByJql(req, res) {
 
         const maxResults = 1000; // Ограничение на кол-во задач
 
-        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}`;
+        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,issuetype,status,creator,assignee,reporter,issuelinks`;
 
         console.log(`Запрос задач по JQL: ${jql}`);
         const searchResult = await jira.request(endpoint);
@@ -463,7 +463,7 @@ async function runJiraBackgroundSearch(taskId, jql) {
                 return; // Просто выходим, статус уже изменен на "cancelled" в эндпоинте отмены
             }
 
-            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}`;
+            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}&fields=summary,issuetype,status,creator,assignee,reporter,issuelinks`;
             const searchResult = await jira.request(endpoint);
             
             const chunk = searchResult.issues || [];

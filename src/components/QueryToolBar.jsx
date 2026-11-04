@@ -18,7 +18,10 @@ import {
     setIsLoading,
     setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
-import { selectIssueTypes, selectSprints } from "../redux/slices/jiraMetadata";
+import {
+    selectIssueTypes,
+    selectLinkTypes,
+} from "../redux/slices/jiraMetadata";
 import styles from "./QueryToolBar.module.css";
 import { selectOpenQuery, setQueryName } from "../redux/slices/openQuerySlice";
 import { setError } from "../redux/slices/errorSlice";
@@ -35,12 +38,13 @@ import {
     clearSearchResults,
     setSearchResults,
 } from "../redux/slices/searchResultsSlice";
+import { buildLevelFilterJql, expandIssueTree } from "../modules/issueTree";
 
 const QueryToolBar = () => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const issueTypes = useSelector(selectIssueTypes);
-    const sprints = useSelector(selectSprints);
+    const linkTypes = useSelector(selectLinkTypes);
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isQueryExecuting = useSelector(selectIsQueryExecuting);
 
@@ -250,59 +254,23 @@ const QueryToolBar = () => {
         const order_pos = query_text.toUpperCase().indexOf("ORDER BY");
         const order_clause = order_pos > 0 ? query_text.slice(order_pos) : "";
         const where_clause = order_pos > 0 ? query_text.slice(0, order_pos - 1) : query_text;
-        const level0 = openQuery.levelFilters[0] ?? {};
-        let query_filters = [];
-        if (level0.summaryFilter != "") {
-            query_filters.push(`summary ~ "${level0.summaryFilter}"`);
-        }
-        if (level0.issueTypeFilter.length > 0) {
-            const issueTypeList = level0.issueTypeFilter.map(
-                itf => issueTypes.find(it => it.id === itf)?.name).filter(v => !!v).join(", ");
-            query_filters.push(`issuetype in (${issueTypeList})`);
-        }
-        if (level0.statusFilter.length > 0) {
-            const statusFilterList = level0.statusFilter.map(
-                (status) => {
-                    const selectedIssueType = issueTypes.find(
-                        (issueTypeOption) =>
-                            issueTypeOption.id === status.issueType,
-                    );
-                    const statusName = selectedIssueType?.statuses?.find(
-                        (statusOption) => statusOption.id === status.statusId,
-                    )?.name;
-                    return `issuetype = "${selectedIssueType?.name}" AND status = "${statusName}"`;
-                },
-            ).join(" OR ")
-            query_filters.push(`(${statusFilterList})`);
-        }
-        if (level0.sprintFilter.length > 0) {
-            query_filters.push(`sprint in (${level0.sprintFilter.join(', ')})`);
-        }
-        if (level0.creatorLoginFilter.length > 0) {
-            query_filters.push(`creator in (${level0.creatorLoginFilter.join(', ')})`);
-        }
-        if (level0.assigneeLoginFilter.length > 0) {
-            query_filters.push(`assignee in (${level0.assigneeLoginFilter.join(', ')})`);
-        }
-        if (level0.reporterLoginFilter.length > 0) {
-            query_filters.push(`reporter in (${level0.reporterLoginFilter.join(', ')})`);
-        }
-
+        const level0 = openQuery.levelFilters?.[0] ?? {};
+        const filtersJql = buildLevelFilterJql(level0, issueTypes);
         let query = '';
         if (where_clause) {
-            if (query_filters.length > 0) {
-                query = query_filters.join(' AND ') + ` AND (${where_clause}) ${order_clause}`
+            if (filtersJql) {
+                query = `${filtersJql} AND (${where_clause}) ${order_clause}`;
             }
             else {
                 query = `${where_clause} ${order_clause}`
             }
         }
         else {
-            if (query_filters.length > 0) {
-                query = query_filters.join(' AND ') + order_clause
+            if (filtersJql) {
+                query = `${filtersJql} ${order_clause}`;
             }
         }
-        return query;
+        return query
     }
 
     const handlePlayClick = async () => {
@@ -311,6 +279,22 @@ const QueryToolBar = () => {
         dispatch(clearSearchResults());
         taskIdRef.current = null;
         isStopRequestedRef.current = false;
+        const levelFilters = Array.isArray(openQuery.levelFilters)
+            ? openQuery.levelFilters
+            : [];
+        const rootIssues = [];
+        const processedIssueKeys = new Set();
+        const cloneIssueTree = (issue) => ({
+            ...issue,
+            children: (issue.children ?? []).map(cloneIssueTree),
+        });
+
+        const searchIssuesByJql = async (jql) => {
+            const { data } = await axios.get(
+                `${BACKEND_URI}search?jql=${encodeURIComponent(jql)}`,
+            );
+            return data;
+        };
 
         try {
             const jql = constructJQLQuery();
@@ -364,13 +348,51 @@ const QueryToolBar = () => {
                         "Сервер вернул некорректный список результатов поиска.",
                     );
                 }
+
+                const newRootIssues = statusResponse.issues
+                    .filter((issue) => {
+                        const key = issue.key ?? issue.id;
+                        if (!key || processedIssueKeys.has(key)) {
+                            return false;
+                        }
+                        processedIssueKeys.add(key);
+                        return true;
+                    })
+                    .map((issue) => ({ ...issue, children: [] }));
+                rootIssues.push(...newRootIssues);
                 dispatch(
                     setSearchResults({
-                        issues: statusResponse.issues,
+                        issues: rootIssues.map(cloneIssueTree),
                         progress: statusResponse.progress,
                         total: statusResponse.total,
                     }),
                 );
+
+                if (newRootIssues.length > 0 && levelFilters.length > 1) {
+                    await expandIssueTree(
+                        newRootIssues,
+                        levelFilters,
+                        linkTypes,
+                        issueTypes,
+                        searchIssuesByJql,
+                        () =>
+                            runId !== searchRunIdRef.current ||
+                            isStopRequestedRef.current,
+                    );
+                    if (
+                        runId === searchRunIdRef.current &&
+                        !isStopRequestedRef.current
+                    ) {
+                        dispatch(
+                            setSearchResults({
+                                issues: rootIssues.map(cloneIssueTree),
+                                progress: statusResponse.progress,
+                                total: statusResponse.total,
+                            }),
+                        );
+                    }
+                }
+
                 if (statusResponse.status !== "processing") {
                     break;
                 }
