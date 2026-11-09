@@ -87,40 +87,46 @@ export function buildLevelFilterJql(filters = {}, issueTypes = []) {
     return clauses.join(" AND ");
 }
 
-const getLinkDirections = (linkType, issueLink) => {
-    const selectors = [
-        linkType?.direction,
-        linkType?.type,
-        linkType?.name,
-    ]
-        .filter(Boolean)
-        .map((value) => String(value).trim().toLowerCase());
-    const directions = [];
+const normalizeLinkTypeValue = (value) =>
+    String(value ?? "")
+        .trim()
+        .toLowerCase();
 
-    if (
-        selectors.some(
-            (value) =>
-                value === "inward" ||
-                value === "inwardissue" ||
-                value === String(issueLink.type?.inward ?? "").toLowerCase(),
-        )
-    ) {
-        directions.push("inwardIssue");
+const getLinkDirections = (linkType) => {
+    const direction = normalizeLinkTypeValue(linkType?.direction);
+
+    if (direction === "inward") {
+        return ["inwardIssue"];
     }
-    if (
-        selectors.some(
-            (value) =>
-                value === "outward" ||
-                value === "outwardissue" ||
-                value === String(issueLink.type?.outward ?? "").toLowerCase(),
-        )
-    ) {
-        directions.push("outwardIssue");
+    if (direction === "outward") {
+        return ["outwardIssue"];
     }
 
-    return directions.length > 0
-        ? directions
-        : ["inwardIssue", "outwardIssue"];
+    return ["inwardIssue", "outwardIssue"];
+};
+
+const getLinkTypeGroup = (linkType) =>
+    normalizeLinkTypeValue(
+        linkType?.type ?? linkType?.name ?? linkType?.id ?? "",
+    );
+
+const matchesLinkType = (issueLinkType, selectedLinkType) => {
+    const selectedValues = [
+        selectedLinkType?.type,
+        selectedLinkType?.name,
+        selectedLinkType?.id,
+    ].map((value) => normalizeLinkTypeValue(value));
+    const issueValues = [
+        issueLinkType?.type,
+        issueLinkType?.name,
+        issueLinkType?.id,
+        issueLinkType?.inward,
+        issueLinkType?.outward,
+    ].map((value) => normalizeLinkTypeValue(value));
+
+    return selectedValues.some((selectedValue) =>
+        selectedValue && issueValues.includes(selectedValue),
+    );
 };
 
 export function getLinkedIssueKeys(issue, filters = {}, linkTypes = []) {
@@ -128,26 +134,37 @@ export function getLinkedIssueKeys(issue, filters = {}, linkTypes = []) {
     const keys = new Set();
 
     for (const issueLink of asArray(issue?.fields?.issuelinks)) {
-        const linkTypeId = String(issueLink.type?.id ?? "");
-        const isLinkTypeSelected =
-            selectedLinkTypeIds.length === 0 ||
-            selectedLinkTypeIds.includes(linkTypeId);
-        if (!isLinkTypeSelected) {
+        const issueLinkType = issueLink.type ?? {};
+
+        if (selectedLinkTypeIds.length === 0) {
+            for (const direction of ["inwardIssue", "outwardIssue"]) {
+                const key = issueLink[direction]?.key;
+                if (key) {
+                    keys.add(key);
+                }
+            }
             continue;
         }
 
-        const linkType = linkTypes.find(
-            (option) => String(option.id) === linkTypeId,
+        const selectedLinkTypes = linkTypes.filter((option) =>
+            selectedLinkTypeIds.includes(String(option.id)),
         );
-        const directions =
-            selectedLinkTypeIds.length === 0
-                ? ["inwardIssue", "outwardIssue"]
-                : getLinkDirections(linkType, issueLink);
 
-        for (const direction of directions) {
-            const key = issueLink[direction]?.key;
-            if (key) {
-                keys.add(key);
+        const matchedSelectedLinkTypes = selectedLinkTypes.filter(
+            (selectedLinkType) =>
+                matchesLinkType(issueLinkType, selectedLinkType),
+        );
+
+        if (matchedSelectedLinkTypes.length === 0) {
+            continue;
+        }
+
+        for (const selectedLinkType of matchedSelectedLinkTypes) {
+            for (const direction of getLinkDirections(selectedLinkType)) {
+                const key = issueLink[direction]?.key;
+                if (key) {
+                    keys.add(key);
+                }
             }
         }
     }

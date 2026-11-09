@@ -1,47 +1,108 @@
-db["link-types"].insertMany(
-[
-	{
-		"type": "Child", 
-		"inward": {
-			"id": "CHILD",
-			"name": "Child"
-		},
-		"outward": {
-			"id": "PARENT",
-			"name": "Parent"
-		}
-	},
-	{
-		"type": "Dependency", 
-		"inward": {
-			"id": "REQUIRED_BY",
-			"name": "Prevents implement"
-		},
-		"outward": {
-			"id": "DEPENDENCY",
-			"name": "Depends on"
-		}
-	},
-	{	
-		"type": "Зависимость", 
-		"inward": {
-			"id": "REQUIRED_BY_RUS",
-			"name": "Зависимая"
-		},
-		"outward": {
-			"id": "DEPENDENCY_RUS",
-			"name": "Зависит от"
-		}
-	},
-	{	
-		"type": "Blocks",
-		"inward": {
-			"id": "BLOCKED_BY",
-			"name": "is blocked by"
-		},
-		"outward": {
-			"id": "BLOCKS",
-			"name": "blocks"
-		}
-	}
-])
+[{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c17"
+  },
+  "id": "REQUIRED_BY",
+  "name": "Prevents implement",
+  "direction": "INWARD",
+  "type": "DEPENDENCY"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c18"
+  },
+  "id": "DEPENDENCY",
+  "name": "Depends on",
+  "direction": "OUTWARD",
+  "type": "DEPENDENCY"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c19"
+  },
+  "id": "CHILD",
+  "name": "Child",
+  "direction": "INWARD",
+  "type": "CHILD"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c1a"
+  },
+  "id": "PARENT",
+  "name": "Parent",
+  "direction": "OUTWARD",
+  "type": "CHILD"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c1b"
+  },
+  "id": "BLOCKED_BY",
+  "name": "is blocked by",
+  "direction": "INWARD",
+  "type": "BLOCKS"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c1c"
+  },
+  "id": "BLOCKS",
+  "name": "blocks",
+  "direction": "OUTWARD",
+  "type": "BLOCKS"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c1d"
+  },
+  "id": "REQUIRED_BY_RUS",
+  "name": "Зависимая",
+  "direction": "INWARD",
+  "type": "ЗАВИСИМОСТЬ"
+},
+{
+  "_id": {
+    "$oid": "6ac7f69e989391b8ce0e4c1e"
+  },
+  "id": "DEPENDENCY_RUS",
+  "name": "Зависит от",
+  "direction": "OUTWARD",
+  "type": "ЗАВИСИМОСТЬ"
+},
+{
+  "_id": {
+    "$oid": "6af1e268b276c16c8c6de6b9"
+  },
+  "id": "IS RELATES BY",
+  "name": "is relates by",
+  "direction": "INWARD",
+  "type": "RELATES"
+},
+{
+  "_id": {
+    "$oid": "6af1e285b276c16c8c6de6bb"
+  },
+  "id": "RELATES",
+  "name": "relates",
+  "direction": "OUTWARD",
+  "type": "RELATES"
+},
+{
+  "_id": {
+    "$oid": "6af1f226b276c16c8c6de6bd"
+  },
+  "id": "HAS_A_CLONE",
+  "name": "has a clone",
+  "direction": "INWARD",
+  "type": "CLONERS"
+},
+{
+  "_id": {
+    "$oid": "6af1f255b276c16c8c6de6bf"
+  },
+  "id": "IS_CLONED_FROM",
+  "name": "is cloned from",
+  "direction": "OUTWARD",
+  "type": "CLONERS"
+}]

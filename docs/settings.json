@@ -1,0 +1,47 @@
+[{
+  "_id": {
+    "$oid": "6ab3b38bfe1dcbccdcafba2d"
+  },
+  "project": "WIP",
+  "jiraLogin": "U_M1YU5",
+  "jiraPassword": "SXXSW#3wsxxs",
+  "jiraServer": "https://jira.moscow.alfaintra.net",
+  "teamMembers": [
+    {
+      "login": "U_M1YU5",
+      "name": "Серкин Михаил",
+      "_id": {
+        "$oid": "6af1dfa7c38caa44b529e765"
+      }
+    },
+    {
+      "login": "U_M27D6",
+      "name": "Ситдиков Рустам",
+      "_id": {
+        "$oid": "6af1dfa7c38caa44b529e766"
+      }
+    },
+    {
+      "login": "U_M27LA",
+      "name": "Кабдолла Мадиар",
+      "_id": {
+        "$oid": "6af1dfa7c38caa44b529e767"
+      }
+    },
+    {
+      "login": "U392487",
+      "name": "Иван Иванов",
+      "_id": {
+        "$oid": "6af1dfa7c38caa44b529e768"
+      }
+    },
+    {
+      "login": "U123455",
+      "name": "Петр Петров",
+      "_id": {
+        "$oid": "6af1dfa7c38caa44b529e769"
+      }
+    }
+  ],
+  "boardId": 83052
+}]

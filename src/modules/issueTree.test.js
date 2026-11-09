@@ -37,12 +37,22 @@ test("getLinkedIssueKeys respects configured direction and removes duplicates", 
         fields: {
             issuelinks: [
                 {
-                    type: { id: "7", inward: "is blocked by", outward: "blocks" },
+                    type: {
+                        id: "jira-7",
+                        name: "blocks",
+                        inward: "is blocked by",
+                        outward: "blocks",
+                    },
                     inwardIssue: { key: "TASK-1" },
                     outwardIssue: { key: "TASK-2" },
                 },
                 {
-                    type: { id: "7", inward: "is blocked by", outward: "blocks" },
+                    type: {
+                        id: "jira-7",
+                        name: "blocks",
+                        inward: "is blocked by",
+                        outward: "blocks",
+                    },
                     outwardIssue: { key: "TASK-2" },
                 },
             ],
@@ -52,8 +62,67 @@ test("getLinkedIssueKeys respects configured direction and removes duplicates", 
     assert.deepEqual(
         getLinkedIssueKeys(
             issue,
-            { linkTypeFilter: ["7"] },
-            [{ id: "7", direction: "outward" }],
+            { linkTypeFilter: ["local-7"] },
+            [{ id: "local-7", type: "BLOCKS", direction: "OUTWARD" }],
+        ),
+        ["TASK-2"],
+    );
+});
+
+test("getLinkedIssueKeys highlights inward relations only for inward direction", () => {
+    const issue = {
+        fields: {
+            issuelinks: [
+                {
+                    type: {
+                        id: "jira-7",
+                        name: "is blocked by",
+                        inward: "is blocked by",
+                        outward: "blocks",
+                    },
+                    inwardIssue: { key: "TASK-1" },
+                    outwardIssue: { key: "TASK-2" },
+                },
+            ],
+        },
+    };
+
+    assert.deepEqual(
+        getLinkedIssueKeys(
+            issue,
+            { linkTypeFilter: ["local-7-inward"] },
+            [{ id: "local-7-inward", type: "BLOCKS", direction: "INWARD" }],
+        ),
+        ["TASK-1"],
+    );
+});
+
+test("getLinkedIssueKeys matches link-family by type and direction for Jira records", () => {
+    const issue = {
+        fields: {
+            issuelinks: [
+                {
+                    type: {
+                        id: "jira-7",
+                        name: "is blocked by",
+                        inward: "is blocked by",
+                        outward: "blocks",
+                    },
+                    inwardIssue: { key: "TASK-1" },
+                    outwardIssue: { key: "TASK-2" },
+                },
+            ],
+        },
+    };
+
+    assert.deepEqual(
+        getLinkedIssueKeys(
+            issue,
+            { linkTypeFilter: ["local-7-outward"] },
+            [
+                { id: "local-7-inward", type: "BLOCKS", direction: "INWARD" },
+                { id: "local-7-outward", type: "BLOCKS", direction: "OUTWARD" },
+            ],
         ),
         ["TASK-2"],
     );

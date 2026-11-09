@@ -1,0 +1,357 @@
+[{
+  "_id": {
+    "$oid": "6aa3cc839ddea0008a692499"
+  },
+  "name": "Текущий спринт",
+  "queryText": "sprint in openSprints() AND project = WIP ORDER BY updated DESC",
+  "epicViewType": "childrenOnly",
+  "levelFilters": [
+    {
+      "summaryFilter": "",
+      "issueTypeFilter": [
+        "TASK"
+      ],
+      "statusFilter": [
+        {
+          "issueType": "TASK",
+          "statusId": "IN PROGRESS"
+        }
+      ],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [
+        "REQUIRED_BY",
+        "CHILD"
+      ]
+    }
+  ],
+  "id": "60a9b75b-8f61-44d3-9b67-01f4b326096a"
+},
+{
+  "_id": {
+    "$oid": "6ab17c4f8ed263f67ed9703a"
+  },
+  "id": "ebd50957-c766-4ae5-9831-0772f71a025e",
+  "name": "Мои в спринте",
+  "queryText": "bla blf assignee = currentUser() AND sprint in openSprints() AND type != story  ORDER BY updated DESC",
+  "epicViewType": "linkedOnly",
+  "levelFilters": [
+    {
+      "summaryFilter": "",
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "summaryFilter": "",
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [
+        "U_M27LA"
+      ],
+      "linkTypeFilter": [
+        "REQUIRED_BY",
+        "CHILD",
+        "BLOCKED_BY",
+        "REQUIRED_BY_RUS"
+      ]
+    },
+    {
+      "summaryFilter": "BLA-BLA",
+      "issueTypeFilter": [
+        "TASK",
+        "BUG"
+      ],
+      "statusFilter": [
+        {
+          "issueType": "TASK",
+          "statusId": "IN RELEASE"
+        },
+        {
+          "issueType": "BUG",
+          "statusId": "IN RELEASE"
+        }
+      ],
+      "sprintFilter": [
+        118216
+      ],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    }
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6ab2e437f2077f9ddbe3e80d"
+  },
+  "id": "8bfd2044-f19a-4daf-ae2c-d0d80552b7e4",
+  "name": "Мои задачи этого спринта",
+  "queryText": "assignee = currentUser() AND project = WIP AND sprint in openSprints() ORDER BY updated DESC",
+  "epicViewType": "linkedAndChildren",
+  "levelFilters": [
+    {
+      "summaryFilter": "",
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [
+        "PARENT",
+        "DEPENDENCY"
+      ]
+    }
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6ac7cc0c015e041a9216e00b"
+  },
+  "id": "5533c9f8-de88-4331-b63c-0783e25652cf",
+  "name": "смимси",
+  "queryText": "bla blf assignee = currentUser() AND sprint in openSprints() AND type != story  ORDER BY updated DESC",
+  "epicViewType": "linkedOnly",
+  "levelFilters": [
+    {
+      "summaryFilter": "",
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "summaryFilter": "",
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [
+        {
+          "linkType": "Dependency",
+          "direction": "inwardIssue",
+          "displayName": "Prevents implement"
+        },
+        {
+          "linkType": "Зависимость",
+          "direction": "inwardIssue",
+          "displayName": "Зависимая"
+        },
+        {
+          "linkType": "Blocks",
+          "direction": "outwardIssue",
+          "displayName": "blocks"
+        }
+      ]
+    },
+    {
+      "summaryFilter": "BLA-BLA",
+      "issueTypeFilter": [
+        "TASK",
+        "BUG"
+      ],
+      "statusFilter": [
+        {
+          "issueType": "TASK",
+          "statusId": "IN RELEASE"
+        },
+        {
+          "issueType": "BUG",
+          "statusId": "IN RELEASE"
+        }
+      ],
+      "sprintFilter": [
+        118216
+      ],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    }
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6aebb895c38caa44b529e6ea"
+  },
+  "id": "1f4e07d3-21fa-4225-91e4-f080ebf10398",
+  "name": "Сигналы",
+  "queryText": "project = WIP  and summary ~ \"Сигналы\"",
+  "epicViewType": "linkedOnly",
+  "levelFilters": [
+    {
+      "issueTypeFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [
+        "U_M1YU5"
+      ],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [],
+      "statusFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [],
+      "statusFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [],
+      "statusFilter": []
+    }
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6aebb921c38caa44b529e6eb"
+  },
+  "id": "e03fad18-ffcb-4312-9e93-a2fe013e1a83",
+  "name": "Старое: Дела в работе",
+  "queryText": "project=ABMLPR and (summary ~ \"Дела в работе\" or summary ~ \"делах в работе\")",
+  "epicViewType": null,
+  "levelFilters": [
+    {
+      "issueTypeFilter": [
+        "EPIC"
+      ],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [
+        "REQUIRED_BY"
+      ]
+    },
+    {
+      "issueTypeFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [
+        "REQUIRED_BY"
+      ],
+      "statusFilter": []
+    }
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6aebba25c38caa44b529e6f6"
+  },
+  "id": "ecf38752-da9b-4a5b-9201-188eace511db",
+  "name": "Старое: эквайринг",
+  "queryText": "project=ABMLPR and issuetype = task and (summary ~ \"Analityc\" or summary ~ \"Analysis\" or summary ~ \"Analytisc\") and summary ~ эквайринг ORDER BY key DESC",
+  "epicViewType": null,
+  "levelFilters": [
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    }
+  ],
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6af1dfa8c38caa44b529e76f"
+  },
+  "id": "d53a40c4-70cb-43e9-b6d1-30b14af8d0b7",
+  "name": "WIP-300",
+  "queryText": "key=WIP-300",
+  "epicViewType": null,
+  "levelFilters": [
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": []
+    },
+    {
+      "issueTypeFilter": [],
+      "statusFilter": [],
+      "sprintFilter": [],
+      "creatorLoginFilter": [],
+      "assigneeLoginFilter": [],
+      "reporterLoginFilter": [],
+      "linkTypeFilter": [
+        "IS RELATES BY"
+      ]
+    }
+  ],
+  "__v": 0
+}]
