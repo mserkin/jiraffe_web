@@ -43,7 +43,7 @@
     border: 1px solid #d5e0eb;
     border-radius: 7px;
     background: #f7f9fc;
-    color: #526b83;
+    color: #526ba3;
     transition: background-color 120ms ease, border-color 120ms ease;
 }
 
@@ -67,7 +67,7 @@
 .nodeButton {
     flex: 1;
     min-width: 0;
-    gap: 8px;
+    gap: 4px;
     padding: 4px 8px 4px 0;
     text-align: left;
     color: #27394b;
@@ -109,10 +109,15 @@
 
 .treeNode[aria-expanded] > .treeRow {
     margin-bottom: 4px;
-    background-color: #f3f7fb;
+    background-color: #ffffff;
+}
+
+.treeNode[aria-expanded] > .treeRow:hover {
+    border-color: #adc8e2;
+    background: #eaf3fc;
 }
 
 .treeNode[aria-expanded] > .treeRow .nodeButton {
     color: #1d3448;
-    font-weight: 600;
+    font-weight: 400;
 }
