@@ -125,6 +125,9 @@
       "name": "Open to team\\bank"
     },
     {
+      "id": "OPEN TO CUSTOMERS"
+    },
+    {
       "id": "CLOSED",
       "name": "Closed"
     }
@@ -260,15 +263,6 @@
 },
 {
   "_id": {
-    "$oid": "6ab840bd80e84226f07bc483"
-  },
-  "id": "VULNERABILITY",
-  "name": "Уязвимость",
-  "icon": "vulnerabilityRus",
-  "statuses": []
-},
-{
-  "_id": {
     "$oid": "6ab840bd80e84226f07bc47d"
   },
   "id": "TESTING",
@@ -308,7 +302,48 @@
   "id": "FASTTRACK_TASK",
   "name": "FastTrack Task",
   "icon": "development",
-  "statuses": []
+  "statuses": [
+    {
+      "id": "TO_DO",
+      "name": "To Do"
+    },
+    {
+      "id": "STAGED_ROLLOUT",
+      "name": "Поэтапная раскатка"
+    },
+    {
+      "id": "UNDER_REVIEW",
+      "name": "На согласовании"
+    },
+    {
+      "id": "LOAD_TESTING_IN_PROGRESS",
+      "name": "Нагрузочное тестирование [In Progress]"
+    },
+    {
+      "id": "READY_TO_PRODUCTION",
+      "name": "Ready To Production"
+    },
+    {
+      "id": "LOAD_TESTING_DONE",
+      "name": "Нагрузочное тестирование [Done]"
+    },
+    {
+      "id": "DEPLOYING_TO_PRODUCTION",
+      "name": "Deploying to production"
+    },
+    {
+      "id": "UNDEPLOYED_FROM_PROD",
+      "name": "UNDEPLOYED FROM PROD"
+    },
+    {
+      "id": "DONE",
+      "name": "Done"
+    },
+    {
+      "id": "FAILED",
+      "name": "Failed"
+    }
+  ]
 },
 {
   "_id": {
@@ -337,16 +372,48 @@
       "name": "Idea"
     },
     {
-      "id": "DISCOVERY",
-      "name": "Discovery"
+      "id": "DISCOVERY_PLANNING",
+      "name": "Планирование Discovery"
     },
     {
-      "id": "QUARTERLY BACKLOG",
-      "name": "Quarterly backlog"
+      "id": "DISCOVERY_PREPARING",
+      "name": "Подготовка к Discovery"
     },
     {
-      "id": "IMPLEMENTING",
-      "name": "Implementing"
+      "id": "COLLECTING_FEEDBACK",
+      "name": "Сбор обратной связи"
+    },
+    {
+      "id": "QUARTERLY_BACKLOG",
+      "name": "Quarterly Backlog"
+    },
+    {
+      "id": "HOLD",
+      "name": "Hold"
+    },
+    {
+      "id": "DEVELOPMENT",
+      "name": "Разработка"
+    },
+    {
+      "id": "ROLLOUT1",
+      "name": "Раскатка 1"
+    },
+    {
+      "id": "ROLLOUT2",
+      "name": "Раскатка 2"
+    },
+    {
+      "id": "ROLLOUT3",
+      "name": "Раскатка 3"
+    },
+    {
+      "id": "ROLLOUT4",
+      "name": "Раскатка 4"
+    },
+    {
+      "id": "ROLLOUT5",
+      "name": "Раскатка 5"
     },
     {
       "id": "CLOSED",

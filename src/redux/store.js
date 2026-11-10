@@ -4,7 +4,8 @@ import errorReducer from './slices/errorSlice.js';
 import queryListReducer from './slices/queryListSlice.js';
 import openQueryReducer from './slices/openQuerySlice.js';
 import settingsReducer from './slices/settingsSlice.js';
-import jiraMetadataReducer from './slices/jiraMetadata.js';
+import exportSettingsReducer from './slices/exportSettingsSlice.js';
+import jiraMetadataReducer from './slices/jiraMetadataSlice.js';
 import searchResultsReducer from './slices/searchResultsSlice.js';
 
 const store = configureStore({
@@ -14,6 +15,7 @@ const store = configureStore({
         queryList: queryListReducer,
         status: statusReducer,
         settings: settingsReducer,
+        exportSettings: exportSettingsReducer,
         jiraMetadata: jiraMetadataReducer,
         searchResults: searchResultsReducer,
     },
