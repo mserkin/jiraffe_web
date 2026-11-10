@@ -21,7 +21,7 @@ import {
 import {
     selectIssueTypes,
     selectLinkTypes,
-} from "../redux/slices/jiraMetadata";
+} from "../redux/slices/jiraMetadataSlice";
 import styles from "./QueryToolBar.module.css";
 import { selectOpenQuery, setQueryName } from "../redux/slices/openQuerySlice";
 import { setError } from "../redux/slices/errorSlice";

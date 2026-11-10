@@ -22,10 +22,7 @@ connect(
     .then(() => console.log("Успешно подключились к MongoDB!"))
     .catch((err) => console.error("Ошибка подключения к базе:", err));
 
-const MemberSchema = new Schema({
-    login: String,
-    name: String,
-});
+
 
 const StatusDescriptor = new Schema({
     issueType: String,
@@ -53,6 +50,20 @@ const queryShortInfoSchema = new Schema(
     },
     { collection: "queries" },
 );
+
+const ExportSettingsSchema = new Schema(
+    {
+        oneCellExportEnabled: Boolean,
+	    oneCellExportTemplate: String,
+	    individualCellsTemplates: [String]
+    },
+    { collection: "export-settings" },
+);
+
+const MemberSchema = new Schema({
+    login: String,
+    name: String,
+});
 
 const SettingsSchema = new Schema(
     {
@@ -92,6 +103,7 @@ const IssueTypesSchema = new Schema([IssueTypeSchema], { collection: "issue-type
 
 const QueryShortInfo = model("Query", queryShortInfoSchema);
 const Settings = model("Settings", SettingsSchema);
+const ExportSettings = model("ExportSettings", ExportSettingsSchema);
 const LinkTypes = model("LinkTypes", LinkTypesSchema);
 const IssueTypes = model("IssueTypes", IssueTypesSchema);
 
@@ -287,6 +299,21 @@ async function updateSettings(req, res) {
         return res
             .status(500)
             .json({ error: `Ошибка сервера при обновлении настроек: ${error}` });
+    }
+}
+
+async function getExportSettings(res) {
+    try {
+        const exportSettings = await ExportSettings.findOne(
+            {},
+            { _id: 0 },
+        );
+        return res.status(200).json(exportSettings);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: `Ошибка сервера при поиске настроек экспорта: ${error}` });
     }
 }
 
@@ -521,6 +548,10 @@ app.get("/settings", async (req, res) => {
 
 app.put("/settings", async (req, res) => {
     updateSettings(req, res);
+});
+
+app.get("/settings/export", async (req, res) => {
+    getExportSettings(res);
 });
 
 app.get("/issue-types", async (req, res) => {

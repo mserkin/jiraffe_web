@@ -5,7 +5,7 @@ import {
     selectIssueTypes,
     selectLinkTypes,
     selectSprints,
-} from "../redux/slices/jiraMetadata";
+} from "../redux/slices/jiraMetadataSlice";
 import { useDispatch, useSelector } from "react-redux";
 import MultipleSelectDialog from "./MultipleSelectDialog";
 import {
