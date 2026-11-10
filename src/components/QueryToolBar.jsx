@@ -105,7 +105,7 @@ const QueryToolBar = () => {
                     name,
                     queryText: null,
                     epicViewType: null,
-                    levelFilters: [],
+                    levelFilters: [{}],
                 };
                 console.log("POST /queries");
                 const createdQuery = (
