@@ -152,6 +152,19 @@ const QueryForm = () => {
         dispatch(setIsQueryChanged(true));
     };
 
+    const handleDeleteLevelClick = (levelIndex) => {
+        if (levelIndex <= 0 || levelIndex >= levelFiltersList.length) {
+            return;
+        }
+
+        dispatch(
+            setLevelFilters(
+                levelFiltersList.filter((_, index) => index !== levelIndex),
+            ),
+        );
+        dispatch(setIsQueryChanged(true));
+    };
+
     const handleLevelSettingsChanged = () => {
         console.log("handleLevelSettingsChanged");
         dispatch(setIsQueryChanged(true));
@@ -229,6 +242,21 @@ const QueryForm = () => {
                     </div>
                     {levelFiltersList.map((filters, index) => (
                         <React.Fragment key={`level-${index}`}>
+                            {index > 0 && (
+                                <div
+                                    className={`${styles.item} ${styles.delete_level_btn}`}
+                                >
+                                    <button
+                                        id={`delete_level_btn-${index + 1}`}
+                                        type="button"
+                                        onClick={() =>
+                                            handleDeleteLevelClick(index)
+                                        }
+                                    >
+                                        Удалить
+                                    </button>
+                                </div>
+                            )}
                             <div
                                 className={`${styles.item} ${styles.level_label}`}
                             >
