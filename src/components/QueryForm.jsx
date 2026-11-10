@@ -18,9 +18,6 @@ import {
     selectLinkTypes,
     selectSprints,
 } from "../redux/slices/jiraMetadataSlice";
-import {
-    fetchExportSettings
-} from "../redux/slices/exportSettingsSlice";
 import { BACKEND_URI, SETTINGS_PATH_PART } from "../modules/const";
 import {
     fetchSettings,
@@ -50,7 +47,6 @@ const QueryForm = () => {
         metadataFetchStarted.current = true;
         dispatch(fetchJiraMetadata());
         dispatch(fetchSettings({ url: BACKEND_URI + SETTINGS_PATH_PART }));
-        dispatch(fetchExportSettings());
     }, [dispatch]);
 
     function getSummaryFilterDisplayString(index) {
