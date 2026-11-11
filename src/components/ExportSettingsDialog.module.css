@@ -3,7 +3,9 @@
     inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
+    width: min(90vw, 600px);
     max-width: min(90vw, 600px);
+    box-sizing: border-box;
     padding: 20px;
     border: 1px solid #d0d5dd;
     border-radius: 12px;
@@ -25,7 +27,7 @@
 }
 
 .export_mode_div {
-    padding: 10px 0px 10px 0px;
+    padding: 20px 0px 10px 0px;
 }
 
 .export_mode_label {
@@ -61,7 +63,16 @@
 }
 
 .singleCellExportTemplate {
+    width: calc(100% - 10px);
+    box-sizing: border-box;
     margin: 0px 0px 10px 0px;
+    font-size: 1rem;
+    padding: 5px 5px 5px 5px;
+}
+
+.dialog_buttons {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .controls button,
