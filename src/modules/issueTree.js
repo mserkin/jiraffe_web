@@ -194,6 +194,14 @@ export async function expandIssueTree(
         const candidateKeys = [
             ...new Set(keysByParent.flat()),
         ];
+
+        if (candidateKeys.length === 0) {
+            for (const parent of parents) {
+                parent.children = [];
+            }
+            break;
+        }
+
         const filterJql = buildLevelFilterJql(filters, issueTypes);
         const matchingIssues = new Map();
 

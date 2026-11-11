@@ -214,13 +214,16 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 <div className={styles.controls || "controls"}>
                     <div className={styles.btnGroup || "btn-group"}>
                         <button type="button" id="addBtn" onClick={handleAdd}>Добавить &rarr;</button>
+                    </div>
+                    <div className={styles.btnGroup || "btn-group"}>
                         <button type="button" id="removeBtn" onClick={handleRemove}>&larr; Удалить</button>
                     </div>
-                    
                     <div className={styles.btnGroup || "btn-group"}>
                         <button type="button" id="upBtn" onClick={handleUp}>Вверх</button>
-                        <button type="button" id="downBtn" onClick={handleDown}>Вниз</button>
                     </div>
+                    <div className={styles.btnGroup || "btn-group"}>                    
+                        <button type="button" id="downBtn" onClick={handleDown}>Вниз</button>
+                    </div>                        
                 </div>
                 
                 {/* Правый список выбора */}
