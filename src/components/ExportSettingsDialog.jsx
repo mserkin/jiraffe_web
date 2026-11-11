@@ -181,16 +181,21 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
             <p>Настройки экспорта</p>
             
             {/* Первый блок: Отдельные ячейки */}
-            <div className={styles.individual_cells_radio_div}>
+            <div className={styles.export_mode_div}>
                 <input 
                     type="radio" 
                     id="individual_cells_radio" 
                     name="export_mode" 
-                    value="individual_cells" 
+                    value="individual_cells"
                     checked={!localEnabled}
                     onChange={(event) => setLocalEnabled(!event.target.checked)}
                 />
-                <label htmlFor="individual_cells_radio">Следующую информацию о рабочем элементе класть в отдельные ячейки</label>
+                <label 
+                    className={styles.export_mode_label}
+                    htmlFor="individual_cells_radio"
+                >
+                    Следующую информацию о рабочем элементе класть в отдельные ячейки
+                </label>
             </div>
             
             {/* Контейнер со списками и кнопками */}
@@ -213,16 +218,20 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 {/* Колонки кнопок управления */}
                 <div className={styles.controls || "controls"}>
                     <div className={styles.btnGroup || "btn-group"}>
-                        <button type="button" id="addBtn" onClick={handleAdd}>Добавить &rarr;</button>
+                        <div className={styles.groupButton}>
+                            <button type="button" id="addBtn" onClick={handleAdd}>Добавить &rarr;</button>
+                        </div>
+                        <div>
+                            <button type="button" id="removeBtn" onClick={handleRemove}>&larr; Удалить</button>
+                        </div>
                     </div>
                     <div className={styles.btnGroup || "btn-group"}>
-                        <button type="button" id="removeBtn" onClick={handleRemove}>&larr; Удалить</button>
-                    </div>
-                    <div className={styles.btnGroup || "btn-group"}>
-                        <button type="button" id="upBtn" onClick={handleUp}>Вверх</button>
-                    </div>
-                    <div className={styles.btnGroup || "btn-group"}>                    
-                        <button type="button" id="downBtn" onClick={handleDown}>Вниз</button>
+                        <div className={styles.groupButton}>
+                            <button type="button" id="upBtn" onClick={handleUp}>Вверх</button>
+                        </div>
+                        <div>
+                            <button type="button" id="downBtn" onClick={handleDown}>Вниз</button>
+                        </div>                            
                     </div>                        
                 </div>
                 
@@ -243,7 +252,7 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
             </div>
 
             {/* Второй блок: Одна ячейка */}
-            <div className={styles.single_cell_radio_div}>
+            <div className={styles.export_mode_div}>
                 <input 
                     type="radio" 
                     id="single_cell_radio" 
@@ -252,12 +261,18 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                     checked={localEnabled}
                     onChange={(event) => setLocalEnabled(event.target.checked)}
                 />
-                <label htmlFor="single_cell_radio">Информацию о рабочем элементе класть в одну ячейку, формируя строку в соответствии с шаблоном:</label>
+                <label 
+                    htmlFor="single_cell_radio"
+                    className={styles.export_mode_label}
+                >
+                    Информацию о рабочем элементе класть в одну ячейку, формируя строку в соответствии с шаблоном:
+                </label>
             </div>
            
             {/* Текстовое поле ввода шаблона */}
             <div>
                 <input
+                    className={styles.singleCellExportTemplate}
                     type="text"
                     value={localTemplate}
                     onChange={(event) => setLocalTemplate(event.target.value)}
@@ -266,10 +281,10 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
 
             {/* Кнопки Подтверждения / Отмены диалога */}
             <div className={styles.dialog_buttons}>
-                <button type="button" onClick={handleConfirm}>
+                <button type="button" className={styles.okButton} onClick={handleConfirm}>
                     Ok
                 </button>
-                <button type="button" onClick={handleDialogClose}>
+                <button type="button" className={styles.cancelButton} onClick={handleDialogClose}>
                     Cancel
                 </button>
             </div>

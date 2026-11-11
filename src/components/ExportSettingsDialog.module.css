@@ -18,21 +18,50 @@
     gap: 20px;
 }
 
-.list-box {
-    width: 250px;
-    height: auto;
-}
-
 .controls {
     display: flex;
     flex-direction: column;
     gap: 30px; /* Разделяет блок Переноса и блок Сортировки */
 }
 
+.export_mode_div {
+    padding: 10px 0px 10px 0px;
+}
+
+.export_mode_label {
+    padding: 0px 0px 0px 10px;
+}
+
 .btn-group {
     display: flex;
     flex-direction: column;
     gap: 8px; /* Расстояние между соседними кнопками */
+}
+
+ .groupButton {
+    margin: 0px 0px 10px;
+ }
+
+.dialog p {
+    font-size: 1.3rem;   
+    margin-bottom: 12px;
+    padding: 0px 20px 10px 0px;
+}
+
+.list-box {
+    width: 190px;
+    height: auto;
+    font-size:1.2rem;
+}
+
+.listBox {
+    margin: 0px 0px 0px 0px;
+    width: 190px;
+    font-size:1rem;
+}
+
+.singleCellExportTemplate {
+    margin: 0px 0px 10px 0px;
 }
 
 .controls button,
@@ -49,4 +78,12 @@
 .controls button:hover,
 .dialog_buttons button:hover {
     background-color: #e9e9e9;
+}
+
+.okButton {
+    margin: 10px 10px 0px 0px;
+}
+
+.cancelButton {
+    margin: 10px 10px 0px 10px;
 }
