@@ -137,14 +137,30 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
 
     const handleAdd = () => {
         if (!selectedLeft) return;
+        const selectedIndex = leftListElements.indexOf(selectedLeft);
+        if (selectedIndex === -1) return;
+
+        const nextLeftListElements = leftListElements.filter(item => item !== selectedLeft);
         setLocalIndividualTemplates(prev => [...prev, selectedLeft]);
-        setSelectedLeft(""); // Сбрасываем выбор в левом списке
+        setSelectedLeft(
+            nextLeftListElements[selectedIndex] ??
+            nextLeftListElements[selectedIndex - 1] ??
+            "",
+        );
     };
 
     const handleRemove = () => {
         if (!selectedRight) return;
+        const selectedIndex = localIndividualTemplates.indexOf(selectedRight);
+        if (selectedIndex === -1) return;
+
+        const nextRightListElements = localIndividualTemplates.filter(item => item !== selectedRight);
         setLocalIndividualTemplates(prev => prev.filter(item => item !== selectedRight));
-        setSelectedRight(""); // Сбрасываем выбор в правом списке
+        setSelectedRight(
+            nextRightListElements[selectedIndex] ??
+            nextRightListElements[selectedIndex - 1] ??
+            "",
+        );
     };
 
     const handleUp = () => {
@@ -171,6 +187,8 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
 
     // Фильтруем левый список: убираем элементы, которые уже перенесены в правый
     const leftListElements = TEMPLATES.filter(item => !localIndividualTemplates.includes(item));
+    const selectedRightIndex = localIndividualTemplates.indexOf(selectedRight);
+    const individualCellsDisabled = localEnabled;
 
     return (
         <dialog
@@ -208,7 +226,9 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                         size={20}
                         value={selectedLeft}
                         onChange={(e) => setSelectedLeft(e.target.value)}
+                        disabled={individualCellsDisabled}
                     >
+                        <option value="" disabled hidden />
                         {leftListElements.map((member) => (
                             <option key={member} value={member}>{member}</option>
                         ))}
@@ -219,18 +239,54 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 <div className={styles.controls || "controls"}>
                     <div className={styles.btnGroup || "btn-group"}>
                         <div className={styles.groupButton}>
-                            <button type="button" id="addBtn" onClick={handleAdd}>Добавить &rarr;</button>
+                            <button
+                                type="button"
+                                id="addBtn"
+                                onClick={handleAdd}
+                                disabled={individualCellsDisabled || !selectedLeft}
+                            >
+                                Добавить &rarr;
+                            </button>
                         </div>
                         <div>
-                            <button type="button" id="removeBtn" onClick={handleRemove}>&larr; Удалить</button>
+                            <button
+                                type="button"
+                                id="removeBtn"
+                                onClick={handleRemove}
+                                disabled={individualCellsDisabled || !selectedRight}
+                            >
+                                &larr; Удалить
+                            </button>
                         </div>
                     </div>
                     <div className={styles.btnGroup || "btn-group"}>
                         <div className={styles.groupButton}>
-                            <button type="button" id="upBtn" onClick={handleUp}>Вверх</button>
+                            <button
+                                type="button"
+                                id="upBtn"
+                                onClick={handleUp}
+                                disabled={
+                                    individualCellsDisabled ||
+                                    !selectedRight ||
+                                    selectedRightIndex <= 0
+                                }
+                            >
+                                ↑ Вверх
+                            </button>
                         </div>
                         <div>
-                            <button type="button" id="downBtn" onClick={handleDown}>Вниз</button>
+                            <button
+                                type="button"
+                                id="downBtn"
+                                onClick={handleDown}
+                                disabled={
+                                    individualCellsDisabled ||
+                                    !selectedRight ||
+                                    selectedRightIndex === localIndividualTemplates.length - 1
+                                }
+                            >
+                                ↓ Вниз
+                            </button>
                         </div>                            
                     </div>                        
                 </div>
@@ -243,7 +299,9 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                         size={20}
                         value={selectedRight}
                         onChange={(e) => setSelectedRight(e.target.value)}
+                        disabled={individualCellsDisabled}
                     >
+                        <option value="" disabled hidden />
                         {localIndividualTemplates.map((member) => (
                             <option key={member} value={member}>{member}</option>
                         ))}
@@ -276,6 +334,7 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                     type="text"
                     value={localTemplate}
                     onChange={(event) => setLocalTemplate(event.target.value)}
+                    disabled={!localEnabled}
                 />
             </div>
 
@@ -294,4 +353,3 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
 
 ExportSettingsDialog.displayName = "ExportSettingsDialog";
 export default ExportSettingsDialog;
-
