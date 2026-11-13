@@ -27,6 +27,7 @@ const ResultTreePane = () => {
             const id = `${parentId}/${issueKey}`;
             return {
                 id,
+                issue,
                 label: `${issue.key ?? ""} ${issue.fields?.summary ?? ""}`.trim(),
                 type: "issue",
                 children: (issue.children ?? []).map((child, childIndex) =>
@@ -75,6 +76,7 @@ const ResultTreePane = () => {
             <ResultToolbar
                 onExpandAll={handleExpandAll}
                 onCollapseAll={handleCollapseAll}
+                tree={tree}
             />
             {total > 0 && (
                 <div className={styles.progress}>

@@ -40,7 +40,7 @@ const LevelFilterSchema = new Schema({
     linkTypeFilter: [String],
 }, { _id: false });
 
-const queryShortInfoSchema = new Schema(
+const QueryShortInfoSchema = new Schema(
     {
         id: String,
         name: String,
@@ -101,7 +101,7 @@ const IssueTypeSchema = new Schema({
 const IssueTypesSchema = new Schema([IssueTypeSchema], { collection: "issue-types" });
 
 
-const QueryShortInfo = model("Query", queryShortInfoSchema);
+const QueryShortInfo = model("Query", QueryShortInfoSchema);
 const Settings = model("Settings", SettingsSchema);
 const ExportSettings = model("ExportSettings", ExportSettingsSchema);
 const LinkTypes = model("LinkTypes", LinkTypesSchema);
@@ -317,6 +317,37 @@ async function getExportSettings(res) {
     }
 }
 
+async function updateExportSettings(req, res) {
+    try {
+        if (
+            !req.body ||
+            typeof req.body !== "object" ||
+            Array.isArray(req.body)
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Тело запроса должно быть объектом" });
+        }
+
+        const updated_settings = { ...req.body };
+        const settings = await ExportSettings.findOneAndUpdate(
+            {},
+            { $set: updated_settings },
+            { upsert: true, returnDocument: "after", runValidators: true },
+        );
+
+        const settingsDocument = settings.toObject({ versionKey: false });
+        delete settingsDocument._id;
+
+        return res.status(200).json(settingsDocument);
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: `Ошибка сервера при обновлении настроек: ${error}` });
+    }
+}
+
 async function getLinkTypes(res) {
     try {
         const linkTypes = await LinkTypes.find(
@@ -390,7 +421,7 @@ async function getIssuesByJql(req, res) {
 
         const maxResults = 1000; // Ограничение на кол-во задач
 
-        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,issuetype,status,creator,assignee,reporter,issuelinks`;
+        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
 
         console.log(`Запрос задач по JQL: ${jql}`);
         const searchResult = await jira.request(endpoint);
@@ -490,7 +521,7 @@ async function runJiraBackgroundSearch(taskId, jql) {
                 return; // Просто выходим, статус уже изменен на "cancelled" в эндпоинте отмены
             }
 
-            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}&fields=summary,issuetype,status,creator,assignee,reporter,issuelinks`;
+            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}&fields=summary,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
             const searchResult = await jira.request(endpoint);
             
             const chunk = searchResult.issues || [];
@@ -552,6 +583,10 @@ app.put("/settings", async (req, res) => {
 
 app.get("/settings/export", async (req, res) => {
     getExportSettings(res);
+});
+
+app.put("/settings/export", async (req, res) => {
+    updateExportSettings(req, res);
 });
 
 app.get("/issue-types", async (req, res) => {

@@ -1,4 +1,3 @@
-import React from "react";
 import {
     useCallback,
     forwardRef,
@@ -6,39 +5,26 @@ import {
     useImperativeHandle,
     useState,
 } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import styles from "./ExportSettingsDialog.module.css";
 import { BACKEND_URI, EXPORT_SETTINGS_PATH_PART } from "../modules/const";
 import {
-    setOneCellExportEnabled,
-    selectOneCellExportEnabled,
-    setOneCellExportTemplate,
-    selectOneCellExportTemplate,
-    setIndividualCellsTemplates,
-    selectIndividualCellsTemplates,
+    setExportSettings,
 } from "../redux/slices/exportSettingsSlice";
 import { setError } from "../redux/slices/errorSlice";
 import axios from "axios";
 
-// Если fetchExportSettings импортируется из вашего слайса, раскомментируйте:
-// import { fetchExportSettings } from "../redux/slices/exportSettingsSlice";
-
 const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
     const dispatch = useDispatch();
     const dialogRef = useRef(null);
-
-    // Глобальные селекторы из Redux (используются для инициализации буфера)
-    const reduxOneCellExportEnabled = useSelector(selectOneCellExportEnabled);
-    const reduxOneCellExportTemplate = useSelector(selectOneCellExportTemplate);
-    const reduxIndividualCellsTemplates = useSelector(selectIndividualCellsTemplates) || [];
 
     const TEMPLATES = [
         "{key}",
         "{issue_type}",
         "{status}",
         "{sprints}",
-        "{estimate}",
+        "{story_points}",
         "{summary_tag}",
         "{summary}",
         "{creator_login}",
@@ -59,41 +45,30 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
     const [selectedRight, setSelectedRight] = useState("");
 
     // Локальное состояние диалога для хранения динамических данных родителя
-    const [dialogData, setDialogData] = useState(null);
-
     useImperativeHandle(ref, () => ({
-        showModal: (data) => {
-            console.log(`showModal(${data ? JSON.stringify(data) : "null"}) executed`);
-            setDialogData(data); 
-            
-            // Заполняем локальный буфер актуальными данными из Redux при открытии
-            setLocalEnabled(reduxOneCellExportEnabled);
-            setLocalTemplate(reduxOneCellExportTemplate);
-            setLocalIndividualTemplates(reduxIndividualCellsTemplates);
+        showModal: (settings) => {
+            setLocalEnabled(Boolean(settings?.oneCellExportEnabled));
+            setLocalTemplate(settings?.oneCellExportTemplate ?? "");
+            setLocalIndividualTemplates(
+                Array.isArray(settings?.individualCellsTemplates)
+                    ? settings.individualCellsTemplates
+                    : [],
+            );
             
             // Сбрасываем старые выделения в списках
             setSelectedLeft("");
             setSelectedRight("");
 
-            const url = BACKEND_URI + EXPORT_SETTINGS_PATH_PART;
-            console.log("Fetching export settings from url: " + url);
-            
-            // Если в вашем проекте есть fetchExportSettings, вызываем его
-            // dispatch(fetchExportSettings({ url }));
-            
-            console.log("Export settings fetched");
             dialogRef.current?.showModal();
         },
         close: () => {
             dialogRef.current?.close();
-            setDialogData(null); 
         },
     }));
 
     const handleDialogClose = (event) => {
         event.stopPropagation();
         dialogRef.current?.close();
-        setDialogData(null);
         onCancel(); // Просто закрываем, Redux не меняется
     };
 
@@ -120,17 +95,14 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
         };
 
         // 1. При нажатии OK сохраняем всё в глобальный Redux-стор
-        dispatch(setOneCellExportEnabled(localEnabled));
-        dispatch(setOneCellExportTemplate(localTemplate));
-        dispatch(setIndividualCellsTemplates(localIndividualTemplates));
+        dispatch(setExportSettings(updatedExportSettings));
 
         // 2. Отправляем обновленные данные на бэкенд
         await updateExportSettings(updatedExportSettings);
 
         // 3. Вызываем родительский callback и закрываем окно
-        onOk(dialogData);
+        onOk(updatedExportSettings);
         dialogRef.current?.close();
-        setDialogData(null);
     };
 
     // --- Обработчики кнопок перемещения (Dual Listbox) ---

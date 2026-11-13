@@ -3,24 +3,30 @@ import axios from 'axios';
 import { setError } from './errorSlice';
 
 const initialState = {
-    "oneCellExportEnabled": false,
-    "oneCellExportTemplate": null,
-    "individualCellsTemplates": []
+    oneCellExportEnabled: false,
+    oneCellExportTemplate: "",
+    individualCellsTemplates: [],
+    status: 'idle',
 };
 
 const fetchExportSettings = createAsyncThunk(
-    'exportSettings',
+    'exportSettings/fetch',
     async ({ url }, thunkAPI) => {
         try {
-            console.log('fetchSettings executed. Url:' + url)
             const res = await axios.get(url);
-            return res.data;
+            return res.data ?? {};
         } catch (error) {
             thunkAPI.dispatch(
                 setError(`Ошибка при подключении к серверу: ${error.message}`),
             );
             throw error;
         }
+    },
+    {
+        condition: (_, { getState }) => {
+            const status = getState().exportSettings.status;
+            return status !== 'loading' && status !== 'succeeded';
+        },
     },
 );
 
@@ -37,23 +43,52 @@ const exportSettingsSlice = createSlice({
         setIndividualCellsTemplates: (state, action) => {
             state.individualCellsTemplates = action.payload;
         },
+        setExportSettings: (state, action) => {
+            return {
+                ...state,
+                ...action.payload,
+                status: 'succeeded',
+            };
+        },
     },
     extraReducers: (builder) => {
-        builder.addCase(fetchExportSettings.fulfilled, (state, action) => {
-            return action.payload;
-        });
+        builder
+            .addCase(fetchExportSettings.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchExportSettings.fulfilled, (state, action) => ({
+                ...initialState,
+                ...action.payload,
+                individualCellsTemplates: Array.isArray(
+                    action.payload.individualCellsTemplates,
+                )
+                    ? action.payload.individualCellsTemplates
+                    : [],
+                status: 'succeeded',
+            }))
+            .addCase(fetchExportSettings.rejected, (state) => {
+                state.status = 'failed';
+            });
     },
 });
 
-const { setOneCellExportEnabled, setOneCellExportTemplate, setIndividualCellsTemplates } = exportSettingsSlice.actions;
+const {
+    setOneCellExportEnabled,
+    setOneCellExportTemplate,
+    setIndividualCellsTemplates,
+    setExportSettings,
+} = exportSettingsSlice.actions;
 const selectExportSettings = (state) => state.exportSettings;
+const selectExportSettingsStatus = (state) => state.exportSettings.status;
 const selectOneCellExportEnabled = (state) => state.exportSettings.oneCellExportEnabled;
 const selectOneCellExportTemplate = (state) => state.exportSettings.oneCellExportTemplate;
 const selectIndividualCellsTemplates = (state) => state.exportSettings.individualCellsTemplates;
 
 export {
     selectExportSettings, 
+    selectExportSettingsStatus,
     fetchExportSettings,
+    setExportSettings,
     setOneCellExportEnabled,
     selectOneCellExportEnabled,
     setOneCellExportTemplate,

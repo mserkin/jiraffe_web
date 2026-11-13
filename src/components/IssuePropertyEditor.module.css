@@ -1,0 +1,17 @@
+.gridContainer {
+    font-size: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    grid-auto-rows: minmax(20px, auto);
+    row-gap: 4px;
+    column-gap: 10px;
+    color: darkslategray;
+    background-color: #d0d2d5;
+    justify-items: stretch;
+    align-items: stretch;
+}
+
+.item {
+    color: darkslategray;
+    background-color: #d0d2d5;
+}
