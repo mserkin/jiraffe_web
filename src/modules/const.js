@@ -6,4 +6,4 @@ export const ISSUE_TYPES_PATH_PART = 'issue-types';
 export const LINK_TYPES_PATH_PART = 'link-types';
 export const SPRINTS_PATH_PART = 'sprints';
 export const VERSION = '0.1';
-
+export const JIRA_ISSUE_URL_PATH = '/browse/';
