@@ -147,6 +147,7 @@ const IssuePropertyEditor = () => {
                         ))
                     }
                 </select>
+            </div>
             <div className={styles.item}>Создатель: </div>
             <div className={styles.item}>
                 <select
@@ -172,13 +173,13 @@ const IssuePropertyEditor = () => {
             <div className={styles.item}>Ответственный: </div>
             <div className={styles.item}>
                 <select
-                    id="issue_responsible"
+                    id="issue_reporter"
                     disabled={selectedIssue.key === null}
                     name="select"
                     value={
                         selectedIssue.reporterLogin ? selectedIssue.reporterLogin : "unknown"
                     }
-                    onChange={handleResponsibleChange}
+                    onChange={handleReporterChange}
                 >
                     {selectedIssue.key === null ? 
                         <option value="unknown"></option>

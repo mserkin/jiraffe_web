@@ -7,6 +7,7 @@ import settingsReducer from './slices/settingsSlice.js';
 import exportSettingsReducer from './slices/exportSettingsSlice.js';
 import jiraMetadataReducer from './slices/jiraMetadataSlice.js';
 import searchResultsReducer from './slices/searchResultsSlice.js';
+import selectedIssueReducer from './slices/selectedIssueSlice.js'
 
 const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
         exportSettings: exportSettingsReducer,
         jiraMetadata: jiraMetadataReducer,
         searchResults: searchResultsReducer,
+        selectedIssue: selectedIssueReducer
     },
 });
 
