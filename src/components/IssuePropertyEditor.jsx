@@ -30,7 +30,10 @@ const IssuePropertyEditor = () => {
 
     return (
         <div className={styles.gridContainer}>
-            <div className={styles.item}>
+            <div className={styles.field}>
+                <label className={styles.item} htmlFor="issue_key">
+                    Ключ
+                </label>
                 <input
                     id="issue_key"
                     type="text"
@@ -38,20 +41,30 @@ const IssuePropertyEditor = () => {
                     value={selectedIssue.key ? selectedIssue.key : ""}
                 />
             </div>
-            <div className={styles.item}>
+            <div className={styles.field}>
+                <label className={styles.item} htmlFor="issue_type">
+                    Тип
+                </label>
                 <input
-                    id="issue_summary"
+                    id="issue_type"
                     type="text"
+                    disabled={true}
+                    value={selectedIssue.issuetype ? selectedIssue.issuetype : ""}
+                />
+            </div>
+            <div className={`${styles.field} ${styles.summary}`}>
+                <label className={styles.item} htmlFor="issue_summary">
+                    Summary
+                </label>
+                <textarea
+                    id="issue_summary"
+                    rows={3}
                     disabled={selectedIssue.key === null}
                     value={selectedIssue.summary ? selectedIssue.summary : ""}
                     onChange={handleSummaryChange}
                 />
             </div>
-            <div className={styles.item}>Тип: </div>
-            <div className={styles.item}>
-                {selectedIssue.issuetype ? selectedIssue.issuetype : ""}
-            </div>
-            <div className={styles.item}>Статус: </div>
+            <label className={styles.item} htmlFor="issue_status">Статус:</label>
             <div className={styles.item}>
                 <select
                     id="issue_status"
@@ -73,7 +86,7 @@ const IssuePropertyEditor = () => {
                     }
                 </select>                    
             </div>
-            <div className={styles.item}>Спринт: </div>
+            <label className={styles.item} htmlFor="issue_sprint">Спринт:</label>
             <div className={styles.item}>
                 <select
                     id="issue_sprint"
@@ -95,7 +108,7 @@ const IssuePropertyEditor = () => {
                     }
                 </select>
             </div>
-            <div className={styles.item}>Стори поинты: </div>
+            <label className={styles.item} htmlFor="issue_story_points">Стори поинты:</label>
             <div className={styles.item}>
                 <select
                     id="issue_story_points"
@@ -126,7 +139,7 @@ const IssuePropertyEditor = () => {
                     </option>
                 </select>
             </div>            
-            <div className={styles.item}>Исполнитель: </div>
+            <label className={styles.item} htmlFor="issue_assignee">Исполнитель:</label>
             <div className={styles.item}>
                 <select
                     id="issue_assignee"
@@ -148,7 +161,7 @@ const IssuePropertyEditor = () => {
                     }
                 </select>
             </div>
-            <div className={styles.item}>Создатель: </div>
+            <label className={styles.item} htmlFor="issue_creator">Создатель:</label>
             <div className={styles.item}>
                 <select
                     id="issue_creator"
@@ -170,7 +183,7 @@ const IssuePropertyEditor = () => {
                     }
                 </select>                
             </div>       
-            <div className={styles.item}>Ответственный: </div>
+            <label className={styles.item} htmlFor="issue_reporter">Ответственный:</label>
             <div className={styles.item}>
                 <select
                     id="issue_reporter"
