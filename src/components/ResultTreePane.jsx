@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectSearchResults } from "../redux/slices/searchResultsSlice";
+import {
+    dropSelection,
+    setSelection,
+} from "../redux/slices/selectedIssueSlice";
 import ResultToolbar from "./ResultToolbar";
 import WorkItemsTree from "./WorkItemsTree";
 import styles from "./ResultTreePane.module.css";
@@ -15,6 +19,7 @@ const getExpandableNodeIds = (node) => {
 
 const ResultTreePane = () => {
     const { issues, progress, total } = useSelector(selectSearchResults);
+    const dispatch = useDispatch();
     const [selectedNodeId, setSelectedNodeId] = useState(null);
     const [expandedNodeIds, setExpandedNodeIds] = useState(
         () => new Set(["found-issues"]),
@@ -71,6 +76,38 @@ const ResultTreePane = () => {
         setExpandedNodeIds(new Set());
     };
 
+    const handleSelect = (node, allowDeselect = false) => {
+        if (allowDeselect && selectedNodeId === node.id) {
+            setSelectedNodeId(null);
+            dispatch(dropSelection());
+            return;
+        }
+
+        setSelectedNodeId(node.id);
+        if (node.type !== "issue") {
+            dispatch(dropSelection());
+            return;
+        }
+
+        const fields = node.issue.fields ?? {};
+        dispatch(
+            setSelection({
+                key: node.issue.key ?? null,
+                summary: fields.summary ?? null,
+                issuetype: fields.issuetype?.name ?? null,
+                status: fields.status?.name ?? null,
+                sprints: Array.isArray(fields.customfield_10375)
+                    ? fields.customfield_10375
+                    : [],
+                creatorLogin: fields.creator?.name ?? null,
+                assigneeLogin: fields.assignee?.name ?? null,
+                reporterLogin: fields.reporter?.name ?? null,
+                storyPoints: fields.customfield_10372 ?? null,
+                description: fields.description ?? null,
+            }),
+        );
+    };
+
     return (
         <div className={styles.resultTreePane}>
             <ResultToolbar
@@ -88,7 +125,7 @@ const ResultTreePane = () => {
                     node={tree}
                     selectedNodeId={selectedNodeId}
                     expandedNodeIds={expandedNodeIds}
-                    onSelect={setSelectedNodeId}
+                    onSelect={handleSelect}
                     onToggle={(nodeId) => {
                         setExpandedNodeIds((current) => {
                             const next = new Set(current);

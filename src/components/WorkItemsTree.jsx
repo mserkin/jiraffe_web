@@ -21,7 +21,7 @@ const WorkItemsTree = ({
             tabIndex={0}
             onClick={(event) => {
                 event.stopPropagation();
-                onSelect(node.id);
+                onSelect(node, true);
                 if (hasChildren) {
                     onToggle(node.id);
                 }
@@ -30,17 +30,17 @@ const WorkItemsTree = ({
                 event.stopPropagation();
                 if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    onSelect(node.id);
+                    onSelect(node, true);
                     if (hasChildren) {
                         onToggle(node.id);
                     }
                 } else if (event.key === "ArrowRight" && hasChildren) {
-                    onSelect(node.id);
+                    onSelect(node);
                     if (!isExpanded) {
                         onToggle(node.id);
                     }
                 } else if (event.key === "ArrowLeft" && hasChildren) {
-                    onSelect(node.id);
+                    onSelect(node);
                     if (isExpanded) {
                         onToggle(node.id);
                     }
