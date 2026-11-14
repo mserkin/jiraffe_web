@@ -30,7 +30,7 @@ const IssuePropertyEditor = () => {
 
     return (
         <div className={styles.gridContainer}>
-            <div className={styles.field}>
+            <div className={`${styles.field} ${styles.keyDiv}`}>
                 <label className={styles.item} htmlFor="issue_key">
                     Ключ
                 </label>
@@ -38,10 +38,11 @@ const IssuePropertyEditor = () => {
                     id="issue_key"
                     type="text"
                     disabled={true}
+                    className={styles.keyInput}
                     value={selectedIssue.key ? selectedIssue.key : ""}
                 />
             </div>
-            <div className={styles.field}>
+            <div className={`${styles.field} ${styles.typeDiv}`}>
                 <label className={styles.item} htmlFor="issue_type">
                     Тип
                 </label>
@@ -49,16 +50,15 @@ const IssuePropertyEditor = () => {
                     id="issue_type"
                     type="text"
                     disabled={true}
+                    className={styles.typeInput}
                     value={selectedIssue.issuetype ? selectedIssue.issuetype : ""}
                 />
             </div>
             <div className={`${styles.field} ${styles.summary}`}>
-                <label className={styles.item} htmlFor="issue_summary">
-                    Summary
-                </label>
                 <textarea
                     id="issue_summary"
                     rows={3}
+                    className={styles.summaryInput}
                     disabled={selectedIssue.key === null}
                     value={selectedIssue.summary ? selectedIssue.summary : ""}
                     onChange={handleSummaryChange}

@@ -40,6 +40,31 @@
     resize: vertical;
 }
 
+.keyDiv {
+    grid-column: 1 / 2;
+    margin: 8px 0px 0px 0px;
+}
+
+.typeDiv {
+    grid-column: 2 / 3;
+    margin: 8px 0px 0px 0px;
+}
+
+.keyInput {
+    margin: 3px 0px 2px 0px;
+}
+
+.typeInput {
+    margin: 3px 0px 2px 0px;
+}
+
+.summaryInput {
+    font-size: 0.875rem;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 label {
     color: #455a64;
     font-size: 0.875rem;
