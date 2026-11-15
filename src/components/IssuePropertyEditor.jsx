@@ -31,7 +31,11 @@ const IssuePropertyEditor = () => {
     return (
         <div className={styles.gridContainer}>
             <div className={`${styles.field} ${styles.keyDiv}`}>
-                <label className={styles.item} htmlFor="issue_key">
+                <label
+                    className={`${styles.item} ${styles.hiddenLabel}`}
+                    htmlFor="issue_key"
+                    aria-hidden="true"
+                >
                     Ключ
                 </label>
                 <input
@@ -39,11 +43,16 @@ const IssuePropertyEditor = () => {
                     type="text"
                     disabled={true}
                     className={styles.keyInput}
+                    aria-label="Ключ"
                     value={selectedIssue.key ? selectedIssue.key : ""}
                 />
             </div>
             <div className={`${styles.field} ${styles.typeDiv}`}>
-                <label className={styles.item} htmlFor="issue_type">
+                <label
+                    className={`${styles.item} ${styles.hiddenLabel}`}
+                    htmlFor="issue_type"
+                    aria-hidden="true"
+                >
                     Тип
                 </label>
                 <input
@@ -51,6 +60,7 @@ const IssuePropertyEditor = () => {
                     type="text"
                     disabled={true}
                     className={styles.typeInput}
+                    aria-label="Тип"
                     value={selectedIssue.issuetype ? selectedIssue.issuetype : ""}
                 />
             </div>
@@ -205,6 +215,17 @@ const IssuePropertyEditor = () => {
                     }
                 </select>                
             </div>                   
+            <div className={`${styles.field} ${styles.description}`}>
+                <textarea
+                    id="issue_description"
+                    rows={8}
+                    wrap="soft"
+                    className={styles.descriptionInput}
+                    disabled={selectedIssue.key === null}
+                    value={selectedIssue.description ?? ""}
+                    aria-label="Описание"
+                />
+            </div>
         </div>
     );
 };

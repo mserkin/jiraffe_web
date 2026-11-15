@@ -28,6 +28,10 @@
     background-color: #d0d2d5;
 }
 
+.hiddenLabel {
+    visibility: hidden;
+}
+
 .field input,
 .field textarea,
 .item select {
@@ -59,10 +63,31 @@
 }
 
 .summaryInput {
-    font-size: 0.875rem;
     resize: vertical;
     width: 100%;
     box-sizing: border-box;
+}
+
+.field .summaryInput {
+    font-size: 0.875rem;
+}
+
+
+.description {
+    margin: 3px 0px 0px 0px;
+    grid-column: 1 / -1;
+}
+
+.descriptionInput {
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow-y: auto;
+    resize: vertical;
+}
+
+.field .descriptionInput {
+    font-size: 0.875rem;
 }
 
 label {
