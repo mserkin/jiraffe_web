@@ -411,6 +411,13 @@ async function getSprints(res) {
 }
 
 async function getIssuesByJql(req, res) {
+    const controller = new AbortController();
+    res.on("close", () => {
+        if (!res.writableEnded) {
+            controller.abort();
+        }
+    });
+
     try {
         const { jql } = req.query;
 
@@ -418,20 +425,27 @@ async function getIssuesByJql(req, res) {
             return res.status(400).json({ error: "Параметр 'jql' обязателен в query-строке запроса." });
         }
 
-        const jira = await JiraClient.getConnection();
+        const jira = await JiraClient.getConnection(undefined, {
+            signal: controller.signal,
+        });
 
         const maxResults = 1000; // Ограничение на кол-во задач
 
         const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,description,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
 
         console.log(`Запрос задач по JQL: ${jql}`);
-        const searchResult = await jira.request(endpoint);
+        const searchResult = await jira.request(endpoint, {
+            signal: controller.signal,
+        });
         
         console.log("Задачи получены. Всего найдено:", searchResult.total);
 
         return res.status(200).json(searchResult.issues);
 
     } catch (error) {
+        if (controller.signal.aborted) {
+            return;
+        }
         console.error(error);
         return res
             .status(500)
@@ -440,23 +454,58 @@ async function getIssuesByJql(req, res) {
 }
 
 async function startSearch(req, res) {
+    const requestStartedAt = Date.now();
     try {
         const { jql } = req.body; // или req.query
         if (!jql) return res.status(400).json({ error: "Параметр 'jql' обязателен." });
 
+        const settings = await Settings.findOne(
+            {},
+            { _id: 0, "teamMembers._id": 0 },
+        );
+        if (!settings) {
+            return res.status(500).json({ error: "Настройки не найдены." });
+        }
+        const timeoutSeconds = Number(settings.timeout);
+        if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
+            return res
+                .status(400)
+                .json({ error: "Таймаут должен быть положительным числом." });
+        }
+        if (req.aborted || res.destroyed) {
+            return;
+        }
+
         const taskId = uuidv4(); // Генерируем уникальный ID для этой сессии
+        const controller = new AbortController();
 
         // Инициализируем состояние задачи в памяти
-        activeTasks.set(taskId, {
+        const task = {
             status: "processing",
             issues: [],
             total: 0,
             isCancelled: false,
-            error: null
-        });
+            error: null,
+            controller,
+            timeoutTimer: null,
+        };
+        activeTasks.set(taskId, task);
+        task.timeoutTimer = setTimeout(() => {
+            if (task.status !== "processing") {
+                return;
+            }
+            task.timeoutTimer = null;
+            task.status = "timedout";
+            task.issues = [];
+            task.controller.abort();
+            console.log(`[Task ${taskId}] Превышен таймаут выполнения.`);
+        }, Math.max(
+            0,
+            timeoutSeconds * 1000 - (Date.now() - requestStartedAt),
+        ));
 
         // Запускаем тяжелый процесс В ФОНЕ (без await!)
-        runJiraBackgroundSearch(taskId, jql);
+        runJiraBackgroundSearch(taskId, jql, settings);
 
         // МГНОВЕННО возвращаем клиенту ID задачи
         return res.status(202).json({ taskId });
@@ -496,20 +545,30 @@ async function cancelSearch(req, res) {
     if (task.status === "processing") {
         task.isCancelled = true; // Выставляем флаг отмены. Фоновый цикл увидит его на следующей итерации.
         task.status = "cancelled";
+        clearTimeout(task.timeoutTimer);
+        task.controller.abort();
         console.log(`[Task ${taskId}] Пользователь запросил отмену.`);
         return res.status(200).json({ message: "Запрос на отмену принят." });
+    }
+    if (
+        task.status === "cancelled" ||
+        task.status === "timedout" ||
+        task.status === "completed"
+    ) {
+        return res.status(200).json({ message: "Задача уже остановлена." });
     }
 
     return res.status(400).json({ message: `Нельзя отменить задачу в статусе ${task.status}` });
 }
 
-async function runJiraBackgroundSearch(taskId, jql) {
+async function runJiraBackgroundSearch(taskId, jql, settings) {
     const task = activeTasks.get(taskId);
     
     try {
-        const settings = await Settings.findOne({}, { _id: 0, "teamMembers._id": 0 });
         const config = { baseUrl: settings.jiraServer, username: settings.jiraLogin, password: settings.jiraPassword };
-        const jira = await JiraClient.getConnection(config);
+        const jira = await JiraClient.getConnection(config, {
+            signal: task.controller.signal,
+        });
 
         const pageSize = 100;
         let startAt = 0;
@@ -517,13 +576,18 @@ async function runJiraBackgroundSearch(taskId, jql) {
 
         do {
             // ПРОВЕРКА НА ИТЕРАЦИИ: Не отменил ли пользователь задачу, пока мы ждали прошлую порцию?
-            if (task.isCancelled) {
+            if (task.status !== "processing" || task.isCancelled) {
                 console.log(`[Task ${taskId}] Цикл остановлен по требованию пользователя.`);
                 return; // Просто выходим, статус уже изменен на "cancelled" в эндпоинте отмены
             }
 
             const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}&fields=summary,description,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
-            const searchResult = await jira.request(endpoint);
+            const searchResult = await jira.request(endpoint, {
+                signal: task.controller.signal,
+            });
+            if (task.status !== "processing" || task.isCancelled) {
+                return;
+            }
             
             const chunk = searchResult.issues || [];
             totalIssuesInJira = searchResult.total;
@@ -536,21 +600,39 @@ async function runJiraBackgroundSearch(taskId, jql) {
 
             startAt += chunk.length;
 
-            // Небольшая пауза (опционально), чтобы не спамить Jira (например, 100мс)
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => {
+                const finishDelay = () => {
+                    clearTimeout(delayTimer);
+                    task.controller.signal.removeEventListener(
+                        "abort",
+                        finishDelay,
+                    );
+                    resolve();
+                };
+                const delayTimer = setTimeout(finishDelay, 100);
+                task.controller.signal.addEventListener(
+                    "abort",
+                    finishDelay,
+                    { once: true },
+                );
+            });
 
         } while (startAt < totalIssuesInJira);
 
         // Если дошли сюда и никто не отменил — задача успешно выполнена
-        if (!task.isCancelled) {
+        if (task.status === "processing" && !task.isCancelled) {
             task.status = "completed";
             console.log(`[Task ${taskId}] Успешно завершена. Собрано задач: ${task.issues.length}`);
         }
 
     } catch (error) {
-        console.error(`[Task ${taskId}] Ошибка выполнения:`, error);
-        task.status = "failed";
-        task.error = error.message;
+        if (task.status === "processing") {
+            console.error(`[Task ${taskId}] Ошибка выполнения:`, error);
+            task.status = "failed";
+            task.error = error.message;
+        }
+    } finally {
+        clearTimeout(task.timeoutTimer);
     }
 }
 

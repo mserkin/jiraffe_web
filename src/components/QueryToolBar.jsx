@@ -18,6 +18,7 @@ import {
     setIsLoading,
     setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
+import { selectTimeout } from "../redux/slices/settingsSlice";
 import {
     selectIssueTypes,
     selectLinkTypes,
@@ -47,13 +48,17 @@ const QueryToolBar = () => {
     const linkTypes = useSelector(selectLinkTypes);
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isQueryExecuting = useSelector(selectIsQueryExecuting);
+    const timeout = useSelector(selectTimeout);
 
     const confirmationDialogRef = useRef(null);
+    const timeoutDialogRef = useRef(null);
     const textInputDialogRef = useRef(null);
     const queryTitleRef = useRef("");
     const taskIdRef = useRef(null);
     const isStopRequestedRef = useRef(false);
     const searchRunIdRef = useRef(0);
+    const searchAbortControllerRef = useRef(null);
+    const timeoutTimerRef = useRef(null);
 
     const settingsDialogRef = useRef(null);
     const [queryTitle, setQueryTitle] = useState("");
@@ -274,24 +279,84 @@ const QueryToolBar = () => {
     }
 
     const handlePlayClick = async () => {
+        const timeoutSeconds = Number(timeout);
+        if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
+            dispatch(setError("Таймаут должен быть положительным числом."));
+            return;
+        }
+
         const runId = ++searchRunIdRef.current;
+        const abortController = new AbortController();
+        searchAbortControllerRef.current = abortController;
         dispatch(setIsQueryExecuting(true));
         dispatch(clearSearchResults());
         taskIdRef.current = null;
         isStopRequestedRef.current = false;
+        let isTimedOut = false;
+        const expireSearch = () => {
+            if (isTimedOut || runId !== searchRunIdRef.current) {
+                return;
+            }
+            isTimedOut = true;
+            clearTimeout(timeoutTimerRef.current);
+            timeoutTimerRef.current = null;
+            isStopRequestedRef.current = true;
+            searchRunIdRef.current += 1;
+            abortController.abort();
+            searchAbortControllerRef.current = null;
+            dispatch(clearSearchResults());
+            dispatch(setIsQueryExecuting(false));
+            timeoutDialogRef.current?.showModal({
+                message:
+                    "Время выполенения запроса превысило заданный лимит. Вы можете упростить запрос или увеличить лимит в настройках, задав значение параметра Таймаут",
+                confirmButtonText: "Понятно",
+                singleButton: true,
+            });
+
+            const taskId = taskIdRef.current;
+            taskIdRef.current = null;
+            if (taskId) {
+                axios
+                    .post(`${BACKEND_URI}search/cancel/${taskId}`)
+                    .catch((error) => {
+                        console.error(
+                            "Не удалось отменить задачу после истечения таймаута:",
+                            error,
+                        );
+                    });
+            }
+        };
+        timeoutTimerRef.current = setTimeout(
+            expireSearch,
+            timeoutSeconds * 1000,
+        );
+
         const levelFilters = Array.isArray(openQuery.levelFilters)
             ? openQuery.levelFilters
             : [];
         const rootIssues = [];
         const processedIssueKeys = new Set();
+        const pendingExpansions = new Set();
+        let latestProgress = 0;
+        let latestTotal = 0;
         const cloneIssueTree = (issue) => ({
             ...issue,
             children: (issue.children ?? []).map(cloneIssueTree),
         });
+        const publishSearchResults = () => {
+            dispatch(
+                setSearchResults({
+                    issues: rootIssues.map(cloneIssueTree),
+                    progress: latestProgress,
+                    total: latestTotal,
+                }),
+            );
+        };
 
         const searchIssuesByJql = async (jql) => {
             const { data } = await axios.get(
                 `${BACKEND_URI}search?jql=${encodeURIComponent(jql)}`,
+                { signal: abortController.signal },
             );
             return data;
         };
@@ -301,6 +366,7 @@ const QueryToolBar = () => {
             const { data: startResponse } = await axios.post(
                 `${BACKEND_URI}search/start`,
                 { jql },
+                { signal: abortController.signal },
             );
             const taskId = startResponse?.taskId;
             if (!taskId) {
@@ -309,7 +375,8 @@ const QueryToolBar = () => {
 
             if (
                 runId !== searchRunIdRef.current ||
-                isStopRequestedRef.current
+                isStopRequestedRef.current ||
+                abortController.signal.aborted
             ) {
                 await axios.post(`${BACKEND_URI}search/cancel/${taskId}`);
                 return;
@@ -319,18 +386,38 @@ const QueryToolBar = () => {
 
             while (
                 runId === searchRunIdRef.current &&
-                !isStopRequestedRef.current
+                !isStopRequestedRef.current &&
+                !abortController.signal.aborted
             ) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+                await new Promise((resolve, reject) => {
+                    const timer = setTimeout(() => {
+                        abortController.signal.removeEventListener(
+                            "abort",
+                            handleAbort,
+                        );
+                        resolve();
+                    }, 1000);
+                    const handleAbort = () => {
+                        clearTimeout(timer);
+                        reject(new Error("Запрос поиска был отменен."));
+                    };
+                    abortController.signal.addEventListener(
+                        "abort",
+                        handleAbort,
+                        { once: true },
+                    );
+                });
                 if (
                     runId !== searchRunIdRef.current ||
-                    isStopRequestedRef.current
+                    isStopRequestedRef.current ||
+                    abortController.signal.aborted
                 ) {
                     break;
                 }
 
                 const { data: statusResponse } = await axios.get(
                     `${BACKEND_URI}search/status/${taskId}`,
+                    { signal: abortController.signal },
                 );
                 if (
                     statusResponse.error !== null &&
@@ -348,7 +435,13 @@ const QueryToolBar = () => {
                         "Сервер вернул некорректный список результатов поиска.",
                     );
                 }
+                if (statusResponse.status === "timedout") {
+                    expireSearch();
+                    break;
+                }
 
+                latestProgress = statusResponse.progress;
+                latestTotal = statusResponse.total;
                 const newRootIssues = statusResponse.issues
                     .filter((issue) => {
                         const key = issue.key ?? issue.id;
@@ -360,16 +453,11 @@ const QueryToolBar = () => {
                     })
                     .map((issue) => ({ ...issue, children: [] }));
                 rootIssues.push(...newRootIssues);
-                dispatch(
-                    setSearchResults({
-                        issues: rootIssues.map(cloneIssueTree),
-                        progress: statusResponse.progress,
-                        total: statusResponse.total,
-                    }),
-                );
+                publishSearchResults();
 
                 if (newRootIssues.length > 0 && levelFilters.length > 1) {
-                    await expandIssueTree(
+                    let expansion;
+                    expansion = expandIssueTree(
                         newRootIssues,
                         levelFilters,
                         linkTypes,
@@ -377,20 +465,44 @@ const QueryToolBar = () => {
                         searchIssuesByJql,
                         () =>
                             runId !== searchRunIdRef.current ||
-                            isStopRequestedRef.current,
-                    );
-                    if (
-                        runId === searchRunIdRef.current &&
-                        !isStopRequestedRef.current
-                    ) {
-                        dispatch(
-                            setSearchResults({
-                                issues: rootIssues.map(cloneIssueTree),
-                                progress: statusResponse.progress,
-                                total: statusResponse.total,
-                            }),
-                        );
-                    }
+                            isStopRequestedRef.current ||
+                            abortController.signal.aborted,
+                        () => {
+                            if (
+                                runId === searchRunIdRef.current &&
+                                !isStopRequestedRef.current &&
+                                !abortController.signal.aborted
+                            ) {
+                                publishSearchResults();
+                            }
+                        },
+                    )
+                        .then(() => {
+                            if (
+                                runId === searchRunIdRef.current &&
+                                !isStopRequestedRef.current &&
+                                !abortController.signal.aborted
+                            ) {
+                                publishSearchResults();
+                            }
+                        })
+                        .catch((expandError) => {
+                            if (
+                                abortController.signal.aborted ||
+                                isStopRequestedRef.current
+                            ) {
+                                return;
+                            }
+                            dispatch(
+                                setError(
+                                    `Ошибка при расширении дерева результатов: ${expandError.message}`,
+                                ),
+                            );
+                        })
+                        .finally(() => {
+                            pendingExpansions.delete(expansion);
+                        });
+                    pendingExpansions.add(expansion);
                 }
 
                 if (statusResponse.status !== "processing") {
@@ -398,6 +510,12 @@ const QueryToolBar = () => {
                 }
             }
         } catch (error) {
+            if (
+                abortController.signal.aborted ||
+                isStopRequestedRef.current
+            ) {
+                return;
+            }
             const responseError = error.response?.data?.error;
             dispatch(
                 setError(
@@ -407,8 +525,12 @@ const QueryToolBar = () => {
                 ),
             );
         } finally {
+            await Promise.all(pendingExpansions);
             if (runId === searchRunIdRef.current) {
+                clearTimeout(timeoutTimerRef.current);
+                timeoutTimerRef.current = null;
                 taskIdRef.current = null;
+                searchAbortControllerRef.current = null;
                 dispatch(setIsQueryExecuting(false));
             }
         }
@@ -417,6 +539,10 @@ const QueryToolBar = () => {
     const handleStopClick = async () => {
         isStopRequestedRef.current = true;
         searchRunIdRef.current += 1;
+        clearTimeout(timeoutTimerRef.current);
+        timeoutTimerRef.current = null;
+        searchAbortControllerRef.current?.abort();
+        searchAbortControllerRef.current = null;
         const taskId = taskIdRef.current;
         taskIdRef.current = null;
         try {
@@ -436,6 +562,8 @@ const QueryToolBar = () => {
             dispatch(setIsQueryExecuting(false));
         }
     };
+
+    const handleTimeoutDialogConfirm = () => {};
 
     return (
         <header>
@@ -512,6 +640,11 @@ const QueryToolBar = () => {
                 ref={confirmationDialogRef}
                 onConfirm={handleConfirmDiscardChanges}
                 onReject={handleRejectDiscardChanges}
+            />
+            <ConfirmationDialog
+                ref={timeoutDialogRef}
+                onConfirm={handleTimeoutDialogConfirm}
+                onReject={handleTimeoutDialogConfirm}
             />
         </header>
     );

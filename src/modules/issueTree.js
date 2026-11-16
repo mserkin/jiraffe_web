@@ -179,6 +179,7 @@ export async function expandIssueTree(
     issueTypes,
     searchIssuesByJql,
     shouldStop = () => false,
+    onUpdate = () => {},
 ) {
     let parents = issues;
 
@@ -204,6 +205,7 @@ export async function expandIssueTree(
 
         const filterJql = buildLevelFilterJql(filters, issueTypes);
         const matchingIssues = new Map();
+        let nextParents = [];
 
         for (let offset = 0; offset < candidateKeys.length; offset += 100) {
             if (shouldStop()) {
@@ -230,21 +232,23 @@ export async function expandIssueTree(
                     matchingIssues.set(foundIssue.key, foundIssue);
                 }
             }
+
+            nextParents = [];
+            for (const [parentIndex, parent] of parents.entries()) {
+                const children = [];
+                for (const key of keysByParent[parentIndex]) {
+                    const matchingIssue = matchingIssues.get(key);
+                    if (matchingIssue) {
+                        const child = { ...matchingIssue, children: [] };
+                        children.push(child);
+                        nextParents.push(child);
+                    }
+                }
+                parent.children = children;
+            }
+            onUpdate(issues);
         }
 
-        const nextParents = [];
-        for (const [parentIndex, parent] of parents.entries()) {
-            const children = [];
-            for (const key of keysByParent[parentIndex]) {
-                const matchingIssue = matchingIssues.get(key);
-                if (matchingIssue) {
-                    const child = { ...matchingIssue, children: [] };
-                    children.push(child);
-                    nextParents.push(child);
-                }
-            }
-            parent.children = children;
-        }
         parents = nextParents;
     }
 

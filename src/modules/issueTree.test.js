@@ -206,3 +206,50 @@ test("expandIssueTree attaches unique children at each configured level", async 
         ["TASK-4"],
     );
 });
+
+test("expandIssueTree publishes children after each backend batch", async () => {
+    const root = {
+        key: "ROOT-1",
+        fields: {
+            issuelinks: Array.from({ length: 101 }, (_, index) => ({
+                type: { id: "7" },
+                outwardIssue: { key: `CHILD-${index + 1}` },
+            })),
+        },
+    };
+    let resolveSecondBatch;
+    let markSecondBatchStarted;
+    const secondBatchStarted = new Promise((resolve) => {
+        markSecondBatchStarted = resolve;
+    });
+    const publishedChildCounts = [];
+    const expansion = expandIssueTree(
+        [root],
+        [{}, {}],
+        [],
+        [],
+        async (jql) => {
+            if (jql.includes("CHILD-1") && !jql.includes("CHILD-101")) {
+                return [{ key: "CHILD-1", fields: { issuelinks: [] } }];
+            }
+            markSecondBatchStarted();
+            return new Promise((resolve) => {
+                resolveSecondBatch = resolve;
+            });
+        },
+        undefined,
+        () => publishedChildCounts.push(root.children.length),
+    );
+
+    await secondBatchStarted;
+    assert.deepEqual(root.children.map((child) => child.key), ["CHILD-1"]);
+    assert.deepEqual(publishedChildCounts, [1]);
+
+    resolveSecondBatch([{ key: "CHILD-101", fields: { issuelinks: [] } }]);
+    await expansion;
+    assert.deepEqual(
+        root.children.map((child) => child.key),
+        ["CHILD-1", "CHILD-101"],
+    );
+    assert.deepEqual(publishedChildCounts, [1, 2]);
+});

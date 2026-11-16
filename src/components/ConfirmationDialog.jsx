@@ -51,9 +51,11 @@ const ConfirmationDialog = forwardRef(({ onConfirm, onReject }, ref) => {
                 <button type="button" onClick={handleConfirm}>
                     {dialogData?.confirmButtonText || 'Да'}
                 </button>
-                <button type="button" onClick={handleReject}>
-                    {dialogData?.rejectButtonText || 'Нет'}
-                </button>
+                {!dialogData?.singleButton && (
+                    <button type="button" onClick={handleReject}>
+                        {dialogData?.rejectButtonText || 'Нет'}
+                    </button>
+                )}
             </div>
         </dialog>
     );

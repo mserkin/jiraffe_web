@@ -22,7 +22,7 @@ class JiraClient {
    * @param {Object} config - Параметры подключения (нужны только при первом вызове)
    * @returns {Promise<JiraClient>}
    */
-  static async getConnection(config) {
+  static async getConnection(config, options = {}) {
     // 1. Если соединение уже успешно установлено — сразу отдаем его
     if (JiraClient.#instance) {
       return JiraClient.#instance;
@@ -44,7 +44,7 @@ class JiraClient {
         const client = new JiraClient(config);
         
         // Валидируем соединение тестовым запросом (например, запрашиваем профиль пользователя)
-        await client.request('/rest/api/2/myself');
+        await client.request('/rest/api/2/myself', options);
         
         // Если запрос успешен, сохраняем экземпляр
         JiraClient.#instance = client;
