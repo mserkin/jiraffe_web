@@ -4,13 +4,17 @@ const initialState = {
     issues: [],
     progress: 0,
     total: 0,
+    resetVersion: 0,
 };
 
 const searchResultsSlice = createSlice({
     name: "searchResults",
     initialState,
     reducers: {
-        clearSearchResults: () => initialState,
+        clearSearchResults: (state) => ({
+            ...initialState,
+            resetVersion: state.resetVersion + 1,
+        }),
         setSearchResults: (state, action) => {
             state.issues = action.payload.issues;
             state.progress = action.payload.progress ?? 0;

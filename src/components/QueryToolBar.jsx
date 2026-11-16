@@ -205,6 +205,10 @@ const QueryToolBar = () => {
         queryTitleRef.current = nextQueryTitle;
         setQueryTitle(nextQueryTitle);
 
+        if (dialogData.pendingAction === PendingAction.ADD_NEW) {
+            dispatch(clearSearchResults());
+        }
+
         switch (dialogData.pendingAction) {
             case PendingAction.SAVE_AS:
                 await saveAsQuery(nextQueryTitle);

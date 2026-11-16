@@ -18,8 +18,7 @@ const getExpandableNodeIds = (node) => {
     return [node.id, ...node.children.flatMap(getExpandableNodeIds)];
 };
 
-const ResultTreePane = () => {
-    const { issues, progress, total } = useSelector(selectSearchResults);
+const ResultTreePaneContent = ({ issues, progress, total }) => {
     const issueTypes = useSelector(selectIssueTypes);
     const dispatch = useDispatch();
     const [selectedNodeId, setSelectedNodeId] = useState(null);
@@ -27,6 +26,10 @@ const ResultTreePane = () => {
         () => new Set(["found-issues"]),
     );
     const previousExpandableNodeIds = useRef(new Set());
+
+    useEffect(() => {
+        dispatch(dropSelection());
+    }, [dispatch]);
 
     const tree = useMemo(() => {
         const toTreeNode = (issue, parentId, index) => {
@@ -151,6 +154,20 @@ const ResultTreePane = () => {
                 />
             </ul>
         </div>
+    );
+};
+
+const ResultTreePane = () => {
+    const { issues, progress, total, resetVersion } =
+        useSelector(selectSearchResults);
+
+    return (
+        <ResultTreePaneContent
+            key={resetVersion}
+            issues={issues}
+            progress={progress}
+            total={total}
+        />
     );
 };
 

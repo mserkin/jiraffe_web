@@ -23,6 +23,7 @@ import {
     fetchSettings,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
+import { clearSearchResults } from "../redux/slices/searchResultsSlice";
 
 const QueryForm = () => {
     const dispatch = useDispatch();
@@ -150,6 +151,7 @@ const QueryForm = () => {
         console.log("handleAddLevelClick");
         dispatch(setLevelFilters([...levelFiltersList, {}]));
         dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
     };
 
     const handleDeleteLevelClick = (levelIndex) => {
@@ -163,23 +165,27 @@ const QueryForm = () => {
             ),
         );
         dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
     };
 
     const handleLevelSettingsChanged = () => {
         console.log("handleLevelSettingsChanged");
         dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
     };
 
     const handleEpicChoiceChanged = (event) => {
         console.log("handleEpicChoiceChanged");
         dispatch(setEpicViewType(event.target.value));
         dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
     };
 
     const handleQueryTextChanged = (event) => {
         console.log("handleQueryChanged");
         dispatch(setQueryText(event.target.value));
         dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
     };
 
     const handleLevelSettingsApply = (dialogData) => {
@@ -196,6 +202,7 @@ const QueryForm = () => {
         dispatch(setLevelFilters(nextLevelFilters));
         console.log(`levelFilters have been set`);
         dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
     };
 
     return (

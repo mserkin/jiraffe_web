@@ -15,6 +15,7 @@ import {
 import { setError } from "../redux/slices/errorSlice";
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
+import { clearSearchResults } from "../redux/slices/searchResultsSlice";
 
 const QueryListItem = ({
     id,
@@ -267,6 +268,7 @@ const QueryListItem = ({
 
     const handleConfirmDeleteAction = async (dataFromDialog) => {
         console.log(`handleConfirmDeleteAction(${JSON.stringify(dataFromDialog)}) executed`)
+        dispatch(clearSearchResults());
         if (isQueryChanged) {
             setIsDeleteConfirmationPending(true);
             console.log('Calling confirmationDialog.showModal()...')
@@ -287,7 +289,9 @@ const QueryListItem = ({
     const handleRejectDeleteAction = async (dataFromDialog) => {};
 
     const handleConfirmAction = async (dataFromDialog) => {
-        console.log(`handleConfirmAction(${getEntriesWithValuesStr(dataFromDialog)}) executed`)
+        console.log(
+            `handleConfirmAction(${JSON.stringify(dataFromDialog)}) executed`,
+        );
         if (isCloneConfirmationPending) {
             console.log('isCloneConfirmationPending==true')
             setIsCloneConfirmationPending(false);
@@ -323,6 +327,7 @@ const QueryListItem = ({
         }
         console.log('handleConfirmAction - opening query')
         dispatch(setIsQueryChanged(false));
+        dispatch(clearSearchResults());
         await openQueryById(id);
     };
 
@@ -344,6 +349,9 @@ const QueryListItem = ({
             });
             return;
         } else {
+            if (queryId !== openQuery.id) {
+                dispatch(clearSearchResults());
+            }
             await openQueryById(queryId);
         }
     };
