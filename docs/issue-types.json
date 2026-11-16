@@ -4,7 +4,7 @@
   },
   "id": "SUB_TASK",
   "name": "Sub-task",
-  "icon": "sub-task",
+  "icon": "subtask",
   "statuses": [
     {
       "id": "SPRINT BACKLOG",
@@ -258,7 +258,7 @@
   },
   "id": "PROD_BUG",
   "name": "Дефект промсреды",
-  "icon": "ProdBugRus",
+  "icon": "prodBugRus",
   "statuses": []
 },
 {

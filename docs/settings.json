@@ -11,37 +11,73 @@
       "login": "U_M1YU5",
       "name": "Серкин Михаил",
       "_id": {
-        "$oid": "6af1dfa7c38caa44b529e765"
+        "$oid": "6afafada5d5a5e4eb0c5e9a1"
       }
     },
     {
       "login": "U_M27D6",
       "name": "Ситдиков Рустам",
       "_id": {
-        "$oid": "6af1dfa7c38caa44b529e766"
+        "$oid": "6afafada5d5a5e4eb0c5e9a2"
       }
     },
     {
       "login": "U_M27LA",
       "name": "Кабдолла Мадиар",
       "_id": {
-        "$oid": "6af1dfa7c38caa44b529e767"
+        "$oid": "6afafada5d5a5e4eb0c5e9a3"
       }
     },
     {
-      "login": "U392487",
-      "name": "Иван Иванов",
+      "login": "U_M31RG",
+      "name": "Свириденко Алексей",
       "_id": {
-        "$oid": "6af1dfa7c38caa44b529e768"
+        "$oid": "6afafada5d5a5e4eb0c5e9a4"
       }
     },
     {
-      "login": "U123455",
-      "name": "Петр Петров",
+      "login": "U_M2R8U",
+      "name": "Болдырев Александр",
       "_id": {
-        "$oid": "6af1dfa7c38caa44b529e769"
+        "$oid": "6afafada5d5a5e4eb0c5e9a5"
+      }
+    },
+    {
+      "login": "U_M38EY",
+      "name": "Карташов Антон",
+      "_id": {
+        "$oid": "6afafada5d5a5e4eb0c5e9a6"
+      }
+    },
+    {
+      "login": "U_M2ETV",
+      "name": "Иванина Ксения",
+      "_id": {
+        "$oid": "6afafada5d5a5e4eb0c5e9a7"
+      }
+    },
+    {
+      "login": "U_M15KM",
+      "name": "Никулин Сергей",
+      "_id": {
+        "$oid": "6afafada5d5a5e4eb0c5e9a8"
+      }
+    },
+    {
+      "login": "U_M16NM",
+      "name": "Яценко Алексей",
+      "_id": {
+        "$oid": "6afafada5d5a5e4eb0c5e9a9"
+      }
+    },
+    {
+      "login": "RUM1JZM",
+      "name": "Власюк Игорь",
+      "_id": {
+        "$oid": "6afafada5d5a5e4eb0c5e9aa"
       }
     }
   ],
-  "boardId": 83052
+  "boardId": 83052,
+  "timeout": 60
 }]
