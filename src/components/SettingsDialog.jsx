@@ -22,6 +22,8 @@ import {
     selectProject,
     setBoardId,
     selectBoardId,
+    setTimeout,
+    selectTimeout,
     setTeamMembers,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
@@ -36,6 +38,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
     const jiraServer = useSelector(selectJiraServer);
     const project = useSelector(selectProject);
     const boardId = useSelector(selectBoardId);
+    const timeout = useSelector(selectTimeout);
     const teamMembers = useSelector(selectTeamMembers);
 
     // Локальное состояние диалога для хранения динамических данных
@@ -76,6 +79,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 jiraServer,
                 project,
                 boardId,
+                timeout,
                 teamMembers: teamMembers.filter((m) => m.login && m.name),
             };
             console.log("PUT /settings");
@@ -88,7 +92,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 setError(`Ошибка при подключении к серверу: ${error.message}`),
             );
         }
-    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, teamMembers]);
+    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, timeout, teamMembers]);
 
     const handleConfirm = async () => {
         // Передаем данные обратно в родительский обработчик «Да»
@@ -180,6 +184,18 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                         }
                     />
                 </div>
+                <div className={styles.settings_dialog_setting_label}>
+                    <label>Таймаут (сек.): </label>
+                </div>
+                <div className={styles.settings_dialog_setting}>
+                    <input
+                        type="text"
+                        value={timeout}
+                        onChange={(event) =>
+                            dispatch(setTimeout(event.target.value))
+                        }
+                    />
+                </div>                
                 <div className={styles.settings_dialog_section_header}>
                     Члены команды
                 </div>

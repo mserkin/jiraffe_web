@@ -72,6 +72,7 @@ const SettingsSchema = new Schema(
         jiraServer: String,
         project: String,
         boardId: Number,
+        timeout: Number,
         teamMembers: [MemberSchema],
     },
     { collection: "settings" },
