@@ -88,8 +88,11 @@
 }
 
 .nodeIcon {
+    width: 16px;
+    height: 16px;
     flex: 0 0 auto;
     color: #58738c;
+    object-fit: contain;
 }
 
 .children {

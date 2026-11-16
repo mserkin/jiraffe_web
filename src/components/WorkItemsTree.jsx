@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { VscFile, VscListTree } from "react-icons/vsc";
 import styles from "./WorkItemsTree.module.css";
 
@@ -8,6 +9,7 @@ const WorkItemsTree = ({
     onSelect,
     onToggle,
 }) => {
+    const [iconFailed, setIconFailed] = useState(false);
     const hasChildren = Boolean(node.children?.length);
     const isExpanded = expandedNodeIds.has(node.id);
     const Icon = node.type === "root" ? VscListTree : VscFile;
@@ -72,7 +74,20 @@ const WorkItemsTree = ({
                     <span className={styles.expandPlaceholder} />
                 )}
                 <span className={styles.nodeButton}>
-                    <Icon className={styles.nodeIcon} aria-hidden="true" />
+                    {node.icon && !iconFailed ? (
+                        <img
+                            className={styles.nodeIcon}
+                            src={`/${encodeURIComponent(
+                                node.icon.toLowerCase().endsWith(".png")
+                                    ? node.icon
+                                    : `${node.icon}.png`,
+                            )}`}
+                            alt=""
+                            onError={() => setIconFailed(true)}
+                        />
+                    ) : (
+                        <Icon className={styles.nodeIcon} aria-hidden="true" />
+                    )}
                     <span>{node.label}</span>
                 </span>
             </div>

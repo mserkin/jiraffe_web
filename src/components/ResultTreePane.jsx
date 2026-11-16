@@ -5,6 +5,7 @@ import {
     dropSelection,
     setSelection,
 } from "../redux/slices/selectedIssueSlice";
+import { selectIssueTypes } from "../redux/slices/jiraMetadataSlice";
 import ResultToolbar from "./ResultToolbar";
 import WorkItemsTree from "./WorkItemsTree";
 import styles from "./ResultTreePane.module.css";
@@ -19,6 +20,7 @@ const getExpandableNodeIds = (node) => {
 
 const ResultTreePane = () => {
     const { issues, progress, total } = useSelector(selectSearchResults);
+    const issueTypes = useSelector(selectIssueTypes);
     const dispatch = useDispatch();
     const [selectedNodeId, setSelectedNodeId] = useState(null);
     const [expandedNodeIds, setExpandedNodeIds] = useState(
@@ -35,6 +37,15 @@ const ResultTreePane = () => {
                 issue,
                 label: `${issue.key ?? ""} ${issue.fields?.summary ?? ""}`.trim(),
                 type: "issue",
+                icon:
+                    issueTypes.find(
+                        (issueType) =>
+                            issueType.id === issue.fields?.issuetype?.id,
+                    )?.icon ??
+                    issueTypes.find(
+                        (issueType) =>
+                            issueType.name === issue.fields?.issuetype?.name,
+                    )?.icon,
                 children: (issue.children ?? []).map((child, childIndex) =>
                     toTreeNode(child, id, childIndex),
                 ),
@@ -49,7 +60,7 @@ const ResultTreePane = () => {
                 toTreeNode(issue, "issue", index),
             ),
         };
-    }, [issues]);
+    }, [issues, issueTypes]);
 
     useEffect(() => {
         const expandableNodeIds = new Set(getExpandableNodeIds(tree));
