@@ -24,18 +24,12 @@ const WorkItemsTree = ({
             onClick={(event) => {
                 event.stopPropagation();
                 onSelect(node, true);
-                if (hasChildren) {
-                    onToggle(node.id);
-                }
             }}
             onKeyDown={(event) => {
                 event.stopPropagation();
                 if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
                     onSelect(node, true);
-                    if (hasChildren) {
-                        onToggle(node.id);
-                    }
                 } else if (event.key === "ArrowRight" && hasChildren) {
                     onSelect(node);
                     if (!isExpanded) {
