@@ -7,12 +7,18 @@ import {
   selectIsLoading,
   setIsInitialQueryOpened,
   selectIsQueryListRefreshPending,
-  setIsQueryListRefreshPending
+  setIsQueryListRefreshPending,
+  setIsQueryChanged,
 } from "../redux/slices/statusSlice";
 import styles from "./QueryList.module.css";
 import QueryListItem from "./QueryListItem";
 import { BACKEND_URI, QUERIES_PATH_PART } from "../modules/const";
-import { fetchQuery, selectOpenQuery } from "../redux/slices/openQuerySlice";
+import {
+  clearOpenQuery,
+  fetchQuery,
+  selectOpenQuery,
+} from "../redux/slices/openQuerySlice";
+import { clearSearchResults } from "../redux/slices/searchResultsSlice";
 
 const QueryList = () => {
   const dispatch = useDispatch();
@@ -98,29 +104,30 @@ const QueryList = () => {
     [dispatch, refreshQueryList],
   );
 
-  const handleQueryDeleted = useCallback(async () => {
-    console.log(`handleQueryDeleted executed`);
-    console.log(`openQuery: ${JSON.stringify(openQuery)}`)
-    const id = openQuery.id;
-    console.log(`id=${id}`);
+  const handleQueryDeleted = useCallback(async (deletedQueryId) => {
     const refreshedQueryList = await refreshQueryList();
     const queries = Array.isArray(refreshedQueryList)
       ? refreshedQueryList
       : [refreshedQueryList];
-    const openQueryFound = queries.find((query) => query?.id === id);
-    console.log(`openQueryFound=${JSON.stringify(openQueryFound)}`);
-    if (!openQueryFound) {
-      console.log("Setting setIsInitialQueryOpened=false");
-      dispatch(setIsInitialQueryOpened(false));
-      console.log("isInitialQueryOpened is set to false");
+    if (deletedQueryId !== openQuery.id) {
+      return;
     }
 
+    dispatch(setIsQueryChanged(false));
+    dispatch(clearSearchResults());
+    if (queries.length === 0) {
+      dispatch(clearOpenQuery());
+      dispatch(setIsInitialQueryOpened(false));
+      return;
+    }
+
+    dispatch(setIsInitialQueryOpened(true));
     dispatch(setIsLoading(true));
     try {
       await dispatch(
         fetchQuery({
           url: BACKEND_URI + QUERIES_PATH_PART,
-          queryId: id,
+          queryId: queries[0].id,
         }),
       ).unwrap();
     } finally {
@@ -129,9 +136,8 @@ const QueryList = () => {
   }, [dispatch, openQuery.id, refreshQueryList]);
 
 const handleIsQueryListRefreshPending = useCallback(async (queryId) => {
-    console.log(`handleIsQueryListRefreshPending executed`);
-    const id = isQueryListRefreshPending.id;
-    console.log(`id=${queryId}`);
+  console.log(`handleIsQueryListRefreshPending executed`);
+  console.log(`id=${queryId}`);
     const refreshedQueryList = await refreshQueryList();
     const queries = Array.isArray(refreshedQueryList)
       ? refreshedQueryList

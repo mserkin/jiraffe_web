@@ -33,8 +33,6 @@ const QueryListItem = ({
         useState(false);
     const [isRenameConfirmationPending, setIsRenameConfirmationPending] =
         useState(false);
-    const [isDeleteConfirmationPending, setIsDeleteConfirmationPending] =
-        useState(false);
     const MENU_BUTTON_ID_PREFIX = "menuBtn";
     const dispatch = useDispatch();
     const isQueryChanged = useSelector(selectIsQueryChanged);
@@ -200,7 +198,7 @@ const QueryListItem = ({
         }
     };
 
-    const handleTextInputDialogCancel = (dialogData) => {};
+    const handleTextInputDialogCancel = () => {};
 
     const saveRenamedQuery = useCallback(
         async (newQueryName) => {
@@ -237,8 +235,7 @@ const QueryListItem = ({
         try {
             dispatch(setIsLoading(true));
             await axios.delete(`${BACKEND_URI}${QUERIES_PATH_PART}/${id}`);
-            await onQueryDeleted();
-            dispatch(setIsQueryChanged(false));
+            await onQueryDeleted(id);
         } catch (error) {
             dispatch(
                 setError(`Ошибка при подключении к серверу: ${error.message}`),
@@ -299,27 +296,11 @@ const QueryListItem = ({
         [dispatch],
     );
 
-    const handleConfirmDeleteAction = async (dataFromDialog) => {
-        console.log(`handleConfirmDeleteAction(${JSON.stringify(dataFromDialog)}) executed`)
-        dispatch(clearSearchResults());
-        if (isQueryChanged) {
-            setIsDeleteConfirmationPending(true);
-            console.log('Calling confirmationDialog.showModal()...')
-            confirmationDialogRef.current?.showModal({
-                requestName: openQuery.name,
-                message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
-                question: "Отменить изменения?",
-                confirmButtonText: "Да",
-                rejectButtonText: "Нет",
-            });
-            return;
-        } else {
-            await deleteQuery();
-
-        }
+    const handleConfirmDeleteAction = async () => {
+        await deleteQuery();
     };
     
-    const handleRejectDeleteAction = async (dataFromDialog) => {};
+    const handleRejectDeleteAction = async () => {};
 
     const handleConfirmAction = async (dataFromDialog) => {
         console.log(
@@ -341,28 +322,9 @@ const QueryListItem = ({
             setIsRenameConfirmationPending(false);
             await saveRenamedQuery(dataFromDialog.newRequestName);
             return;
-        } else if (isDeleteConfirmationPending) {
-            console.log('isDeleteConfirmationPending==true')
-            setIsDeleteConfirmationPending(false);
+        } else if (dataFromDialog.pendingAction === PendingAction.DELETE) {
             await deleteQuery();
             return;
-        } else if (dataFromDialog.pendingAction === PendingAction.DELETE) {
-            console.log('pandingAction==DELETE')
-            if (isQueryChanged) {
-                setIsDeleteConfirmationPending(true);
-                console.log('Calling confirmationDialog.showModal()...')
-                confirmationDialogRef.current?.showModal({
-                    requestName: openQuery.name,
-                    message: `В текущий запрос '${openQuery.name || ""}' внесены не сохраненные изменения. Если продолжить, изменения будут потеряны. Нажмите «Да», чтобы продолжить, или «Нет», чтобы вернуться к редактированию текущего запроса.`,
-                    question: "Отменить изменения?",
-                    confirmButtonText: "Да",
-                    rejectButtonText: "Нет",
-                });
-                return;
-            } else {
-                await deleteQuery();
-
-            }
         }
         console.log('handleConfirmAction - opening query')
         dispatch(setIsQueryChanged(false));
@@ -370,10 +332,9 @@ const QueryListItem = ({
         await openQueryById(id);
     };
 
-    const handleRejectAction = async (dataFromDialog) => {
+    const handleRejectAction = async () => {
         setIsCloneConfirmationPending(false);
         setIsRenameConfirmationPending(false);
-        setIsDeleteConfirmationPending(false);
     };
 
     const handleItemClick = async (queryId) => {
