@@ -105,6 +105,13 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
         dialogRef.current?.close();
     };
 
+    const handleTemplateKeyDown = (event) => {
+        if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+            handleConfirm();
+        }
+    };
+
     // --- Обработчики кнопок перемещения (Dual Listbox) ---
 
     const handleAdd = () => {
@@ -306,6 +313,7 @@ const ExportSettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
                     type="text"
                     value={localTemplate}
                     onChange={(event) => setLocalTemplate(event.target.value)}
+                    onKeyDown={handleTemplateKeyDown}
                     disabled={!localEnabled}
                 />
             </div>

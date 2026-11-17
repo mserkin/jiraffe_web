@@ -33,6 +33,13 @@ const TextInputDialog = forwardRef(({ onOk, onCancel }, ref) => {
         setDialogData(null);
     };
 
+    const handleInputKeyDown = (event) => {
+        if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+            handleConfirm();
+        }
+    };
+
     return (
         <dialog
             ref={dialogRef}
@@ -45,6 +52,7 @@ const TextInputDialog = forwardRef(({ onOk, onCancel }, ref) => {
                 value={dialogData?.requestName || ""}
                 className={styles.query_name_input}
                 onChange={(event) => setDialogData({...dialogData, requestName: event.target.value})}
+                onKeyDown={handleInputKeyDown}
                 autoFocus
             />
             <div className={styles.dialog_buttons}>

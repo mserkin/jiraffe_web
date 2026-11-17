@@ -1,56 +1,72 @@
 [{
   "_id": {
-    "$oid": "6ab840bd80e84226f07bc47a"
+    "$oid": "6ab840bd80e84226f07bc476"
   },
-  "id": "SUB_TASK",
-  "name": "Sub-task",
-  "icon": "subtask",
+  "id": "UNKNOWN",
+  "name": "unknown",
+  "icon": "unknown",
   "statuses": [
     {
-      "id": "SPRINT BACKLOG",
-      "name": "Sprint backlog"
-    },
-    {
-      "id": "IN PROGRESS",
-      "name": "In progress"
-    },
-    {
-      "id": "REVIEW",
-      "name": "Review"
-    },
-    {
-      "id": "CLOSED",
-      "name": "Closed"
+      "id": "UNKNOWN",
+      "name": "Unknown"
     }
   ]
 },
 {
   "_id": {
-    "$oid": "6ab840bd80e84226f07bc47e"
+    "$oid": "6ab840bd80e84226f07bc477"
   },
-  "id": "DEVELOPMENT_SUBTASK",
-  "name": "Development",
-  "icon": "development",
+  "id": "EPIC",
+  "name": "Epic",
+  "icon": "epic",
   "statuses": [
     {
-      "id": "SPRINT BACKLOG",
-      "name": "Sprint backlog"
+      "id": "IDEA",
+      "name": "Idea"
     },
     {
-      "id": "IN PROGRESS",
-      "name": "In progress"
+      "id": "DISCOVERY_PLANNING",
+      "name": "Планирование Discovery"
     },
     {
-      "id": "REVIEW",
-      "name": "Review"
+      "id": "DISCOVERY_PREPARING",
+      "name": "Подготовка к Discovery"
     },
     {
-      "id": "TESTING",
-      "name": "Testing"
+      "id": "COLLECTING_FEEDBACK",
+      "name": "Сбор обратной связи"
     },
     {
-      "id": "READY TO DEPLOY",
-      "name": "Ready to deploy"
+      "id": "QUARTERLY_BACKLOG",
+      "name": "Quarterly Backlog"
+    },
+    {
+      "id": "HOLD",
+      "name": "Hold"
+    },
+    {
+      "id": "DEVELOPMENT",
+      "name": "Разработка"
+    },
+    {
+      "id": "ROLLOUT1",
+      "name": "Раскатка 1"
+    },
+    {
+      "id": "ROLLOUT2",
+      "name": "Раскатка 2"
+    },
+    {
+      "id": "ROLLOUT3",
+      "name": "Раскатка 3"
+    },
+    {
+      "id": "ROLLOUT4",
+      "name": "Раскатка 4"
+    },
+    {
+      "id": "ROLLOUT5",
+      "name": "Раскатка 5"
     },
     {
       "id": "CLOSED",
@@ -135,6 +151,32 @@
 },
 {
   "_id": {
+    "$oid": "6ab840bd80e84226f07bc47a"
+  },
+  "id": "SUB_TASK",
+  "name": "Sub-task",
+  "icon": "subtask",
+  "statuses": [
+    {
+      "id": "SPRINT BACKLOG",
+      "name": "Sprint backlog"
+    },
+    {
+      "id": "IN PROGRESS",
+      "name": "In progress"
+    },
+    {
+      "id": "REVIEW",
+      "name": "Review"
+    },
+    {
+      "id": "CLOSED",
+      "name": "Closed"
+    }
+  ]
+},
+{
+  "_id": {
     "$oid": "6ab840bd80e84226f07bc47b"
   },
   "id": "BUG",
@@ -199,6 +241,74 @@
 },
 {
   "_id": {
+    "$oid": "6ab840bd80e84226f07bc47d"
+  },
+  "id": "TESTING",
+  "name": "Testing",
+  "icon": "testing",
+  "statuses": [
+    {
+      "id": "SPRINT BACKLOG",
+      "name": "Sprint backlog"
+    },
+    {
+      "id": "IN PROGRESS",
+      "name": "In progress"
+    },
+    {
+      "id": "REVIEW",
+      "name": "Review"
+    },
+    {
+      "id": "TESTING",
+      "name": "Testing"
+    },
+    {
+      "id": "READY TO DEPLOY",
+      "name": "Ready to deploy"
+    },
+    {
+      "id": "CLOSED",
+      "name": "Closed"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6ab840bd80e84226f07bc47e"
+  },
+  "id": "DEVELOPMENT_SUBTASK",
+  "name": "Development",
+  "icon": "development",
+  "statuses": [
+    {
+      "id": "SPRINT BACKLOG",
+      "name": "Sprint backlog"
+    },
+    {
+      "id": "IN PROGRESS",
+      "name": "In progress"
+    },
+    {
+      "id": "REVIEW",
+      "name": "Review"
+    },
+    {
+      "id": "TESTING",
+      "name": "Testing"
+    },
+    {
+      "id": "READY TO DEPLOY",
+      "name": "Ready to deploy"
+    },
+    {
+      "id": "CLOSED",
+      "name": "Closed"
+    }
+  ]
+},
+{
+  "_id": {
     "$oid": "6ab840bd80e84226f07bc47f"
   },
   "id": "DESIGN_CORP",
@@ -240,58 +350,6 @@
     {
       "id": "CANCELLED",
       "name": "Cancelled"
-    }
-  ]
-},
-{
-  "_id": {
-    "$oid": "6ab840bd80e84226f07bc481"
-  },
-  "id": "QUARTERLY_TARGET",
-  "name": "Квартальная цель",
-  "icon": "quarterlyTargetRus",
-  "statuses": []
-},
-{
-  "_id": {
-    "$oid": "6ab840bd80e84226f07bc482"
-  },
-  "id": "PROD_BUG",
-  "name": "Дефект промсреды",
-  "icon": "prodBugRus",
-  "statuses": []
-},
-{
-  "_id": {
-    "$oid": "6ab840bd80e84226f07bc47d"
-  },
-  "id": "TESTING",
-  "name": "Testing",
-  "icon": "testing",
-  "statuses": [
-    {
-      "id": "SPRINT BACKLOG",
-      "name": "Sprint backlog"
-    },
-    {
-      "id": "IN PROGRESS",
-      "name": "In progress"
-    },
-    {
-      "id": "REVIEW",
-      "name": "Review"
-    },
-    {
-      "id": "TESTING",
-      "name": "Testing"
-    },
-    {
-      "id": "READY TO DEPLOY",
-      "name": "Ready to deploy"
-    },
-    {
-      "id": "CLOSED",
-      "name": "Closed"
     }
   ]
 },
@@ -347,73 +405,75 @@
 },
 {
   "_id": {
-    "$oid": "6ab840bd80e84226f07bc476"
+    "$oid": "6ab840bd80e84226f07bc481"
   },
-  "id": "UNKNOWN",
-  "name": "unknown",
-  "icon": "unknown",
+  "id": "QUARTERLY_TARGET",
+  "name": "Квартальная цель",
+  "icon": "quarterlyTargetRus",
+  "statuses": []
+},
+{
+  "_id": {
+    "$oid": "6ab840bd80e84226f07bc482"
+  },
+  "id": "PROD_BUG",
+  "name": "Дефект промсреды",
+  "icon": "prodBugRus",
+  "statuses": []
+},
+{
+  "_id": {
+    "$oid": "6afc43a6b276c16c8c6de6fb"
+  },
+  "id": "BUG_SUBTASK",
+  "name": "Bug (sub-task)",
+  "icon": "bug",
   "statuses": [
     {
-      "id": "UNKNOWN",
-      "name": "Unknown"
+      "id": "SPRINT BACKLOG",
+      "name": "Sprint backlog"
+    },
+    {
+      "id": "REVIEW",
+      "name": "Review"
+    },
+    {
+      "id": "IN PROGRESS",
+      "name": "In progress"
+    },
+    {
+      "id": "TESTING",
+      "name": "Testing"
+    },
+    {
+      "id": "READY TO DEPLOY",
+      "name": "Ready to deploy"
+    },
+    {
+      "id": "CLOSED",
+      "name": "Closed"
     }
   ]
 },
 {
   "_id": {
-    "$oid": "6ab840bd80e84226f07bc477"
+    "$oid": "6afc644ab276c16c8c6de6fe"
   },
-  "id": "EPIC",
-  "name": "Epic",
-  "icon": "epic",
+  "id": "ANALYTICS_SUBTASK",
+  "name": "Analytics",
+  "icon": "analytics",
   "statuses": [
     {
-      "id": "IDEA",
-      "name": "Idea"
+      "id": "SPRINT BACKLOG",
+      "name": "Sprint backlog"
     },
     {
-      "id": "DISCOVERY_PLANNING",
-      "name": "Планирование Discovery"
+      "id": "REVIEW",
+      "name": "Review"
     },
     {
-      "id": "DISCOVERY_PREPARING",
-      "name": "Подготовка к Discovery"
-    },
-    {
-      "id": "COLLECTING_FEEDBACK",
-      "name": "Сбор обратной связи"
-    },
-    {
-      "id": "QUARTERLY_BACKLOG",
-      "name": "Quarterly Backlog"
-    },
-    {
-      "id": "HOLD",
-      "name": "Hold"
-    },
-    {
-      "id": "DEVELOPMENT",
-      "name": "Разработка"
-    },
-    {
-      "id": "ROLLOUT1",
-      "name": "Раскатка 1"
-    },
-    {
-      "id": "ROLLOUT2",
-      "name": "Раскатка 2"
-    },
-    {
-      "id": "ROLLOUT3",
-      "name": "Раскатка 3"
-    },
-    {
-      "id": "ROLLOUT4",
-      "name": "Раскатка 4"
-    },
-    {
-      "id": "ROLLOUT5",
-      "name": "Раскатка 5"
+      "id": "IN PROGRESS",
+      "name": "In progress"
     },
     {
       "id": "CLOSED",

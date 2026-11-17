@@ -16,6 +16,7 @@ import { setError } from "../redux/slices/errorSlice";
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { clearSearchResults } from "../redux/slices/searchResultsSlice";
+import { queryNameExists } from "../modules/queryNames";
 
 const QueryListItem = ({
     id,
@@ -125,6 +126,38 @@ const QueryListItem = ({
 
         queryTitleRef.current = nextQueryTitle;
         setQueryName(nextQueryTitle);
+
+        const shouldCheckName =
+            dialogData.pendingAction === PendingAction.CLONE ||
+            dialogData.pendingAction === PendingAction.RENAME;
+        let isNameTaken = false;
+        if (shouldCheckName) {
+            try {
+                isNameTaken = await queryNameExists(
+                    nextQueryTitle,
+                    dialogData.pendingAction === PendingAction.RENAME
+                        ? id
+                        : undefined,
+                );
+            } catch (error) {
+                dispatch(
+                    setError(
+                        `Ошибка при подключении к серверу: ${error.message}`,
+                    ),
+                );
+                return;
+            }
+        }
+
+        if (isNameTaken) {
+            confirmationDialogRef.current?.showModal({
+                message: "Запрос с таким именем уже есть, введите другое имя",
+                confirmButtonText: "Продолжить",
+                singleButton: true,
+                retryDialogData: dialogData,
+            });
+            return;
+        }
 
         switch (dialogData.pendingAction) {
             case PendingAction.CLONE:
@@ -292,6 +325,12 @@ const QueryListItem = ({
         console.log(
             `handleConfirmAction(${JSON.stringify(dataFromDialog)}) executed`,
         );
+        if (dataFromDialog?.retryDialogData) {
+            textInputDialogRef.current?.showModal(
+                dataFromDialog.retryDialogData,
+            );
+            return;
+        }
         if (isCloneConfirmationPending) {
             console.log('isCloneConfirmationPending==true')
             setIsCloneConfirmationPending(false);

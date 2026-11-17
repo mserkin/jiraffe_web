@@ -41,6 +41,7 @@ import {
     setSearchResults,
 } from "../redux/slices/searchResultsSlice";
 import { buildLevelFilterJql, expandIssueTree } from "../modules/issueTree";
+import { queryNameExists } from "../modules/queryNames";
 
 const QueryToolBar = ({ settingsDialogRef }) => {
     const dispatch = useDispatch();
@@ -209,6 +210,39 @@ const QueryToolBar = ({ settingsDialogRef }) => {
             dispatch(clearSearchResults());
         }
 
+        const shouldCheckName =
+            dialogData.pendingAction === PendingAction.ADD_NEW ||
+            dialogData.pendingAction === PendingAction.SAVE_AS ||
+            dialogData.pendingAction === PendingAction.CHANGE_NAME;
+        let isNameTaken = false;
+        if (shouldCheckName) {
+            try {
+                isNameTaken = await queryNameExists(
+                    nextQueryTitle,
+                    dialogData.pendingAction === PendingAction.CHANGE_NAME
+                        ? openQuery.id
+                        : undefined,
+                );
+            } catch (error) {
+                dispatch(
+                    setError(
+                        `Ошибка при подключении к серверу: ${error.message}`,
+                    ),
+                );
+                return;
+            }
+        }
+
+        if (isNameTaken) {
+            confirmationDialogRef.current?.showModal({
+                message: "Запрос с таким именем уже есть, введите другое имя",
+                confirmButtonText: "Продолжить",
+                singleButton: true,
+                retryDialogData: dialogData,
+            });
+            return;
+        }
+
         switch (dialogData.pendingAction) {
             case PendingAction.SAVE_AS:
                 await saveAsQuery(nextQueryTitle);
@@ -252,6 +286,12 @@ const QueryToolBar = ({ settingsDialogRef }) => {
     };
 
     const handleConfirmDiscardChanges = async (dataFromDialog) => {
+        if (dataFromDialog?.retryDialogData) {
+            textInputDialogRef.current?.showModal(
+                dataFromDialog.retryDialogData,
+            );
+            return;
+        }
         if (isCreateConfirmationPending) {
             setIsCreateConfirmationPending(false);
             await createQuery();
