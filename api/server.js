@@ -294,6 +294,8 @@ async function updateSettings(req, res) {
         const settingsDocument = settings.toObject({ versionKey: false });
         delete settingsDocument._id;
 
+        JiraClient.resetConnection();
+
         return res.status(200).json(settingsDocument);
     } catch (error) {
         console.error(error);

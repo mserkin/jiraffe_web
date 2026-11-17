@@ -22,6 +22,7 @@ import { selectTimeout } from "../redux/slices/settingsSlice";
 import {
     selectIssueTypes,
     selectLinkTypes,
+    fetchJiraMetadata,
 } from "../redux/slices/jiraMetadataSlice";
 import styles from "./QueryToolBar.module.css";
 import { selectOpenQuery, setQueryName } from "../redux/slices/openQuerySlice";
@@ -41,7 +42,7 @@ import {
 } from "../redux/slices/searchResultsSlice";
 import { buildLevelFilterJql, expandIssueTree } from "../modules/issueTree";
 
-const QueryToolBar = () => {
+const QueryToolBar = ({ settingsDialogRef }) => {
     const dispatch = useDispatch();
     const openQuery = useSelector(selectOpenQuery);
     const issueTypes = useSelector(selectIssueTypes);
@@ -60,7 +61,6 @@ const QueryToolBar = () => {
     const searchAbortControllerRef = useRef(null);
     const timeoutTimerRef = useRef(null);
 
-    const settingsDialogRef = useRef(null);
     const [queryTitle, setQueryTitle] = useState("");
     const [isCreateConfirmationPending, setIsCreateConfirmationPending] =
         useState(false);
@@ -241,8 +241,11 @@ const QueryToolBar = () => {
     };
 
     const handleTextInputDialogCancel = (dialogData) => {};
-    const handleSettingsDialogSubmit = (dialogData) => {};
-    const handleSettingsDialogCancel = (dialogData) => {};
+    const handleSettingsDialogSubmit = () => {};
+    const handleSettingsDialogCancel = () => {};
+    const handleSettingsDialogClosed = () => {
+        dispatch(fetchJiraMetadata());
+    };
 
     const handleRejectDiscardChanges = () => {
         setIsCreateConfirmationPending(false);
@@ -634,6 +637,7 @@ const QueryToolBar = () => {
                 ref={settingsDialogRef}
                 onOk={handleSettingsDialogSubmit}
                 onCancel={handleSettingsDialogCancel}
+                onClosed={handleSettingsDialogClosed}
             />
             <TextInputDialog
                 ref={textInputDialogRef}

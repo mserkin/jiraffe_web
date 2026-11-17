@@ -14,8 +14,10 @@ import {
 import LevelSettingsDialog from "./LevelSettingsDialog";
 import {
     fetchJiraMetadata,
+    selectIsJiraMetadataLoading,
     selectIssueTypes,
     selectLinkTypes,
+    selectSprintsUnavailable,
     selectSprints,
 } from "../redux/slices/jiraMetadataSlice";
 import { BACKEND_URI, SETTINGS_PATH_PART } from "../modules/const";
@@ -32,10 +34,23 @@ const QueryForm = () => {
     const levelFilters = useSelector(selectLevelFilters);
     const levelFiltersList = Array.isArray(levelFilters) ? levelFilters : [];
     const levelSettingsDialogRef = useRef(null);
+    const settingsDialogRef = useRef(null);
+    const sprintsErrorDialogRef = useRef(null);
     const issueTypes = useSelector(selectIssueTypes);
     const linkTypes = useSelector(selectLinkTypes);
     const teamMembers = useSelector(selectTeamMembers);
     const sprints = useSelector(selectSprints);
+    const sprintsUnavailable = useSelector(selectSprintsUnavailable);
+    const isJiraMetadataLoading = useSelector(selectIsJiraMetadataLoading);
+
+    useEffect(() => {
+        const dialog = sprintsErrorDialogRef.current;
+        if (sprintsUnavailable && !dialog?.open) {
+            dialog?.showModal();
+        } else if (!sprintsUnavailable && dialog?.open) {
+            dialog.close();
+        }
+    }, [sprintsUnavailable]);
     const ROLE_DISPLAY_NAME = {
         creator: "созд.",
         assignee: "исполн.",
@@ -208,7 +223,7 @@ const QueryForm = () => {
     return (
         <>
             <form className={styles.formContainer} onSubmit={handleSubmit}>
-                <QueryToolBar />
+                <QueryToolBar settingsDialogRef={settingsDialogRef} />
                 <div className={styles.gridContainer}>
                     <div className={`${styles.item} ${styles.query_label}`}>
                         Запрос:
@@ -311,6 +326,31 @@ const QueryForm = () => {
                 ref={levelSettingsDialogRef}
                 onApply={handleLevelSettingsApply}
             />
+            <dialog
+                ref={sprintsErrorDialogRef}
+                className={styles.sprintsErrorDialog}
+                onCancel={(event) => event.preventDefault()}
+            >
+                <p>
+                    Не удалось получить список спринтов от Jira. Проверьте
+                    подключение.
+                </p>
+                <div className={styles.sprintsErrorDialogButtons}>
+                    <button
+                        type="button"
+                        disabled={isJiraMetadataLoading}
+                        onClick={() => dispatch(fetchJiraMetadata())}
+                    >
+                        Попробовать еще раз
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => settingsDialogRef.current?.showModal({})}
+                    >
+                        Настройки
+                    </button>
+                </div>
+            </dialog>
         </>
     );
 };

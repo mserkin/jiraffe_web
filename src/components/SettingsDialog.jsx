@@ -30,7 +30,7 @@ import {
 import { setError } from "../redux/slices/errorSlice";
 import axios from "axios";
 
-const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
+const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
     const dispatch = useDispatch();
     const dialogRef = useRef(null);
     const jiraLogin = useSelector(selectJiraLogin);
@@ -70,6 +70,10 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
         onCancel();
     };
 
+    const handleClose = () => {
+        onClosed();
+    };
+
     const updateSettings = useCallback(async () => {
         console.log("updateSettings executed");
         try {
@@ -97,8 +101,8 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
     const handleConfirm = async () => {
         // Передаем данные обратно в родительский обработчик «Да»
         onOk(dialogData);
-        dialogRef.current?.close();
         await updateSettings();
+        dialogRef.current?.close();
         setDialogData(null);
     };
 
@@ -114,6 +118,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel }, ref) => {
         <dialog
             ref={dialogRef}
             className={styles.dialog}
+            onClose={handleClose}
             onClick={(event) => event.stopPropagation()}
         >
             <p>Настройки Jiraffe {VERSION}</p>

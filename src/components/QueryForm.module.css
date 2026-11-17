@@ -136,3 +136,27 @@
     margin-top: 2px;
     min-height: 36px;
 }
+
+.sprintsErrorDialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    max-width: min(90vw, 420px);
+    padding: 20px;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    background: #fff;
+    color: #1f2937;
+}
+
+.sprintsErrorDialog::backdrop {
+    background: rgba(15, 23, 42, 0.35);
+}
+
+.sprintsErrorDialogButtons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}

@@ -4,6 +4,11 @@ class JiraClient {
   // Статическое свойство для отслеживания текущего процесса подключения (Promise)
   static #connectionPromise = null;
 
+  static resetConnection() {
+    JiraClient.#instance = null;
+    JiraClient.#connectionPromise = null;
+  }
+
   constructor(config) {
     // Предотвращаем создание инстанса через оператор new из внешнего кода
     if (JiraClient.#instance) {
@@ -23,6 +28,15 @@ class JiraClient {
    * @returns {Promise<JiraClient>}
    */
   static async getConnection(config, options = {}) {
+    const shouldRecreateConnection = config && JiraClient.#instance && (
+      JiraClient.#instance.baseUrl !== config.baseUrl.replace(/\/\$/, '') ||
+      JiraClient.#instance.credentials !== btoa(`${config.username}:${config.password}`)
+    );
+
+    if (shouldRecreateConnection) {
+      JiraClient.resetConnection();
+    }
+
     // 1. Если соединение уже успешно установлено — сразу отдаем его
     if (JiraClient.#instance) {
       return JiraClient.#instance;
