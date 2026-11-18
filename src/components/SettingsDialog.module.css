@@ -74,6 +74,52 @@
     width: 100%;
 }
 
+.settings_dialog_setting .demo_mode_switch {
+    appearance: none;
+    position: relative;
+    width: 42px;
+    min-width: 42px;
+    height: 24px;
+    min-height: 24px;
+    margin: 6px 0;
+    border: 0;
+    border-radius: 12px;
+    background: #94a3b8;
+    cursor: pointer;
+    transition: background-color var(--transition-ui);
+}
+
+.settings_dialog_setting .demo_mode_switch::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 25%);
+    transition: transform var(--transition-ui);
+}
+
+.settings_dialog_setting .demo_mode_switch:checked {
+    background: var(--color-accent);
+}
+
+.settings_dialog_setting .demo_mode_switch:checked::before {
+    transform: translateX(18px);
+}
+
+.settings_dialog_setting .demo_mode_switch:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.settings_dialog_setting .demo_mode_switch:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .team_members_label {
     text-align: center;
     padding-top: 10px;

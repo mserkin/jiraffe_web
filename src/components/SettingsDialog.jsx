@@ -128,7 +128,22 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
             <p>Настройки Jiraffe {VERSION}</p>
             <div className={styles.gridContainer}>
                 <div className={styles.settings_dialog_section_header}>
-                    Учетные данные Jira
+                    Настройки Jira
+                </div>
+                <div className={styles.settings_dialog_setting_label}>
+                    <label htmlFor="demo-mode-switch">Демо-режим: </label>
+                </div>
+                <div className={styles.settings_dialog_setting}>
+                    <input
+                        id="demo-mode-switch"
+                        type="checkbox"
+                        role="switch"
+                        className={styles.demo_mode_switch}
+                        checked={demoModeEnabled}
+                        onChange={(event) =>
+                            dispatch(setDemoModeEnabled(event.target.checked))
+                        }
+                    />
                 </div>
                 <div className={styles.settings_dialog_setting_label}>
                     <label> Логин: </label>
@@ -205,18 +220,6 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
                         }
                     />
                 </div>
-                <div className={styles.settings_dialog_setting_label}>
-                    <label>Демо-режим: </label>
-                </div>
-                <div className={styles.settings_dialog_setting}>
-                    <input
-                        type="checkbox"
-                        checked={demoModeEnabled}
-                        onChange={(event) =>
-                            dispatch(setDemoModeEnabled(event.target.checked))
-                        }
-                    />
-                </div>                                
                 <div className={styles.settings_dialog_section_header}>
                     Члены команды
                 </div>
