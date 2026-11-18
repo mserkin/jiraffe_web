@@ -8,6 +8,7 @@ const initialState = {
     jiraServer: '',
     boardId: 0,
     timeout: 300,
+    demoModeEnabled: false,
     project: '',
     teamMembers: [],
 };
@@ -49,7 +50,10 @@ const settingsSlice = createSlice({
         },
         setTimeout: (state, action) => {
             state.timeout = action.payload;
-        },        
+        },    
+        setDemoModeEnabled: (state, action) => {
+            state.demoModeEnabled = action.payload;
+        },                
         setTeamMembers: (state, action) => {
             state.teamMembers = action.payload;
         },        
@@ -61,7 +65,7 @@ const settingsSlice = createSlice({
     },
 });
 
-const { setJiraLogin, setJiraPassword, setJiraServer, setProject, setBoardId, setTimeout, setTeamMembers } = settingsSlice.actions;
+const { setJiraLogin, setJiraPassword, setJiraServer, setProject, setBoardId, setTimeout, setDemoModeEnabled, setTeamMembers } = settingsSlice.actions;
 const selectSettings = (state) => state.settings;
 const selectJiraLogin = (state) => state.settings.jiraLogin;
 const selectJiraPassword = (state) => state.settings.jiraPassword;
@@ -69,6 +73,7 @@ const selectJiraServer = (state) => state.settings.jiraServer;
 const selectProject = (state) => state.settings.project;
 const selectBoardId = (state) => state.settings.boardId;
 const selectTimeout = (state) => state.settings.timeout;
+const selectDemoModeEnabled = (state) => state.settings.demoModeEnabled;
 const selectTeamMembers = (state) => state.settings.teamMembers;
 
 export {
@@ -86,6 +91,8 @@ export {
     selectBoardId,
     setTimeout,
     selectTimeout,        
+    setDemoModeEnabled,
+    selectDemoModeEnabled,        
     setTeamMembers,
     selectTeamMembers
 };

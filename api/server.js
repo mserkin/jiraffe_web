@@ -73,6 +73,7 @@ const SettingsSchema = new Schema(
         project: String,
         boardId: Number,
         timeout: Number,
+        demoModeEnabled: Boolean,
         teamMembers: [MemberSchema],
     },
     { collection: "settings" },

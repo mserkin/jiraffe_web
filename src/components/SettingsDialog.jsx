@@ -24,6 +24,8 @@ import {
     selectBoardId,
     setTimeout,
     selectTimeout,
+    setDemoModeEnabled,
+    selectDemoModeEnabled,
     setTeamMembers,
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
@@ -39,6 +41,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
     const project = useSelector(selectProject);
     const boardId = useSelector(selectBoardId);
     const timeout = useSelector(selectTimeout);
+    const demoModeEnabled = useSelector(selectDemoModeEnabled);
     const teamMembers = useSelector(selectTeamMembers);
 
     // Локальное состояние диалога для хранения динамических данных
@@ -84,6 +87,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
                 project,
                 boardId,
                 timeout,
+                demoModeEnabled,
                 teamMembers: teamMembers.filter((m) => m.login && m.name),
             };
             console.log("PUT /settings");
@@ -96,7 +100,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
                 setError(`Ошибка при подключении к серверу: ${error.message}`),
             );
         }
-    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, timeout, teamMembers]);
+    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, timeout, demoModeEnabled, teamMembers]);
 
     const handleConfirm = async () => {
         // Передаем данные обратно в родительский обработчик «Да»
@@ -200,7 +204,19 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
                             dispatch(setTimeout(event.target.value))
                         }
                     />
-                </div>                
+                </div>
+                <div className={styles.settings_dialog_setting_label}>
+                    <label>Демо-режим: </label>
+                </div>
+                <div className={styles.settings_dialog_setting}>
+                    <input
+                        type="checkbox"
+                        checked={demoModeEnabled}
+                        onChange={(event) =>
+                            dispatch(setDemoModeEnabled(event.target.checked))
+                        }
+                    />
+                </div>                                
                 <div className={styles.settings_dialog_section_header}>
                     Члены команды
                 </div>
