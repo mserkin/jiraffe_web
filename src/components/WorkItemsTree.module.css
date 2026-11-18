@@ -112,7 +112,7 @@
 
 .treeNode[aria-expanded] > .treeRow {
     margin-bottom: 4px;
-    background-color: var(--color-surface);
+    background-color: var(--color-surface-light);
 }
 
 .treeNode[aria-expanded] > .treeRow:hover {
