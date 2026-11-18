@@ -1,38 +1,40 @@
-/* Главный секрет: заставляем ВСЕ элементы на странице 
-   прятать свои отступы внутрь ширины, предотвращая скролл */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* Обнуляем встроенные отступы браузера для страницы */
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden; /* Жесткая страховка от случайного горизонтального скролла */
-}
-
 .App {
   text-align: center;
 }
 
-/* Наша идеальная двухколоночная Grid-сетка */
 .appGrid {
   display: grid;
-  /* Левая колонка строго 420px, правая забирает весь остаток без вылетов */
-  grid-template-columns: 300px minmax(0, 1fr); 
-  gap: 25px;                      /* Четкий зазор между колонками */
-  padding: 20px;                  /* Отступ сетки от краев экрана */
-  align-items: start;             /* Прижимает обе колонки к самому верху */
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
   width: 100%;
 }
 
+.leftColumn {
+  min-width: 0;
+}
 
-/* Контейнер для правой стороны */
 .rightColumn {
   display: flex;
   flex-direction: column;         
-  gap: 15px;                      /* Зазор между Filter и BookList */
+  gap: 18px;
   width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .appGrid {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 680px) {
+  .appGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 12px;
+  }
 }

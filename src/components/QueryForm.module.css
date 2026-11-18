@@ -1,12 +1,13 @@
 .formContainer {
-    background-color: #d0d2d5;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
     padding: 10px 20px 20px 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-card);
     width: 100%; /* Растягиваем на всю ширину правой колонки */
     max-width: 100%; /* Больше никакой фиксированной ширины */
     margin: 0; /* Сбрасываем старый margin */
+    transition: box-shadow var(--transition-ui), border-color var(--transition-ui);
 }
 
 .gridContainer {
@@ -16,19 +17,22 @@
     grid-auto-rows: minmax(20px, auto);
     row-gap: 4px;
     column-gap: 10px;
-    color: darkslategray;
-    background-color: #d0d2d5;
+    color: var(--color-text);
+    background-color: var(--color-surface);
     justify-items: stretch;
     align-items: stretch;
 }
 
 .item {
-    color: darkslategray;
-    background-color: #d0d2d5;
+    color: var(--color-text);
+    background-color: var(--color-surface);
 }
 
 .query_label {
     grid-column: 1 / span 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;
 }
@@ -44,6 +48,9 @@
 
 .epic_label {
     grid-column: 1 / span 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;
 }
@@ -71,8 +78,11 @@
 
 .level_label {
     grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
-    padding: 10px 10px 0px 0px;
+    padding: 0px 10px 0px 0px;
 }
 
 .delete_level_btn {
@@ -95,10 +105,10 @@
     width: 100%;
     font-size: 0.8rem;
     font-style: italic;
-    color: darkslategray;
+    color: var(--color-text-muted);
     line-height: 1.5;
-    height: calc(2.5lh - 10px);
-    min-height: 28px;
+    height: 36px;
+    min-height: 36px;
 }
 
 .level_setup_btn {
@@ -143,15 +153,15 @@
     transform: translate(-50%, -50%);
     max-width: min(90vw, 420px);
     padding: 20px;
-    border: 1px solid #d0d5dd;
-    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
     background: #fff;
     color: #1f2937;
 }
 
 .sprintsErrorDialog::backdrop {
-    background: rgba(15, 23, 42, 0.35);
+    background: rgb(15 23 42 / 48%);
 }
 
 .sprintsErrorDialogButtons {

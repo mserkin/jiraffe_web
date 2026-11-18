@@ -4,18 +4,18 @@
     transform: translate(-50%, -50%);
     z-index: 1000;
     padding: 20px;
-    border: 1px solid #d0d5dd;
-    border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
-    background: #fff;
-    color: #1f2937;    
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    background: var(--color-surface);
+    color: var(--color-text);
     width: min(90vw, 600px);
     max-width: min(90vw, 600px);
     box-sizing: border-box;
 }
 
 .dialog::backdrop {
-    background: rgba(15, 23, 42, 0.35);
+    background: rgb(15 23 42 / 48%);
 }
 
 .dialog_buttons {
@@ -35,7 +35,7 @@
     display: grid;
     grid-template-rows: 60px 60px 60px 60px 60px 60px 60px 60px 60px;
     grid-template-columns: 1fr 4fr 1fr;
-    color: darkslategray;
+    color: var(--color-text);
     justify-items: stretch;
     align-items: stretch;
     grid-template-areas:
@@ -72,6 +72,9 @@
 
 .summary_label {
     grid-area: summary_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;    
 } 
@@ -88,6 +91,9 @@
 
 .type_label {
     grid-area: type_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;        
 } 
@@ -99,7 +105,7 @@
 } 
 
 .type_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -113,6 +119,9 @@
 
 .status_label {
     grid-area: status_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;        
 } 
@@ -124,7 +133,7 @@
 } 
 
 .status_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -137,6 +146,9 @@
 
 .sprint_label {
     grid-area: sprint_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;        
 } 
@@ -148,7 +160,7 @@
 } 
 
 .sprint_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -161,6 +173,9 @@
 
 .creator_label {
     grid-area: creator_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;    
 } 
@@ -172,7 +187,7 @@
 } 
 
 .creator_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -185,6 +200,9 @@
 
 .assignee_label {
     grid-area: assignee_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;    
 } 
@@ -196,7 +214,7 @@
 } 
 
 .assignee_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -209,6 +227,9 @@
 
 .reporter_label {
     grid-area: reporter_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;    
 } 
@@ -220,7 +241,7 @@
 } 
 
 .reporter_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -233,6 +254,9 @@
 
 .link_types_label {
     grid-area: link_types_label;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     text-align: right;
     padding: 0px 10px 0px 0px;    
 } 
@@ -244,7 +268,7 @@
 } 
 
 .link_types_textarea textarea {
-    color: darkslategray;
+    color: var(--color-text);
     font-style: italic;
     font-size: 0.9rem;
 }
@@ -265,6 +289,30 @@
 }
 
 .dialog button {
-    height: 80%;
-    padding: 10px 10px 10px 10px;
+    height: 42px;
+    min-height: 42px;
+    padding: 7px 12px;
+}
+
+.summary_textarea,
+.type_textarea,
+.status_textarea,
+.sprint_textarea,
+.creator_textarea,
+.assignee_textarea,
+.reporter_textarea,
+.link_types_textarea,
+.type_change_button,
+.status_change_button,
+.sprint_change_button,
+.creator_change_button,
+.assignee_change_button,
+.reporter_change_button,
+.link_types_change_button {
+    display: flex;
+    align-items: center;
+}
+
+.dialog textarea {
+    height: 42px;
 }

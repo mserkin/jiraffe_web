@@ -4,46 +4,64 @@ ul {
 }
 
 .toolbar {
-    padding: 10px, 30px;
-    height: 60px;
+    padding: 4px 0;
+    min-height: 52px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap: 20px;
+    align-items: center;
+    gap: 10px;
 }
 
 .toolbarIconItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    width: 56px;
-    height: 56px;
-    padding: 10px;
-    color: darkslategray;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: var(--color-text-muted);
+    transition: color var(--transition-ui), background-color var(--transition-ui), border-color var(--transition-ui), transform var(--transition-ui);
 }
 
 .toolbarIconItemDisabled {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    width: 56px;
-    height: 56px;
-    padding: 10px;
-    color: gray;
+    width: 44px;
+    height: 44px;
+    padding: 8px;
+    color: var(--color-text-muted);
     opacity: 0.5;
     pointer-events: none; /* Disables mouse clicks and hover events */
     cursor: not-allowed;
 }
 
 .toolbarTextItem {
+    display: flex;
+    align-items: center;
     cursor: pointer;
     flex-grow: 1;
-    height: 48px;
-    color: darkslategray;
-    font-size: 1.2rem;
-    padding-top: 10px;
+    min-height: 44px;
+    color: var(--color-text);
+    font-size: 1.125rem;
+    font-weight: 600;
+    padding: 8px 0;
 }
 
 .toolbarIconItem:hover {
-    border: 1px solid #08c;
-    border-radius: 5px;
-    background-color: rgb(119, 194, 255);
+    border-color: #d7e3ff;
+    color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+    transform: translateY(-1px);
+}
+
+.toolbarIconItem:active {
+    transform: translateY(0) scale(0.97);
 }
 
 .query_name_input {

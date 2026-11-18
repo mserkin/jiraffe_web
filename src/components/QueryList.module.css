@@ -1,23 +1,24 @@
 .formContainer {
-    background-color: #f0f2f5;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
     padding: 20px;             /* 20px свободного места со всех четырех сторон */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-card);
     width: 100%;
     max-width: 300px;          /* Ваше отличное ограничение ширины */
     margin: 0;
     box-sizing: border-box;    /* ГАРАНТИРУЕТ, что padding 20px останется ВНУТРИ формы и не раздует её */
+    transition: box-shadow var(--transition-ui), border-color var(--transition-ui);
 }
 
 .formContainer h2 {
-    color: darkslategray;
+    color: var(--color-text);
     margin-top: 0;       
     margin-bottom: 15px;
-    font-size: 24px;
+    font-size: 1.375rem;
     text-align: center;
 }
 
 .emptyQueryListMessage {
-    color: darkslategray;
+    color: var(--color-text-muted);
 }
