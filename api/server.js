@@ -102,12 +102,199 @@ const IssueTypeSchema = new Schema({
 
 const IssueTypesSchema = new Schema([IssueTypeSchema], { collection: "issue-types" });
 
+const JiraMockSchema = new Schema(
+    {
+        method: Schema.Types.Mixed,
+        path: Schema.Types.Mixed,
+        query: Schema.Types.Mixed,
+        body: Schema.Types.Mixed,
+        response: Schema.Types.Mixed,
+    },
+    { collection: "jira-mocks", strict: false },
+);
+
 
 const QueryShortInfo = model("Query", QueryShortInfoSchema);
 const Settings = model("Settings", SettingsSchema);
 const ExportSettings = model("ExportSettings", ExportSettingsSchema);
 const LinkTypes = model("LinkTypes", LinkTypesSchema);
 const IssueTypes = model("IssueTypes", IssueTypesSchema);
+const JiraMock = model("JiraMock", JiraMockSchema);
+
+function matchesMockPath(mockPath, requestPath) {
+    if (mockPath === null || mockPath === undefined) {
+        return true;
+    }
+
+    if (typeof mockPath !== "string") {
+        return false;
+    }
+
+    const mockSegments = mockPath.split("/");
+    const requestSegments = requestPath.split("/");
+
+    return (
+        mockSegments.length === requestSegments.length &&
+        mockSegments.every(
+            (segment, index) =>
+                segment.startsWith(":") || segment === requestSegments[index],
+        )
+    );
+}
+
+function normalizeMockQuery(query) {
+    if (typeof query === "string") {
+        return [...new URLSearchParams(query.replace(/^\?/, "")).entries()]
+            .sort(([keyA, valueA], [keyB, valueB]) =>
+                keyA.localeCompare(keyB) || valueA.localeCompare(valueB),
+            );
+    }
+
+    if (query && typeof query === "object" && !Array.isArray(query)) {
+        return Object.entries(query)
+            .flatMap(([key, value]) =>
+                (Array.isArray(value) ? value : [value]).map((item) => [
+                    key,
+                    String(item),
+                ]),
+            )
+            .sort(([keyA, valueA], [keyB, valueB]) =>
+                keyA.localeCompare(keyB) || valueA.localeCompare(valueB),
+            );
+    }
+
+    return null;
+}
+
+function matchesMockQuery(mockQuery, requestUrl) {
+    if (mockQuery === null || mockQuery === undefined) {
+        return true;
+    }
+
+    const requestQuery = normalizeMockQuery(
+        new URL(requestUrl, "http://localhost").searchParams.toString(),
+    );
+    const expectedQuery = normalizeMockQuery(mockQuery);
+
+    return (
+        expectedQuery !== null &&
+        JSON.stringify(expectedQuery) === JSON.stringify(requestQuery)
+    );
+}
+
+function normalizeMockBody(value) {
+    if (value === null || value === undefined) {
+        return value;
+    }
+
+    if (typeof value === "string") {
+        try {
+            return normalizeMockBody(JSON.parse(value));
+        } catch {
+            return value;
+        }
+    }
+
+    if (Array.isArray(value)) {
+        return value.map(normalizeMockBody);
+    }
+
+    if (typeof value === "object") {
+        return Object.keys(value)
+            .sort()
+            .reduce((normalized, key) => {
+                normalized[key] = normalizeMockBody(value[key]);
+                return normalized;
+            }, {});
+    }
+
+    return value;
+}
+
+function matchesMockBody(mockBody, requestBody, method) {
+    if (method !== "POST") {
+        return true;
+    }
+
+    if (mockBody === null || mockBody === undefined) {
+        return true;
+    }
+
+    return (
+        JSON.stringify(normalizeMockBody(mockBody)) ===
+        JSON.stringify(normalizeMockBody(requestBody))
+    );
+}
+
+async function findJiraMock(req, demoModeEnabled) {
+    if (!demoModeEnabled) {
+        return null;
+    }
+
+    const mocks = await JiraMock.find({
+        $or: [{ method: req.method }, { method: null }],
+    });
+    const matchingMocks = mocks.filter((mock) => {
+        const comparisons = {
+            method:
+                mock.method === null ||
+                mock.method === undefined ||
+                mock.method === req.method,
+            path: matchesMockPath(mock.path, req.path),
+            query: matchesMockQuery(mock.query, req.originalUrl),
+            body: matchesMockBody(mock.body, req.body, req.method),
+        };
+        const matched = Object.values(comparisons).every(Boolean);
+
+        console.log(
+            "[jira-mock] comparison",
+            JSON.stringify(
+                {
+                    mockId: mock._id,
+                    mock: {
+                        method: mock.method,
+                        path: mock.path,
+                        query: mock.query,
+                        body: mock.body,
+                    },
+                    request: {
+                        method: req.method,
+                        path: req.path,
+                        query: req.query,
+                        body: req.body,
+                    },
+                    comparisons,
+                    result: matched ? "matched" : "not matched",
+                },
+                (_key, value) =>
+                    value === undefined ? "<undefined>" : value,
+            ),
+        );
+
+        return matched;
+    });
+
+    matchingMocks.sort((first, second) => {
+        const specificity = (mock) =>
+            ["method", "path", "query", "body"].filter(
+                (field) => mock[field] !== null && mock[field] !== undefined,
+            ).length;
+
+        return specificity(second) - specificity(first);
+    });
+
+    return matchingMocks[0] ?? null;
+}
+
+async function respondWithJiraMock(req, res, demoModeEnabled) {
+    const mock = await findJiraMock(req, demoModeEnabled);
+    if (!mock) {
+        return false;
+    }
+
+    res.status(200).json(mock.response);
+    return true;
+}
 
 async function getQueryList(res) {
     try {
@@ -424,6 +611,14 @@ async function getIssuesByJql(req, res) {
     try {
         const { jql } = req.query;
 
+        const settings = await Settings.findOne({}, { demoModeEnabled: 1 });
+        if (
+            settings?.demoModeEnabled &&
+            (await respondWithJiraMock(req, res, settings.demoModeEnabled))
+        ) {
+            return;
+        }
+
         if (!jql) {
             return res.status(400).json({ error: "Параметр 'jql' обязателен в query-строке запроса." });
         }
@@ -460,15 +655,24 @@ async function startSearch(req, res) {
     const requestStartedAt = Date.now();
     try {
         const { jql } = req.body; // или req.query
-        if (!jql) return res.status(400).json({ error: "Параметр 'jql' обязателен." });
-
         const settings = await Settings.findOne(
             {},
             { _id: 0, "teamMembers._id": 0 },
         );
+        if (
+            settings?.demoModeEnabled &&
+            (await respondWithJiraMock(req, res, settings.demoModeEnabled))
+        ) {
+            return;
+        }
+
+        if (!jql) {
+            return res.status(400).json({ error: "Параметр 'jql' обязателен." });
+        }
         if (!settings) {
             return res.status(500).json({ error: "Настройки не найдены." });
         }
+
         const timeoutSeconds = Number(settings.timeout);
         if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
             return res
@@ -518,23 +722,35 @@ async function startSearch(req, res) {
 }
 
 async function getSearchStatus(req, res) {
-    const { taskId } = req.params;
-    const task = activeTasks.get(taskId);
+    try {
+        const settings = await Settings.findOne({}, { demoModeEnabled: 1 });
+        if (
+            settings?.demoModeEnabled &&
+            (await respondWithJiraMock(req, res, settings.demoModeEnabled))
+        ) {
+            return;
+        }
 
-    if (!task) {
-        return res.status(404).json({ error: "Задача не найдена или устарела" });
+        const { taskId } = req.params;
+        const task = activeTasks.get(taskId);
+
+        if (!task) {
+            return res.status(404).json({ error: "Задача не найдена или устарела" });
+        }
+
+        return res.status(200).json({
+            status: task.status,
+            progress: task.issues.length,
+            total: task.total,
+            error: task.error,
+            issues: task.issues
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            error: `Ошибка сервера при получении статуса поиска: ${error.message}`,
+        });
     }
-
-    // Возвращаем текущее состояние (фронтенд увидит статус и сколько задач уже скачано)
-    return res.status(200).json({
-        status: task.status,
-        progress: task.issues.length,
-        total: task.total,
-        error: task.error,
-        issues: task.issues // Можно отдавать накопленный массив
-    });
-    
-    // Идея: Если статус "completed" или "cancelled", после этого ответа можно сделать activeTasks.delete(taskId), чтобы очистить память
 }
 
 async function cancelSearch(req, res) {
