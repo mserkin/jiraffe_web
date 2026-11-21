@@ -180,6 +180,7 @@ export async function expandIssueTree(
     searchIssuesByJql,
     shouldStop = () => false,
     onUpdate = () => {},
+    epicViewType = "linkedAndChildren",
 ) {
     let parents = issues;
 
@@ -190,22 +191,21 @@ export async function expandIssueTree(
 
         const filters = levelFilters[levelIndex] ?? {};
         const keysByParent = parents.map((parent) =>
-            getLinkedIssueKeys(parent, filters, linkTypes),
+            epicViewType === "childrenOnly"
+                ? []
+                : getLinkedIssueKeys(parent, filters, linkTypes),
         );
         const candidateKeys = [
             ...new Set(keysByParent.flat()),
         ];
-
-        if (candidateKeys.length === 0) {
-            for (const parent of parents) {
-                parent.children = [];
-            }
-            break;
-        }
-
         const filterJql = buildLevelFilterJql(filters, issueTypes);
         const matchingIssues = new Map();
         let nextParents = [];
+
+        for (const parent of parents) {
+            parent.children = [];
+            parent.epicChildren = [];
+        }
 
         for (let offset = 0; offset < candidateKeys.length; offset += 100) {
             if (shouldStop()) {
@@ -246,7 +246,42 @@ export async function expandIssueTree(
                 }
                 parent.children = children;
             }
+
             onUpdate(issues);
+        }
+
+        for (const parent of parents) {
+            if (
+                epicViewType !== "linkedOnly" &&
+                parent.fields?.issuetype?.name?.toLowerCase() === "epic" &&
+                parent.key
+            ) {
+                if (shouldStop()) {
+                    return issues;
+                }
+
+                const epicLinkClause = `"Epic Link" = ${quoteJqlValue(parent.key)}`;
+                const jql = filterJql
+                    ? `${epicLinkClause} AND (${filterJql})`
+                    : epicLinkClause;
+                const foundIssues = await searchIssuesByJql(jql);
+
+                if (!Array.isArray(foundIssues)) {
+                    throw new Error(
+                        "Сервер вернул некорректный список принадлежащих элементов.",
+                    );
+                }
+
+                parent.epicChildren = foundIssues
+                    .filter((foundIssue) => foundIssue?.key)
+                    .map((foundIssue) => {
+                        const child = { ...foundIssue, children: [] };
+                        nextParents.push(child);
+                        return child;
+                    });
+
+                onUpdate(issues);
+            }
         }
 
         parents = nextParents;

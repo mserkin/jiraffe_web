@@ -35,6 +35,22 @@ const ResultTreePaneContent = ({ issues, progress, total }) => {
         const toTreeNode = (issue, parentId, index) => {
             const issueKey = issue.key ?? issue.id ?? index;
             const id = `${parentId}/${issueKey}`;
+            const children = (issue.children ?? []).map((child, childIndex) =>
+                toTreeNode(child, id, childIndex),
+            );
+            const epicChildren = (issue.epicChildren ?? []).map(
+                (child, childIndex) => toTreeNode(child, `${id}/epic-children`, childIndex),
+            );
+            if (epicChildren.length > 0) {
+                children.push({
+                    id: `${id}/epic-children`,
+                    label: "Принадлежащие элементы",
+                    type: "group",
+                    icon: "children.png",
+                    children: epicChildren,
+                });
+            }
+
             return {
                 id,
                 issue,
@@ -49,9 +65,7 @@ const ResultTreePaneContent = ({ issues, progress, total }) => {
                         (issueType) =>
                             issueType.name === issue.fields?.issuetype?.name,
                     )?.icon,
-                children: (issue.children ?? []).map((child, childIndex) =>
-                    toTreeNode(child, id, childIndex),
-                ),
+                children,
             };
         };
 

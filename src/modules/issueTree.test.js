@@ -253,3 +253,145 @@ test("expandIssueTree publishes children after each backend batch", async () => 
     );
     assert.deepEqual(publishedChildCounts, [1, 2]);
 });
+
+test("expandIssueTree loads Epic Link children using their configured level filter", async () => {
+    const root = {
+        key: "EPIC-1",
+        fields: { issuetype: { name: "Epic" }, issuelinks: [] },
+    };
+    const requestedJql = [];
+
+    await expandIssueTree(
+        [root],
+        [{}, { summaryFilter: "second level" }, { summaryFilter: "third level" }],
+        [],
+        [],
+        async (jql) => {
+            requestedJql.push(jql);
+            if (jql === '"Epic Link" = "EPIC-1" AND (summary ~ "second level")') {
+                return [
+                    {
+                        key: "STORY-1",
+                        fields: {
+                            summary: "second level",
+                            issuetype: { name: "Story" },
+                            issuelinks: [
+                                {
+                                    type: { id: "7" },
+                                    outwardIssue: { key: "TASK-1" },
+                                },
+                            ],
+                        },
+                    },
+                ];
+            }
+            if (jql === 'key in ("TASK-1") AND (summary ~ "third level")') {
+                return [{ key: "TASK-1", fields: { summary: "third level" } }];
+            }
+            return [];
+        },
+    );
+
+    assert.deepEqual(requestedJql, [
+        '"Epic Link" = "EPIC-1" AND (summary ~ "second level")',
+        'key in ("TASK-1") AND (summary ~ "third level")',
+    ]);
+    assert.deepEqual(
+        root.epicChildren.map((child) => child.key),
+        ["STORY-1"],
+    );
+    assert.deepEqual(
+        root.epicChildren[0].children.map((child) => child.key),
+        ["TASK-1"],
+    );
+});
+
+test("expandIssueTree does not load Epic Link children beyond configured levels", async () => {
+    const root = {
+        key: "ROOT-1",
+        fields: {
+            issuetype: { name: "Task" },
+            issuelinks: [{ type: { id: "7" }, outwardIssue: { key: "EPIC-1" } }],
+        },
+    };
+    const requestedJql = [];
+
+    await expandIssueTree(
+        [root],
+        [{}, {}],
+        [{ id: "7", direction: "outward" }],
+        [],
+        async (jql) => {
+            requestedJql.push(jql);
+            return [
+                {
+                    key: "EPIC-1",
+                    fields: { issuetype: { name: "Epic" }, issuelinks: [] },
+                },
+            ];
+        },
+    );
+
+    assert.deepEqual(requestedJql, ['key in ("EPIC-1")']);
+    assert.deepEqual(root.children.map((child) => child.key), ["EPIC-1"]);
+    assert.equal(root.children[0].epicChildren, undefined);
+});
+
+test("expandIssueTree skips Epic Link loading for linkedOnly view", async () => {
+    const epic = {
+        key: "EPIC-1",
+        fields: { issuetype: { name: "Epic" }, issuelinks: [] },
+    };
+    const requestedJql = [];
+
+    await expandIssueTree(
+        [epic],
+        [{}, {}],
+        [],
+        [],
+        async (jql) => {
+            requestedJql.push(jql);
+            return [];
+        },
+        undefined,
+        undefined,
+        "linkedOnly",
+    );
+
+    assert.deepEqual(requestedJql, []);
+    assert.deepEqual(epic.epicChildren, []);
+});
+
+test("expandIssueTree loads only Epic Link children for childrenOnly view", async () => {
+    const epic = {
+        key: "EPIC-1",
+        fields: {
+            issuetype: { name: "Epic" },
+            issuelinks: [{ type: { id: "7" }, outwardIssue: { key: "LINKED-1" } }],
+        },
+    };
+    const requestedJql = [];
+
+    await expandIssueTree(
+        [epic],
+        [{}, { summaryFilter: "child level" }],
+        [{ id: "7", direction: "outward" }],
+        [],
+        async (jql) => {
+            requestedJql.push(jql);
+            if (jql === '"Epic Link" = "EPIC-1" AND (summary ~ "child level")') {
+                return [{ key: "CHILD-1", fields: { summary: "child level" } }];
+            }
+            return [];
+        },
+        undefined,
+        undefined,
+        "childrenOnly",
+    );
+
+    assert.deepEqual(requestedJql, [
+        '"Epic Link" = "EPIC-1" AND (summary ~ "child level")',
+    ]);
+    assert.deepEqual(epic.children, []);
+    assert.deepEqual(epic.epicChildren.map((child) => child.key), ["CHILD-1"]);
+});

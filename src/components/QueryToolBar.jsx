@@ -389,6 +389,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         const cloneIssueTree = (issue) => ({
             ...issue,
             children: (issue.children ?? []).map(cloneIssueTree),
+            epicChildren: (issue.epicChildren ?? []).map(cloneIssueTree),
         });
         const publishSearchResults = () => {
             dispatch(
@@ -523,6 +524,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                                 publishSearchResults();
                             }
                         },
+                        openQuery.epicViewType ?? "linkedAndChildren",
                     )
                         .then(() => {
                             if (
