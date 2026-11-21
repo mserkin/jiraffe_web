@@ -569,12 +569,19 @@ async function getIssueTypes(res) {
     }
 }
 
-async function getSprints(res) {
+async function getSprints(req, res) {
     try {
         const settings = await Settings.findOne(
             {},
             { _id: 0, "teamMembers._id": 0 },
         );
+
+        if (
+            settings?.demoModeEnabled &&
+            (await respondWithJiraMock(req, res, settings.demoModeEnabled))
+        ) {
+            return;
+        }
 
         const config = {
             baseUrl: settings.jiraServer,
@@ -900,7 +907,7 @@ app.get("/link-types", async (req, res) => {
 });
 
 app.get("/sprints", async (req, res) => {
-    getSprints(res);
+    getSprints(req, res);
 });
 
 app.get("/search", async (req, res) => {
