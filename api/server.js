@@ -286,13 +286,16 @@ async function findJiraMock(req, demoModeEnabled) {
     return matchingMocks[0] ?? null;
 }
 
-async function respondWithJiraMock(req, res, demoModeEnabled) {
+async function respondWithJiraMock(req, res, demoModeEnabled, transformResponse) {
     const mock = await findJiraMock(req, demoModeEnabled);
     if (!mock) {
         return false;
     }
 
-    res.status(200).json(mock.response);
+    const response = transformResponse
+        ? transformResponse(mock.response)
+        : mock.response;
+    res.status(200).json(response);
     return true;
 }
 
@@ -569,6 +572,40 @@ async function getIssueTypes(res) {
     }
 }
 
+function filterAndSortSprints(sprints) {
+    if (!Array.isArray(sprints)) {
+        return [];
+    }
+
+    const now = new Date();
+    const cutoff = new Date(now);
+    const cutoffTime = cutoff.getTime();
+    cutoff.setMonth(cutoff.getMonth() - 3);
+    console.log(cutoff);
+    console.log(cutoffTime);
+
+    return sprints
+        .filter((sprint) => {
+            if (!sprint?.startDate) {
+                return false;
+            }
+
+            const startDate = new Date(sprint.startDate);
+            const startTime = startDate.getTime();
+            const ok = !Number.isNaN(startDate.getTime()) && startTime >= cutoffTime;
+            console.log(`${sprint.name} date: ${startDate} time: ${startTime} is ${ok}`)
+        })
+        .sort((first, second) => {
+            const firstDistance = Math.abs(
+                new Date(first.startDate).getTime() - now.getTime(),
+            );
+            const secondDistance = Math.abs(
+                new Date(second.startDate).getTime() - now.getTime(),
+            );
+            return firstDistance - secondDistance;
+        });
+}
+
 async function getSprints(req, res) {
     try {
         const settings = await Settings.findOne(
@@ -578,7 +615,16 @@ async function getSprints(req, res) {
 
         if (
             settings?.demoModeEnabled &&
-            (await respondWithJiraMock(req, res, settings.demoModeEnabled))
+            (await respondWithJiraMock(
+                req,
+                res,
+                settings.demoModeEnabled,
+                (response) => filterAndSortSprints(
+                    Array.isArray(response)
+                        ? response
+                        : response?.values ?? [],
+                ),
+            ))
         ) {
             return;
         }
@@ -598,7 +644,7 @@ async function getSprints(req, res) {
         const sprints = await jira1.request(`/rest/agile/1.0/board/${boardId}/sprint`); //?state=active,future`);
         console.log("Спринты получены:", sprints.values);
 
-        return res.status(200).json(sprints.values);
+        return res.status(200).json(filterAndSortSprints(sprints.values));
     } catch (error) {
         console.error(error);
         return res
