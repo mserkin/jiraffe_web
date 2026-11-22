@@ -595,7 +595,7 @@ async function getSprints(req, res) {
     
         // Запрашиваем спринты, используя метод созданного подключения
         const boardId = settings.boardId;
-        const sprints = await jira1.request(`/rest/agile/1.0/board/${boardId}/sprint?state=active,future`);
+        const sprints = await jira1.request(`/rest/agile/1.0/board/${boardId}/sprint`); //?state=active,future`);
         console.log("Спринты получены:", sprints.values);
 
         return res.status(200).json(sprints.values);
