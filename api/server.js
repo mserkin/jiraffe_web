@@ -579,29 +579,47 @@ function filterAndSortSprints(sprints) {
 
     const now = new Date();
     const cutoff = new Date(now);
-    const cutoffTime = cutoff.getTime();
+    const dayOfMonth = cutoff.getDate();
+    cutoff.setDate(1);
     cutoff.setMonth(cutoff.getMonth() - 3);
-    console.log(cutoff);
-    console.log(cutoffTime);
+    const lastDayOfCutoffMonth = new Date(
+        cutoff.getFullYear(),
+        cutoff.getMonth() + 1,
+        0,
+    ).getDate();
+    cutoff.setDate(Math.min(dayOfMonth, lastDayOfCutoffMonth));
+    const cutoffTime = cutoff.getTime();
 
     return sprints
         .filter((sprint) => {
-            if (!sprint?.startDate) {
-                return false;
+            if (!sprint?.startDate && sprint.state == "future") {
+                return true;
             }
 
             const startDate = new Date(sprint.startDate);
             const startTime = startDate.getTime();
-            const ok = !Number.isNaN(startDate.getTime()) && startTime >= cutoffTime;
-            console.log(`${sprint.name} date: ${startDate} time: ${startTime} is ${ok}`)
+            return !Number.isNaN(startTime) && startTime >= cutoffTime;
         })
         .sort((first, second) => {
-            const firstDistance = Math.abs(
-                new Date(first.startDate).getTime() - now.getTime(),
-            );
-            const secondDistance = Math.abs(
-                new Date(second.startDate).getTime() - now.getTime(),
-            );
+            const firstTime = first?.startDate
+                ? new Date(first.startDate).getTime()
+                : Number.NaN;
+            const secondTime = second?.startDate
+                ? new Date(second.startDate).getTime()
+                : Number.NaN;
+            const firstHasDate = Number.isFinite(firstTime);
+            const secondHasDate = Number.isFinite(secondTime);
+
+            if (!firstHasDate || !secondHasDate) {
+                return firstHasDate === secondHasDate
+                    ? 0
+                    : firstHasDate
+                      ? -1
+                      : 1;
+            }
+
+            const firstDistance = Math.abs(firstTime - now.getTime());
+            const secondDistance = Math.abs(secondTime - now.getTime());
             return firstDistance - secondDistance;
         });
 }
@@ -641,10 +659,37 @@ async function getSprints(req, res) {
     
         // Запрашиваем спринты, используя метод созданного подключения
         const boardId = settings.boardId;
-        const sprints = await jira1.request(`/rest/agile/1.0/board/${boardId}/sprint`); //?state=active,future`);
-        console.log("Спринты получены:", sprints.values);
+        const pageSize = 50;
+        let startAt = 0;
+        let hasMore = true;
+        const sprints = [];
 
-        return res.status(200).json(filterAndSortSprints(sprints.values));
+        while (hasMore) {
+            const response = await jira1.request(
+                `/rest/agile/1.0/board/${boardId}/sprint?startAt=${startAt}&maxResults=${pageSize}`,
+            );
+            const chunk = Array.isArray(response?.values) ? response.values : [];
+
+            if (chunk.length === 0) {
+                hasMore = false;
+                continue;
+            }
+
+            sprints.push(...chunk);
+            startAt += chunk.length;
+
+            if (response?.isLast === true) {
+                hasMore = false;
+            } else if (Number.isFinite(response?.total)) {
+                hasMore = startAt < response.total;
+            } else {
+                hasMore = chunk.length === pageSize;
+            }
+        }
+
+        console.log("Спринты получены:", sprints);
+
+        return res.status(200).json(filterAndSortSprints(sprints));
     } catch (error) {
         console.error(error);
         return res
