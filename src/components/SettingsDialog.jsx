@@ -37,6 +37,8 @@ import axios from "axios";
 const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
     const dispatch = useDispatch();
     const dialogRef = useRef(null);
+    const initialThemeRef = useRef(null);
+    const isConfirmedRef = useRef(false);
     const jiraLogin = useSelector(selectJiraLogin);
     const jiraPassword = useSelector(selectJiraPassword);
     const jiraServer = useSelector(selectJiraServer);
@@ -56,6 +58,8 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
             console.log(
                 `showModal(${data ? JSON.stringify(data) : "null"}) executed`,
             );
+            initialThemeRef.current = theme;
+            isConfirmedRef.current = false;
             setDialogData(data); // Сохраняем переданные данные
             const url = BACKEND_URI + SETTINGS_PATH_PART;
             console.log("Fetching settings from url: " + url);
@@ -71,12 +75,19 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
 
     const handleDialogClose = (event) => {
         event.stopPropagation();
+        if (initialThemeRef.current !== null) {
+            dispatch(setTheme(initialThemeRef.current));
+        }
+        isConfirmedRef.current = true;
         dialogRef.current?.close();
         setDialogData(null);
         onCancel();
     };
 
     const handleClose = () => {
+        if (!isConfirmedRef.current && initialThemeRef.current !== null) {
+            dispatch(setTheme(initialThemeRef.current));
+        }
         onClosed();
     };
 
@@ -108,6 +119,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
 
     const handleConfirm = async () => {
         // Передаем данные обратно в родительский обработчик «Да»
+        isConfirmedRef.current = true;
         onOk(dialogData);
         await updateSettings();
         dialogRef.current?.close();

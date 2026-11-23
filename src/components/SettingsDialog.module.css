@@ -74,6 +74,11 @@
     width: 100%;
 }
 
+.settings_dialog_setting select {
+    font-size: 1rem;
+    width: 100%;
+}
+
 .settings_dialog_setting .demo_mode_switch {
     appearance: none;
     position: relative;
