@@ -156,8 +156,8 @@
     border: 1px solid var(--color-border);
     border-radius: 16px;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
-    background: #fff;
-    color: #1f2937;
+    background: var(--color-surface);
+    color: var(--color-text);
 }
 
 .sprintsErrorDialog::backdrop {

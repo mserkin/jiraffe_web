@@ -11,6 +11,7 @@ const initialState = {
     demoModeEnabled: false,
     project: '',
     teamMembers: [],
+    theme: localStorage.getItem('jiraffe-theme') === 'dark' ? 'dark' : 'light',
 };
 
 const fetchSettings = createAsyncThunk(
@@ -56,16 +57,30 @@ const settingsSlice = createSlice({
         },                
         setTeamMembers: (state, action) => {
             state.teamMembers = action.payload;
-        },        
+        },
+        setTheme: (state, action) => {
+            state.theme = action.payload === 'dark' ? 'dark' : 'light';
+            localStorage.setItem('jiraffe-theme', state.theme);
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(fetchSettings.fulfilled, (state, action) => {
-            return action.payload;
+            const theme =
+                action.payload?.theme ??
+                state.theme ??
+                (localStorage.getItem('jiraffe-theme') === 'dark' ? 'dark' : 'light');
+            const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+            localStorage.setItem('jiraffe-theme', normalizedTheme);
+            return {
+                ...state,
+                ...action.payload,
+                theme: normalizedTheme,
+            };
         });
     },
 });
 
-const { setJiraLogin, setJiraPassword, setJiraServer, setProject, setBoardId, setTimeout, setDemoModeEnabled, setTeamMembers } = settingsSlice.actions;
+const { setJiraLogin, setJiraPassword, setJiraServer, setProject, setBoardId, setTimeout, setDemoModeEnabled, setTeamMembers, setTheme } = settingsSlice.actions;
 const selectSettings = (state) => state.settings;
 const selectJiraLogin = (state) => state.settings.jiraLogin;
 const selectJiraPassword = (state) => state.settings.jiraPassword;
@@ -75,6 +90,7 @@ const selectBoardId = (state) => state.settings.boardId;
 const selectTimeout = (state) => state.settings.timeout;
 const selectDemoModeEnabled = (state) => state.settings.demoModeEnabled;
 const selectTeamMembers = (state) => state.settings.teamMembers;
+const selectTheme = (state) => state.settings.theme;
 
 export {
     selectSettings, 
@@ -94,7 +110,9 @@ export {
     setDemoModeEnabled,
     selectDemoModeEnabled,        
     setTeamMembers,
-    selectTeamMembers
+    selectTeamMembers,
+    setTheme,
+    selectTheme
 };
 
 export default settingsSlice.reducer;

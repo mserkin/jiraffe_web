@@ -25,6 +25,23 @@
   --transition-ui: 160ms ease;
 }
 
+:root[data-theme='dark'] {
+  color: #dbe7f7;
+  background: #0b1220;
+  --color-bg: #0b1220;
+  --color-surface-light: #172033;
+  --color-surface: #111827;
+  --color-surface-muted: #1e293b;
+  --color-border: #334155;
+  --color-text: #dbe7f7;
+  --color-text-muted: #a8b8cf;
+  --color-accent: #6092ff;
+  --color-accent-hover: #7ba6ff;
+  --color-accent-soft: #1b2b4a;
+  --color-focus: #82aaff;
+  --shadow-card: 0 12px 32px rgb(0 0 0 / 38%), 0 2px 6px rgb(0 0 0 / 24%);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -50,6 +67,12 @@ body {
   line-height: inherit;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme='dark'] body {
+  background:
+    radial-gradient(ellipse at 75% -20%, rgb(96 146 255 / 12%), transparent 48%),
+    linear-gradient(145deg, #111827 0%, #0b1220 62%);
 }
 
 button,
@@ -218,4 +241,34 @@ dialog[open]::backdrop {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+:root[data-theme='dark'] button {
+  border-color: var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+}
+
+:root[data-theme='dark'] button:hover:not(:disabled) {
+  border-color: #49627f;
+  background-color: #263449;
+}
+
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] select,
+:root[data-theme='dark'] textarea {
+  border-color: var(--color-border);
+  color: var(--color-text);
+  background-color: var(--color-surface-light);
+}
+
+:root[data-theme='dark'] input::placeholder,
+:root[data-theme='dark'] textarea::placeholder {
+  color: #8394aa;
+}
+
+:root[data-theme='dark'] dialog {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
 }

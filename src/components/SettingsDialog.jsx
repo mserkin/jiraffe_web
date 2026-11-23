@@ -28,6 +28,8 @@ import {
     selectDemoModeEnabled,
     setTeamMembers,
     selectTeamMembers,
+    setTheme,
+    selectTheme,
 } from "../redux/slices/settingsSlice";
 import { setError } from "../redux/slices/errorSlice";
 import axios from "axios";
@@ -43,6 +45,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
     const timeout = useSelector(selectTimeout);
     const demoModeEnabled = useSelector(selectDemoModeEnabled);
     const teamMembers = useSelector(selectTeamMembers);
+    const theme = useSelector(selectTheme);
 
     // Локальное состояние диалога для хранения динамических данных
     const [dialogData, setDialogData] = useState(null);
@@ -89,6 +92,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
                 timeout,
                 demoModeEnabled,
                 teamMembers: teamMembers.filter((m) => m.login && m.name),
+                theme,
             };
             console.log("PUT /settings");
             await axios.put(
@@ -100,7 +104,7 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
                 setError(`Ошибка при подключении к серверу: ${error.message}`),
             );
         }
-    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, timeout, demoModeEnabled, teamMembers]);
+    }, [dispatch, jiraLogin, jiraPassword, jiraServer, project, boardId, timeout, demoModeEnabled, teamMembers, theme]);
 
     const handleConfirm = async () => {
         // Передаем данные обратно в родительский обработчик «Да»
@@ -127,6 +131,24 @@ const SettingsDialog = forwardRef(({ onOk, onCancel, onClosed }, ref) => {
         >
             <p>Настройки Jiraffe {VERSION}</p>
             <div className={styles.gridContainer}>
+                <div className={styles.settings_dialog_section_header}>
+                    Внешний вид
+                </div>
+                <div className={styles.settings_dialog_setting_label}>
+                    <label htmlFor="theme-select">Тема: </label>
+                </div>
+                <div className={styles.settings_dialog_setting}>
+                    <select
+                        id="theme-select"
+                        value={theme}
+                        onChange={(event) =>
+                            dispatch(setTheme(event.target.value))
+                        }
+                    >
+                        <option value="light">Светлая</option>
+                        <option value="dark">Темная</option>
+                    </select>
+                </div>
                 <div className={styles.settings_dialog_section_header}>
                     Настройки Jira
                 </div>

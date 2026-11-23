@@ -75,6 +75,7 @@ const SettingsSchema = new Schema(
         timeout: Number,
         demoModeEnabled: Boolean,
         teamMembers: [MemberSchema],
+        theme: { type: String, enum: ["light", "dark"], default: "light" },
     },
     { collection: "settings" },
 );
