@@ -64,6 +64,7 @@ const QueryListItem = ({
         setQueryName(name);
         textInputDialogRef.current?.showModal({
             prompt: "Введите название нового запроса:",
+            requestName: name,
             pendingAction: PendingAction.CLONE,
         });
     };
@@ -72,6 +73,7 @@ const QueryListItem = ({
         setQueryName(name);
         textInputDialogRef.current?.showModal({
             prompt: "Введите новое название запроса:",
+            requestName: name,
             pendingAction: PendingAction.RENAME,
         });
     };

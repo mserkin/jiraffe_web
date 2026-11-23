@@ -94,6 +94,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
     const handleEditNameClick = async (event) => {
         textInputDialogRef.current?.showModal({
             prompt: "Введите новое название запроса:",
+            requestName: openQuery.name,
             pendingAction: PendingAction.CHANGE_NAME,
         });
     };
