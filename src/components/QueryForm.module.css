@@ -78,6 +78,7 @@
 
 .level_label {
     grid-column: 2;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -87,6 +88,7 @@
 
 .delete_level_btn {
     grid-column: 1;
+    height: 36px;
     margin-right: 10px;
 }
 
@@ -98,11 +100,14 @@
 
 .level_settings {
     grid-column: 3;
+    height: 36px;
     margin-right: 10px;
 }
 
 .level_settings textarea {
     width: 100%;
+    margin: 0;
+    box-sizing: border-box;
     font-size: 0.8rem;
     font-style: italic;
     color: var(--color-text-muted);
