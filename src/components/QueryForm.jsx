@@ -8,6 +8,7 @@ import {
     selectOpenQuery,
     setQueryText,
     setProject,
+    setCountLimit,
     setEpicViewType,
     selectLevelFilters,
     setLevelFilters,
@@ -212,6 +213,13 @@ const QueryForm = () => {
         dispatch(clearSearchResults());
     };
 
+    const handleCountLimitChanged = (event) => {
+        console.log("handleCountLimitChanged");
+        dispatch(setCountLimit(event.target.value));
+        dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
+    };
+
     const handleLevelSettingsApply = (dialogData) => {
         if (!dialogData || dialogData.levelIndex === undefined) {
             return;
@@ -262,6 +270,27 @@ const QueryForm = () => {
                             onChange={handleQueryTextChanged}
                         />
                     </div>
+                    <div className={`${styles.item} ${styles.maxCount_label}`}>
+                        Лимит
+                    </div>
+                    <div className={`${styles.item} ${styles.maxCount_input}`}>
+                        <select
+                            id="maxCount_input"
+                            name="select"
+                            value={
+                                openQuery.countLimit
+                                    ? openQuery.countLimit
+                                    : 0
+                            }
+                            onChange={handleCountLimitChanged}
+                        >
+                            <option value="0">Любое</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>                    
                     <div className={`${styles.item} ${styles.epic_label}`}>
                         Показывать
                     </div>

@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { MONGO_LOGIN, MONGO_PASSWORD } from "./credits.js";
 import JiraClient from "./jira_client.js";
 import { v4 as uuidv4 } from 'uuid'; // Установите через npm i uuid для генерации ID задач
+import { count } from "node:console";
 
 // Хранилище для фоновых задач
 const activeTasks = new Map();
@@ -46,6 +47,7 @@ const QueryShortInfoSchema = new Schema(
         name: String,
         queryText: String,
         project: String,
+        countLimit: Number,
         epicViewType: String,
         levelFilters: [LevelFilterSchema],
     },

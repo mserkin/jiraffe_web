@@ -149,6 +149,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     name,
                     project: openQuery.project,
                     queryText: openQuery.queryText,
+                    countLimit: openQuery.countLimit,
                     epicViewType: openQuery.epicViewType,
                     levelFilters: openQuery.levelFilters,
                 };
@@ -182,7 +183,9 @@ const QueryToolBar = ({ settingsDialogRef }) => {
             const updatedQuery = {
                 id: openQuery.id,
                 name: openQuery.name,
+                project: openQuery.project,
                 queryText: openQuery.queryText,
+                countLimit: openQuery.countLimit,
                 epicViewType: openQuery.epicViewType,
                 levelFilters: openQuery.levelFilters,
             };

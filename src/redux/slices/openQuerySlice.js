@@ -9,6 +9,7 @@ const initialState = {
     name: null,
     queryText: null,
     project: null,
+    countLimit: 0,
 };
 
 const fetchQuery = createAsyncThunk(
@@ -42,6 +43,9 @@ const openQuerySlice = createSlice({
         },
         setProject: (state, action) => {
             state.project = action.payload;
+        },
+        setCountLimit: (state, action) => {
+            state.countLimit = action.payload;
         },        
         setLevelFilters: (state, action) => {
             state.levelFilters = action.payload;
@@ -53,9 +57,10 @@ const openQuerySlice = createSlice({
         });
     },
 });
-const { clearOpenQuery, setQueryName, setQueryText, setProject, setEpicViewType, setLevelFilters } = openQuerySlice.actions;
+const { clearOpenQuery, setQueryName, setQueryText, setProject, setCountLimit, setEpicViewType, setLevelFilters } = openQuerySlice.actions;
 const selectOpenQuery = (state) => state.openQuery;
 const selectQueryName = (state) => state.openQuery.name;
+const selectCountLimit = (state) => state.openQuery.countLimit;
 const selectEpicViewType = (state) => state.openQuery.epicViewType;
 const selectQueryText = (state) => state.openQuery.queryText;
 const selectProject = (state) => state.openQuery.project;
@@ -71,6 +76,8 @@ export {
     selectQueryText,
     setProject,
     selectProject,
+    setCountLimit,
+    selectCountLimit,
     setEpicViewType,
     selectEpicViewType,
     setLevelFilters,
