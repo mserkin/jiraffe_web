@@ -41,6 +41,11 @@
     grid-column: 2;
 }
 
+.project_input input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
 .query_label {
     grid-column: 3;
     display: flex;

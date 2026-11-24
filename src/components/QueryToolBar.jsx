@@ -107,7 +107,6 @@ const QueryToolBar = ({ settingsDialogRef }) => {
     const createQuery = useCallback(
         async (name = queryTitleRef.current) => {
             console.log("createQuery executed");
-            console.log(`project: ${defaultProject}`);
             try {
                 dispatch(setIsLoading(true));
                 const newQuery = {
@@ -137,7 +136,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                 dispatch(setIsLoading(false));
             }
         },
-        [dispatch],
+        [dispatch, defaultProject],
     );
 
     const saveAsQuery = useCallback(
@@ -148,6 +147,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                 dispatch(setIsLoading(true));
                 const newQuery = {
                     name,
+                    project: openQuery.project,
                     queryText: openQuery.queryText,
                     epicViewType: openQuery.epicViewType,
                     levelFilters: openQuery.levelFilters,
@@ -312,6 +312,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         const where_clause = order_pos > 0 ? query_text.slice(0, order_pos - 1) : query_text;
         const level0 = openQuery.levelFilters?.[0] ?? {};
         const filtersJql = buildLevelFilterJql(level0, issueTypes);
+        const projectJql = openQuery.project ? `project = "${openQuery.project}"` : "";
         let query = '';
         if (where_clause) {
             if (filtersJql) {
@@ -324,6 +325,11 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         else {
             if (filtersJql) {
                 query = `${filtersJql} ${order_clause}`;
+            }
+        }
+        if (projectJql) {
+            if (query) {
+                query = `${projectJql} AND (${query})`;
             }
         }
         return query
@@ -390,6 +396,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         const pendingExpansions = new Set();
         let latestProgress = 0;
         let latestTotal = 0;
+
         const cloneIssueTree = (issue) => ({
             ...issue,
             children: (issue.children ?? []).map(cloneIssueTree),
