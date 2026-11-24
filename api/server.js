@@ -45,6 +45,7 @@ const QueryShortInfoSchema = new Schema(
         id: String,
         name: String,
         queryText: String,
+        project: String,
         epicViewType: String,
         levelFilters: [LevelFilterSchema],
     },

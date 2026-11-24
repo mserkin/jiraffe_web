@@ -18,7 +18,7 @@ import {
     setIsLoading,
     setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
-import { selectTimeout } from "../redux/slices/settingsSlice";
+import { selectTimeout, selectProject } from "../redux/slices/settingsSlice";
 import {
     selectIssueTypes,
     selectLinkTypes,
@@ -51,6 +51,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isQueryExecuting = useSelector(selectIsQueryExecuting);
     const timeout = useSelector(selectTimeout);
+    const defaultProject = useSelector(selectProject);
 
     const confirmationDialogRef = useRef(null);
     const timeoutDialogRef = useRef(null);
@@ -106,10 +107,12 @@ const QueryToolBar = ({ settingsDialogRef }) => {
     const createQuery = useCallback(
         async (name = queryTitleRef.current) => {
             console.log("createQuery executed");
+            console.log(`project: ${defaultProject}`);
             try {
                 dispatch(setIsLoading(true));
                 const newQuery = {
                     name,
+                    project: defaultProject,
                     queryText: null,
                     epicViewType: null,
                     levelFilters: [{}],

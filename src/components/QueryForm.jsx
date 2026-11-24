@@ -7,6 +7,7 @@ import QueryToolBar from "./QueryToolBar";
 import {
     selectOpenQuery,
     setQueryText,
+    setProject,
     setEpicViewType,
     selectLevelFilters,
     setLevelFilters,
@@ -204,6 +205,13 @@ const QueryForm = () => {
         dispatch(clearSearchResults());
     };
 
+    const handleProjectChanged = (event) => {
+        console.log("handleProjectChanged");
+        dispatch(setProject(event.target.value));
+        dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
+    };
+
     const handleLevelSettingsApply = (dialogData) => {
         if (!dialogData || dialogData.levelIndex === undefined) {
             return;
@@ -226,6 +234,20 @@ const QueryForm = () => {
             <form className={styles.formContainer} onSubmit={handleSubmit}>
                 <QueryToolBar settingsDialogRef={settingsDialogRef} />
                 <div className={styles.gridContainer}>
+                    <div className={`${styles.item} ${styles.project_label}`}>
+                        Проект
+                    </div>
+                    <div className={`${styles.item} ${styles.project_input}`}>
+                        <input
+                            id="project_input"
+                            type="text"
+                            placeholder="Любой проект"
+                            value={
+                                openQuery.project ? openQuery.project : ""
+                            }
+                            onChange={handleProjectChanged}
+                        />
+                    </div>
                     <div className={`${styles.item} ${styles.query_label}`}>
                         Запрос
                     </div>
