@@ -271,38 +271,38 @@ const QueryForm = () => {
                                 Уровень {index + 1}
                             </div>
                             <div
-                                className={`${styles.item} ${styles.level_settings}`}
+                                className={`${styles.item} ${styles.level_settings} ${
+                                    index > 0
+                                        ? styles.level_settingsWithDelete
+                                        : styles.level_settingsWithSetup
+                                }`}
                             >
                                 <textarea
                                     id={"level_settings-" + index}
                                     value={getFilterDisplayString(index)}
                                     onChange={handleLevelSettingsChanged}
                                 ></textarea>
-                            </div>
-                            <div
-                                className={`${styles.item} ${styles.level_setup_btn}`}
-                            >
-                                <li
-                                    id={"level_setup_btn-" + (index + 1)}
-                                    className={styles.ToolButtonItem}
-                                    onClick={() => handleSetupLevelClick(index)}
-                                >
-                                    <VscEdit size={16} />
-                                </li>
-                            </div>
-                            {index > 0 && (
-                                <div
-                                    className={`${styles.item} ${styles.delete_level_btn}`}
-                                >
-                                    <li
+                                {index > 0 && (
+                                    <button
                                         id={`delete_level_btn-${index + 1}`}
-                                        className={styles.ToolButtonItem}
+                                        type="button"
+                                        className={`${styles.toolButtonItem} ${styles.delete_level_btn}`}
+                                        aria-label={`Удалить уровень ${index + 1}`}
                                         onClick={() => handleDeleteLevelClick(index)}
                                     >
                                         <VscClose size={16} />
-                                    </li>                                    
-                                </div>
-                            )}
+                                    </button>
+                                )}
+                                <button
+                                    id={"level_setup_btn-" + (index + 1)}
+                                    type="button"
+                                    className={`${styles.toolButtonItem} ${styles.level_setup_btn}`}
+                                    aria-label={`Настроить уровень ${index + 1}`}
+                                    onClick={() => handleSetupLevelClick(index)}
+                                >
+                                    <VscEdit size={16} />
+                                </button>
+                            </div>
                         </React.Fragment>
                     ))}
                     {levelFiltersList.length < 4 && (

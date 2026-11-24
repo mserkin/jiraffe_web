@@ -87,18 +87,17 @@
 }
 
 .delete_level_btn{
-    grid-column: 7;
-    height: 36px;
-}
-
-.delete_level_btn button {
-    height: 36px;
-    min-height: 36px;
+    position: absolute;
+    right: 36px;
+    top: 6px;
+    z-index: 2;
 }
 
 .level_settings {
-    grid-column: 4 / span 2;
+    grid-column: 4 / span 4;
     height: 36px;
+    position: relative;
+    z-index: 1;
 }
 
 .level_settings textarea {
@@ -113,20 +112,24 @@
     min-height: 36px;
 }
 
-.level_setup_btn {
-    grid-column: 6;
-    margin-bottom: 0;
-    height: 36px;
+.level_settingsWithSetup textarea {
+    padding-right: 36px;
+}
+
+.level_settingsWithDelete textarea {
+    padding-right: 72px;
 }
 
 .level_setup_btn {
-    margin-bottom: 0;
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    z-index: 2;
 }
 
 .level_setup_btn button {
-    width: 100%;
-    height: 36px;
-    min-height: 36px;
+    width: 24px;
+    height: 24px;
 }
 
 .addLevelButton {
@@ -180,10 +183,12 @@
     cursor: pointer;
     width: 24px;
     height: 24px;
+    min-height: 24px;
     padding: 1px;
     border: 1px solid transparent;
-    border-radius: 10px;
+    border-radius: 8px;
     color: var(--color-text-muted);
+    background: transparent;
     transition: color var(--transition-ui), background-color var(--transition-ui), border-color var(--transition-ui), transform var(--transition-ui);
 }
 
@@ -201,13 +206,34 @@
     cursor: not-allowed;
 }
 
-.toolButtonItem:hover {
+.toolButtonItem:hover:not(:disabled) {
     border-color: #d7e3ff;
     color: var(--color-accent);
     background-color: var(--color-accent-soft);
     transform: translateY(-1px);
 }
 
-.toolButtonItem:active {
+.toolButtonItem:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.toolButtonItem:active:not(:disabled) {
+    transform: translateY(0) scale(0.97);
+}
+
+:global(:root[data-theme='dark']) .toolButtonItem {
+    border-color: transparent;
+    color: var(--color-text-muted);
+    background: transparent;
+}
+
+:global(:root[data-theme='dark']) .toolButtonItem:hover:not(:disabled) {
+    border-color: #d7e3ff;
+    color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+}
+
+:global(:root[data-theme='dark']) .toolButtonItem:active:not(:disabled) {
     transform: translateY(0) scale(0.97);
 }
