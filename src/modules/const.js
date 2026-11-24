@@ -5,5 +5,5 @@ export const EXPORT_SETTINGS_PATH_PART = 'settings/export';
 export const ISSUE_TYPES_PATH_PART = 'issue-types';
 export const LINK_TYPES_PATH_PART = 'link-types';
 export const SPRINTS_PATH_PART = 'sprints';
-export const VERSION = '0.2';
+export const VERSION = '1.0';
 export const JIRA_ISSUE_URL_PATH = '/browse/';
