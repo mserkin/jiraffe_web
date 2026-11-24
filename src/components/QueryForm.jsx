@@ -226,7 +226,7 @@ const QueryForm = () => {
                 <QueryToolBar settingsDialogRef={settingsDialogRef} />
                 <div className={styles.gridContainer}>
                     <div className={`${styles.item} ${styles.query_label}`}>
-                        Запрос:
+                        Запрос
                     </div>
                     <div className={`${styles.item} ${styles.query}`}>
                         <input
@@ -240,7 +240,7 @@ const QueryForm = () => {
                         />
                     </div>
                     <div className={`${styles.item} ${styles.epic_label}`}>
-                        У эпиков показывать
+                        Показывать
                     </div>
                     <div className={`${styles.item} ${styles.epic_choice}`}>
                         <select
@@ -253,12 +253,12 @@ const QueryForm = () => {
                             }
                             onChange={handleEpicChoiceChanged}
                         >
-                            <option value="linkedOnly">Только связанные</option>
+                            <option value="linkedOnly">только связанные</option>
                             <option value="childrenOnly">
-                                Только принадлежащие
+                                только принадлежащие
                             </option>
                             <option value="linkedAndChildren">
-                                И связанные и принадлежащие
+                                и связанные и принадлежащие
                             </option>
                         </select>
                     </div>
