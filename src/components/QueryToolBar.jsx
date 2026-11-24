@@ -316,20 +316,30 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         let query = '';
         if (where_clause) {
             if (filtersJql) {
-                query = `${filtersJql} AND (${where_clause}) ${order_clause}`;
+                if (projectJql) {
+                    query = `${projectJql} AND (${filtersJql} AND (${where_clause})) ${order_clause}`;
+                }
+                else {                                    
+                    query = `${filtersJql} AND (${where_clause}) ${order_clause}`;
+                }
             }
             else {
-                query = `${where_clause} ${order_clause}`
+                if (projectJql) {
+                    query = `${projectJql} AND (${where_clause}) ${order_clause}`
+                }
+                else {                
+                    query = `${where_clause} ${order_clause}`
+                }
             }
         }
         else {
             if (filtersJql) {
-                query = `${filtersJql} ${order_clause}`;
-            }
-        }
-        if (projectJql) {
-            if (query) {
-                query = `${projectJql} AND (${query})`;
+                if (projectJql) {
+                    query = `${projectJql} AND (${filtersJql}) ${order_clause}`;                
+                }
+                else {           
+                    query = `${filtersJql} ${order_clause}`;
+                }
             }
         }
         return query
