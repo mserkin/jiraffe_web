@@ -26,6 +26,7 @@ import {
     selectTeamMembers,
 } from "../redux/slices/settingsSlice";
 import { clearSearchResults } from "../redux/slices/searchResultsSlice";
+import { VscClose, VscEdit } from "react-icons/vsc";
 
 const QueryForm = () => {
     const dispatch = useDispatch();
@@ -264,21 +265,6 @@ const QueryForm = () => {
                     </div>
                     {levelFiltersList.map((filters, index) => (
                         <React.Fragment key={`level-${index}`}>
-                            {index > 0 && (
-                                <div
-                                    className={`${styles.item} ${styles.delete_level_btn}`}
-                                >
-                                    <button
-                                        id={`delete_level_btn-${index + 1}`}
-                                        type="button"
-                                        onClick={() =>
-                                            handleDeleteLevelClick(index)
-                                        }
-                                    >
-                                        Удалить
-                                    </button>
-                                </div>
-                            )}
                             <div
                                 className={`${styles.item} ${styles.level_label}`}
                             >
@@ -296,14 +282,27 @@ const QueryForm = () => {
                             <div
                                 className={`${styles.item} ${styles.level_setup_btn}`}
                             >
-                                <button
+                                <li
                                     id={"level_setup_btn-" + (index + 1)}
-                                    type="button"
+                                    className={styles.ToolButtonItem}
                                     onClick={() => handleSetupLevelClick(index)}
                                 >
-                                    Настроить
-                                </button>
+                                    <VscEdit size={16} />
+                                </li>
                             </div>
+                            {index > 0 && (
+                                <div
+                                    className={`${styles.item} ${styles.delete_level_btn}`}
+                                >
+                                    <li
+                                        id={`delete_level_btn-${index + 1}`}
+                                        className={styles.ToolButtonItem}
+                                        onClick={() => handleDeleteLevelClick(index)}
+                                    >
+                                        <VscClose size={16} />
+                                    </li>                                    
+                                </div>
+                            )}
                         </React.Fragment>
                     ))}
                     {levelFiltersList.length < 4 && (
