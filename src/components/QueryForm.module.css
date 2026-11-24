@@ -13,7 +13,7 @@
 .gridContainer {
     font-size: 1rem;
     display: grid;
-    grid-template-columns: 0.4fr 0.6fr 0.5fr 5fr 1fr 0.2fr 0.2fr;
+    grid-template-columns: 0.3fr 0.6fr 0.5fr 5fr 1fr 0.2fr 0.2fr;
     grid-auto-rows: minmax(20px, auto);
     row-gap: 4px;
     column-gap: 4px;
@@ -39,6 +39,31 @@
 
 .project_input {
     grid-column: 2;
+    margin: 0px 8px 0px 0px;
+}
+
+.project_input input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.maxCount_label {
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: right;
+    padding: 0px 10px 0px 0px;
+}
+
+.maxCount_input {
+    grid-column: 2;
+    margin: 0px 8px 0px 0px;
+}
+
+.maxCount_input select {
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .project_input input {
