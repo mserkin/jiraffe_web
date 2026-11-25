@@ -47,6 +47,7 @@ import {
     expandIssueTree,
 } from "../modules/issueTree";
 import { queryNameExists } from "../modules/queryNames";
+import { replaceCustomFilterValues } from "../modules/customFilters";
 
 const QueryToolBar = ({ settingsDialogRef }) => {
     const dispatch = useDispatch();
@@ -119,6 +120,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     project: defaultProject,
                     queryText: null,
                     epicViewType: null,
+                    customFilters: [],
                     levelFilters: [{}],
                 };
                 console.log("POST /queries");
@@ -156,6 +158,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     queryText: openQuery.queryText,
                     countLimit: openQuery.countLimit,
                     epicViewType: openQuery.epicViewType,
+                    customFilters: openQuery.customFilters,
                     levelFilters: openQuery.levelFilters,
                 };
                 console.log("POST /queries");
@@ -192,6 +195,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                 queryText: openQuery.queryText,
                 countLimit: openQuery.countLimit,
                 epicViewType: openQuery.epicViewType,
+                customFilters: openQuery.customFilters,
                 levelFilters: openQuery.levelFilters,
             };
             console.log("PUT /queries/id");
@@ -314,7 +318,10 @@ const QueryToolBar = ({ settingsDialogRef }) => {
     };
 
     const constructJQLQuery = () => {
-        const query_text = (openQuery.queryText ?? "").trim();
+        const query_text = replaceCustomFilterValues(
+            openQuery.queryText,
+            openQuery.customFilters,
+        ).trim();
         const order_pos = query_text.toUpperCase().indexOf("ORDER BY");
         const order_clause = order_pos > 0 ? query_text.slice(order_pos) : "";
         const where_clause = order_pos > 0 ? query_text.slice(0, order_pos - 1) : query_text;

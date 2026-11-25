@@ -11,7 +11,6 @@ import {
     setIsInitialQueryOpened,
     setIsLoading,
     setIsQueryChanged,
-    setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
 import { setError } from "../redux/slices/errorSlice";
 import TextInputDialog from "./TextInputDialog";
@@ -93,12 +92,10 @@ const QueryListItem = ({
     };
 
     const handleMoveUpClick = () => {
-        dispatch(setIsQueryListRefreshPending(true));
         dispatch(moveQueryUp(id));
     };
 
     const handleMoveDownClick = () => {
-        dispatch(setIsQueryListRefreshPending(true));
         dispatch(moveQueryDown(id));
     };  
 

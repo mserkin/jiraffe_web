@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { setError } from './errorSlice';
+import { reconcileCustomFilters } from '../../modules/customFilters.js';
 
 const initialState = {
     epicViewType: null,
@@ -17,7 +18,9 @@ const fetchQuery = createAsyncThunk(
     'openQuery',
     async ({ url, queryId }, thunkAPI) => {
         try {
-            const res = await axios.get(`${url}/${queryId}`);
+            const res = await axios.get(`${url}/${queryId}`, {
+                headers: { "Cache-Control": "no-cache" },
+            });
             return res.data;
         } catch (error) {
             thunkAPI.dispatch(
@@ -49,7 +52,7 @@ const openQuerySlice = createSlice({
             state.countLimit = action.payload;
         },        
         setCustomFilters:(state, action) => {
-            state.setCustomFilters = action.payload;
+            state.customFilters = action.payload;
         }, 
         setLevelFilters: (state, action) => {
             state.levelFilters = action.payload;
@@ -57,7 +60,13 @@ const openQuerySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(fetchQuery.fulfilled, (state, action) => {
-            return action.payload;
+            return {
+                ...action.payload,
+                customFilters: reconcileCustomFilters(
+                    action.payload.queryText,
+                    action.payload.customFilters,
+                ),
+            };
         });
     },
 });

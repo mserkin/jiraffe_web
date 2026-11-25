@@ -1026,6 +1026,11 @@ async function runJiraBackgroundSearch(taskId, jql, settings) {
     }
 }
 
+app.use("/queries", (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
+
 app.get("/queries", async (req, res) => {
     getQueryList(res);
 });

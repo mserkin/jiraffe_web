@@ -24,24 +24,22 @@ const queryListSlice = createSlice({
     initialState,
     reducers: {
         moveQueryUp: (state, action) => {
-            // Implementation for moving query up
-            let newState = initialState;
-            const queryIndex = state.findIndex((q) => q.id === action.payload.id);
+            const queryIndex = state.findIndex((query) => query.id === action.payload);
             if (queryIndex > 0) {
-                newState = [...state];
-                [newState[queryIndex], newState[queryIndex - 1]] = [newState[queryIndex - 1], newState[queryIndex]];
+                [state[queryIndex - 1], state[queryIndex]] = [
+                    state[queryIndex],
+                    state[queryIndex - 1],
+                ];
             }
-            return newState;
         },
         moveQueryDown: (state, action) => {
-            // Implementation for moving query down
-            let newState = initialState;
-            const queryIndex = state.findIndex((q) => q.id === action.payload.id);
-            if (queryIndex < state.length - 1) {
-                newState = [...state];
-                [newState[queryIndex], newState[queryIndex + 1]] = [newState[queryIndex + 1], newState[queryIndex]];
+            const queryIndex = state.findIndex((query) => query.id === action.payload);
+            if (queryIndex >= 0 && queryIndex < state.length - 1) {
+                [state[queryIndex], state[queryIndex + 1]] = [
+                    state[queryIndex + 1],
+                    state[queryIndex],
+                ];
             }
-            return newState;
         }
     },
     extraReducers: (builder) => {

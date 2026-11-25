@@ -13,7 +13,7 @@
 .gridContainer {
     font-size: 1rem;
     display: grid;
-    grid-template-columns: 0.3fr 0.6fr 0.5fr 5fr 1fr 0.2fr 0.2fr;
+    grid-template-columns: 0.3fr 0.6fr 1fr 5fr 1fr 0.2fr 0.2fr;
     grid-auto-rows: minmax(20px, auto);
     row-gap: 4px;
     column-gap: 4px;
@@ -103,6 +103,25 @@
 }
 
 .epic_choice select {
+    font-size: 1rem;
+    width: 100%;
+}
+
+.customFilterLabel {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: right;
+    padding: 0px 10px 0px 0px;
+}
+
+.customFilterInput {
+    grid-column: 4 / span 4;
+}
+
+.customFilterInput input {
+    box-sizing: border-box;
     font-size: 1rem;
     width: 100%;
 }

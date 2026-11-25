@@ -10,6 +10,7 @@ import {
     setProject,
     setCountLimit,
     setEpicViewType,
+    setCustomFilters,
     selectLevelFilters,
     setLevelFilters,
 } from "../redux/slices/openQuerySlice";
@@ -29,11 +30,17 @@ import {
 } from "../redux/slices/settingsSlice";
 import { clearSearchResults } from "../redux/slices/searchResultsSlice";
 import { VscClose, VscEdit } from "react-icons/vsc";
+import { reconcileCustomFilters } from "../modules/customFilters";
+
+const EMPTY_CUSTOM_FILTERS = [];
 
 const QueryForm = () => {
     const dispatch = useDispatch();
     const metadataFetchStarted = useRef(false);
     const openQuery = useSelector(selectOpenQuery);
+    const customFilters = Array.isArray(openQuery.customFilters)
+        ? openQuery.customFilters
+        : EMPTY_CUSTOM_FILTERS;
     const levelFilters = useSelector(selectLevelFilters);
     const levelFiltersList = Array.isArray(levelFilters) ? levelFilters : [];
     const levelSettingsDialogRef = useRef(null);
@@ -45,6 +52,21 @@ const QueryForm = () => {
     const sprints = useSelector(selectSprints);
     const sprintsUnavailable = useSelector(selectSprintsUnavailable);
     const isJiraMetadataLoading = useSelector(selectIsJiraMetadataLoading);
+
+    useEffect(() => {
+        const reconciledFilters = reconcileCustomFilters(
+            openQuery.queryText,
+            customFilters,
+        );
+        const filtersChanged =
+            JSON.stringify(reconciledFilters) !== JSON.stringify(customFilters);
+
+        if (filtersChanged) {
+            dispatch(setCustomFilters(reconciledFilters));
+            dispatch(setIsQueryChanged(true));
+            dispatch(clearSearchResults());
+        }
+    }, [customFilters, dispatch, openQuery.queryText]);
 
     useEffect(() => {
         const dialog = sprintsErrorDialogRef.current;
@@ -201,7 +223,22 @@ const QueryForm = () => {
 
     const handleQueryTextChanged = (event) => {
         console.log("handleQueryChanged");
-        dispatch(setQueryText(event.target.value));
+        const queryText = event.target.value;
+        dispatch(setQueryText(queryText));
+        dispatch(
+            setCustomFilters(
+                reconcileCustomFilters(queryText, customFilters),
+            ),
+        );
+        dispatch(setIsQueryChanged(true));
+        dispatch(clearSearchResults());
+    };
+
+    const handleCustomFilterChanged = (index, value) => {
+        const nextCustomFilters = customFilters.map((filter, filterIndex) =>
+            filterIndex === index ? { ...filter, value } : filter,
+        );
+        dispatch(setCustomFilters(nextCustomFilters));
         dispatch(setIsQueryChanged(true));
         dispatch(clearSearchResults());
     };
@@ -314,6 +351,31 @@ const QueryForm = () => {
                             </option>
                         </select>
                     </div>
+                    {customFilters.map((filter, index) => (
+                        <React.Fragment key={`${filter.name}-${index}`}>
+                            <label
+                                className={`${styles.item} ${styles.customFilterLabel}`}
+                                htmlFor={`custom_filter_${index}`}
+                            >
+                                {filter.name}
+                            </label>
+                            <div
+                                className={`${styles.item} ${styles.customFilterInput}`}
+                            >
+                                <input
+                                    id={`custom_filter_${index}`}
+                                    type="text"
+                                    value={filter.value ?? ""}
+                                    onChange={(event) =>
+                                        handleCustomFilterChanged(
+                                            index,
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                        </React.Fragment>
+                    ))}
                     {levelFiltersList.map((filters, index) => (
                         <React.Fragment key={`level-${index}`}>
                             <div
