@@ -38,9 +38,14 @@ import ConfirmationDialog from "./ConfirmationDialog";
 import SettingsDialog from "./SettingsDialog";
 import {
     clearSearchResults,
+    setSearchComplete,
     setSearchResults,
 } from "../redux/slices/searchResultsSlice";
-import { buildLevelFilterJql, expandIssueTree } from "../modules/issueTree";
+import {
+    buildLevelFilterJql,
+    countIssueTree,
+    expandIssueTree,
+} from "../modules/issueTree";
 import { queryNameExists } from "../modules/queryNames";
 
 const QueryToolBar = ({ settingsDialogRef }) => {
@@ -407,8 +412,12 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         const rootIssues = [];
         const processedIssueKeys = new Set();
         const pendingExpansions = new Set();
-        let latestProgress = 0;
-        let latestTotal = 0;
+        const countLimit = Number(openQuery.countLimit) || 0;
+        const issueBudget = { count: 0, limit: countLimit };
+        let latestLimitReached = false;
+        let limitStopRequested = false;
+        let searchCompleted = false;
+        let expansionFailed = false;
 
         const cloneIssueTree = (issue) => ({
             ...issue,
@@ -416,18 +425,44 @@ const QueryToolBar = ({ settingsDialogRef }) => {
             epicChildren: (issue.epicChildren ?? []).map(cloneIssueTree),
         });
         const publishSearchResults = () => {
+            const totalCount = countIssueTree(rootIssues);
+            issueBudget.count = totalCount;
+            if (countLimit > 0 && totalCount >= countLimit) {
+                latestLimitReached = true;
+                limitStopRequested = true;
+                const taskId = taskIdRef.current;
+                if (taskId) {
+                    axios
+                        .post(`${BACKEND_URI}search/cancel/${taskId}`)
+                        .catch((error) => {
+                            const responseError = error.response?.data?.error;
+                            dispatch(
+                                setError(
+                                    `Не удалось остановить загрузку после достижения лимита: ${
+                                        responseError ?? error.message
+                                    }`,
+                                ),
+                            );
+                        });
+                }
+            }
             dispatch(
                 setSearchResults({
                     issues: rootIssues.map(cloneIssueTree),
-                    progress: latestProgress,
-                    total: latestTotal,
+                    progress: totalCount,
+                    countLimit,
+                    limitReached:
+                        latestLimitReached ||
+                        (countLimit > 0 && totalCount >= countLimit),
                 }),
             );
         };
 
-        const searchIssuesByJql = async (jql) => {
+        const searchIssuesByJql = async (jql, limit) => {
             const { data } = await axios.get(
-                `${BACKEND_URI}search?jql=${encodeURIComponent(jql)}`,
+                `${BACKEND_URI}search?jql=${encodeURIComponent(jql)}${
+                    limit === undefined ? "" : `&limit=${limit}`
+                }`,
                 { signal: abortController.signal },
             );
             return data;
@@ -437,7 +472,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
             const jql = constructJQLQuery();
             const { data: startResponse } = await axios.post(
                 `${BACKEND_URI}search/start`,
-                { jql },
+                { jql, countLimit: openQuery.countLimit },
                 { signal: abortController.signal },
             );
             const taskId = startResponse?.taskId;
@@ -459,8 +494,13 @@ const QueryToolBar = ({ settingsDialogRef }) => {
             while (
                 runId === searchRunIdRef.current &&
                 !isStopRequestedRef.current &&
+                !limitStopRequested &&
                 !abortController.signal.aborted
             ) {
+                await Promise.all(pendingExpansions);
+                if (limitStopRequested) {
+                    break;
+                }
                 await new Promise((resolve, reject) => {
                     const timer = setTimeout(() => {
                         abortController.signal.removeEventListener(
@@ -482,6 +522,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                 if (
                     runId !== searchRunIdRef.current ||
                     isStopRequestedRef.current ||
+                    limitStopRequested ||
                     abortController.signal.aborted
                 ) {
                     break;
@@ -512,22 +553,35 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     break;
                 }
 
-                latestProgress = statusResponse.progress;
-                latestTotal = statusResponse.total;
+                latestLimitReached = statusResponse.limitReached === true;
+                const availableRootSlots =
+                    countLimit > 0
+                        ? Math.max(0, countLimit - issueBudget.count)
+                        : undefined;
                 const newRootIssues = statusResponse.issues
                     .filter((issue) => {
                         const key = issue.key ?? issue.id;
-                        if (!key || processedIssueKeys.has(key)) {
-                            return false;
-                        }
-                        processedIssueKeys.add(key);
-                        return true;
+                        return key && !processedIssueKeys.has(key);
                     })
+                    .slice(
+                        0,
+                        availableRootSlots === undefined
+                            ? undefined
+                            : availableRootSlots,
+                    )
                     .map((issue) => ({ ...issue, children: [] }));
+                for (const issue of newRootIssues) {
+                    processedIssueKeys.add(issue.key ?? issue.id);
+                }
                 rootIssues.push(...newRootIssues);
+                issueBudget.count += newRootIssues.length;
                 publishSearchResults();
 
-                if (newRootIssues.length > 0 && levelFilters.length > 1) {
+                if (
+                    newRootIssues.length > 0 &&
+                    levelFilters.length > 1 &&
+                    (countLimit === 0 || issueBudget.count < countLimit)
+                ) {
                     let expansion;
                     expansion = expandIssueTree(
                         newRootIssues,
@@ -549,6 +603,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                             }
                         },
                         openQuery.epicViewType ?? "linkedAndChildren",
+                        issueBudget,
                     )
                         .then(() => {
                             if (
@@ -566,6 +621,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                             ) {
                                 return;
                             }
+                            expansionFailed = true;
                             dispatch(
                                 setError(
                                     `Ошибка при расширении дерева результатов: ${expandError.message}`,
@@ -579,6 +635,7 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                 }
 
                 if (statusResponse.status !== "processing") {
+                    searchCompleted = statusResponse.status === "completed";
                     break;
                 }
             }
@@ -600,6 +657,14 @@ const QueryToolBar = ({ settingsDialogRef }) => {
         } finally {
             await Promise.all(pendingExpansions);
             if (runId === searchRunIdRef.current) {
+                if (
+                    (searchCompleted || limitStopRequested) &&
+                    !expansionFailed &&
+                    !isStopRequestedRef.current &&
+                    !abortController.signal.aborted
+                ) {
+                    dispatch(setSearchComplete(true));
+                }
                 clearTimeout(timeoutTimerRef.current);
                 timeoutTimerRef.current = null;
                 taskIdRef.current = null;

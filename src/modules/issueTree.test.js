@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
     buildLevelFilterJql,
+    countIssueTree,
     expandIssueTree,
     getLinkedIssueKeys,
 } from "./issueTree.js";
@@ -394,4 +395,40 @@ test("expandIssueTree loads only Epic Link children for childrenOnly view", asyn
     ]);
     assert.deepEqual(epic.children, []);
     assert.deepEqual(epic.epicChildren.map((child) => child.key), ["CHILD-1"]);
+});
+
+test("expandIssueTree enforces one issue budget across root and Epic Link levels", async () => {
+    const epics = ["EPIC-1", "EPIC-2"].map((key) => ({
+        key,
+        fields: { issuetype: { name: "Epic" }, issuelinks: [] },
+    }));
+    const issueBudget = { count: 2, limit: 3 };
+    const requestedLimits = [];
+
+    await expandIssueTree(
+        epics,
+        [{}, {}, {}],
+        [],
+        [],
+        async (_jql, limit) => {
+            requestedLimits.push(limit);
+            return [
+                { key: "CHILD-1", fields: {} },
+                { key: "CHILD-2", fields: {} },
+            ];
+        },
+        undefined,
+        undefined,
+        "linkedAndChildren",
+        issueBudget,
+    );
+
+    assert.deepEqual(requestedLimits, [1]);
+    assert.deepEqual(
+        epics[0].epicChildren.map((child) => child.key),
+        ["CHILD-1"],
+    );
+    assert.deepEqual(epics[1].epicChildren, []);
+    assert.equal(countIssueTree(epics), 3);
+    assert.equal(issueBudget.count, 3);
 });

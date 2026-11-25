@@ -170,14 +170,14 @@ function normalizeMockQuery(query) {
     return null;
 }
 
-function matchesMockQuery(mockQuery, requestUrl) {
+function matchesMockQuery(mockQuery, requestUrl, ignoredRequestKeys = []) {
     if (mockQuery === null || mockQuery === undefined) {
         return true;
     }
 
     const requestQuery = normalizeMockQuery(
         new URL(requestUrl, "http://localhost").searchParams.toString(),
-    );
+    ).filter(([key]) => !ignoredRequestKeys.includes(key));
     const expectedQuery = normalizeMockQuery(mockQuery);
 
     return (
@@ -215,7 +215,12 @@ function normalizeMockBody(value) {
     return value;
 }
 
-function matchesMockBody(mockBody, requestBody, method) {
+function matchesMockBody(
+    mockBody,
+    requestBody,
+    method,
+    ignoredRequestKeys = [],
+) {
     if (method !== "POST") {
         return true;
     }
@@ -224,10 +229,15 @@ function matchesMockBody(mockBody, requestBody, method) {
         return true;
     }
 
-    return (
-        JSON.stringify(normalizeMockBody(mockBody)) ===
-        JSON.stringify(normalizeMockBody(requestBody))
-    );
+    const comparableRequestBody = { ...requestBody };
+    for (const key of ignoredRequestKeys) {
+        if (!Object.hasOwn(mockBody, key)) {
+            delete comparableRequestBody[key];
+        }
+    }
+
+    return JSON.stringify(normalizeMockBody(mockBody)) ===
+        JSON.stringify(normalizeMockBody(comparableRequestBody));
 }
 
 async function findJiraMock(req, demoModeEnabled) {
@@ -245,8 +255,17 @@ async function findJiraMock(req, demoModeEnabled) {
                 mock.method === undefined ||
                 mock.method === req.method,
             path: matchesMockPath(mock.path, req.path),
-            query: matchesMockQuery(mock.query, req.originalUrl),
-            body: matchesMockBody(mock.body, req.body, req.method),
+            query: matchesMockQuery(
+                mock.query,
+                req.originalUrl,
+                req.path === "/search" ? ["limit"] : [],
+            ),
+            body: matchesMockBody(
+                mock.body,
+                req.body,
+                req.method,
+                req.path === "/search/start" ? ["countLimit"] : [],
+            ),
         };
         const matched = Object.values(comparisons).every(Boolean);
 
@@ -712,26 +731,42 @@ async function getIssuesByJql(req, res) {
 
     try {
         const { jql } = req.query;
+        const requestedLimit =
+            req.query.limit === undefined ? 1000 : Number(req.query.limit);
+        if (!jql) {
+            return res.status(400).json({ error: "Параметр 'jql' обязателен в query-строке запроса." });
+        }
+        if (
+            !Number.isInteger(requestedLimit) ||
+            requestedLimit < 1 ||
+            requestedLimit > 1000
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Лимит элементов должен быть от 1 до 1000." });
+        }
 
         const settings = await Settings.findOne({}, { demoModeEnabled: 1 });
         if (
             settings?.demoModeEnabled &&
-            (await respondWithJiraMock(req, res, settings.demoModeEnabled))
+            (await respondWithJiraMock(
+                req,
+                res,
+                settings.demoModeEnabled,
+                (response) =>
+                    Array.isArray(response)
+                        ? response.slice(0, requestedLimit)
+                        : response,
+            ))
         ) {
             return;
-        }
-
-        if (!jql) {
-            return res.status(400).json({ error: "Параметр 'jql' обязателен в query-строке запроса." });
         }
 
         const jira = await JiraClient.getConnection(undefined, {
             signal: controller.signal,
         });
 
-        const maxResults = 1000; // Ограничение на кол-во задач
-
-        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${maxResults}&fields=summary,description,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
+        const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&maxResults=${requestedLimit}&fields=summary,description,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
 
         console.log(`Запрос задач по JQL: ${jql}`);
         const searchResult = await jira.request(endpoint, {
@@ -740,7 +775,9 @@ async function getIssuesByJql(req, res) {
         
         console.log("Задачи получены. Всего найдено:", searchResult.total);
 
-        return res.status(200).json(searchResult.issues);
+        return res
+            .status(200)
+            .json(searchResult.issues.slice(0, requestedLimit));
 
     } catch (error) {
         if (controller.signal.aborted) {
@@ -756,7 +793,9 @@ async function getIssuesByJql(req, res) {
 async function startSearch(req, res) {
     const requestStartedAt = Date.now();
     try {
-        const { jql } = req.body; // или req.query
+        const { jql } = req.body;
+        const countLimit =
+            req.body.countLimit === undefined ? 0 : Number(req.body.countLimit);
         const settings = await Settings.findOne(
             {},
             { _id: 0, "teamMembers._id": 0 },
@@ -770,6 +809,14 @@ async function startSearch(req, res) {
 
         if (!jql) {
             return res.status(400).json({ error: "Параметр 'jql' обязателен." });
+        }
+        if (
+            !Number.isInteger(countLimit) ||
+            countLimit < 0
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Лимит элементов должен быть неотрицательным целым числом." });
         }
         if (!settings) {
             return res.status(500).json({ error: "Настройки не найдены." });
@@ -793,6 +840,8 @@ async function startSearch(req, res) {
             status: "processing",
             issues: [],
             total: 0,
+            countLimit,
+            limitReached: false,
             isCancelled: false,
             error: null,
             controller,
@@ -844,6 +893,7 @@ async function getSearchStatus(req, res) {
             status: task.status,
             progress: task.issues.length,
             total: task.total,
+            limitReached: task.limitReached,
             error: task.error,
             issues: task.issues
         });
@@ -902,7 +952,11 @@ async function runJiraBackgroundSearch(taskId, jql, settings) {
                 return; // Просто выходим, статус уже изменен на "cancelled" в эндпоинте отмены
             }
 
-            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${pageSize}&fields=summary,description,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
+            const requestedPageSize =
+                task.countLimit > 0
+                    ? Math.min(pageSize, task.countLimit - startAt)
+                    : pageSize;
+            const endpoint = `/rest/api/2/search?jql=${encodeURIComponent(jql)}&startAt=${startAt}&maxResults=${requestedPageSize}&fields=summary,description,issuetype,status,creator,assignee,reporter,issuelinks,customfield_10372,customfield_10375`;
             const searchResult = await jira.request(endpoint, {
                 signal: task.controller.signal,
             });
@@ -910,16 +964,25 @@ async function runJiraBackgroundSearch(taskId, jql, settings) {
                 return;
             }
             
-            const chunk = searchResult.issues || [];
+            const receivedChunk = searchResult.issues || [];
+            const chunk =
+                task.countLimit > 0
+                    ? receivedChunk.slice(0, task.countLimit - startAt)
+                    : receivedChunk;
             totalIssuesInJira = searchResult.total;
+            task.total = totalIssuesInJira;
 
             if (chunk.length === 0) break;
 
             // Наполняем задачу данными прямо в памяти
-            task.total = totalIssuesInJira;
             task.issues = task.issues.concat(chunk);
 
             startAt += chunk.length;
+            task.limitReached =
+                task.countLimit > 0 && task.issues.length >= task.countLimit;
+            if (task.limitReached) {
+                break;
+            }
 
             await new Promise(resolve => {
                 const finishDelay = () => {

@@ -18,7 +18,14 @@ const getExpandableNodeIds = (node) => {
     return [node.id, ...node.children.flatMap(getExpandableNodeIds)];
 };
 
-const ResultTreePaneContent = ({ issues, progress, total }) => {
+const ResultTreePaneContent = ({
+    issues,
+    progress,
+    limitReached,
+    countLimit,
+    hasSearchRun,
+    isSearchComplete,
+}) => {
     const issueTypes = useSelector(selectIssueTypes);
     const dispatch = useDispatch();
     const [selectedNodeId, setSelectedNodeId] = useState(null);
@@ -143,9 +150,13 @@ const ResultTreePaneContent = ({ issues, progress, total }) => {
                 onCollapseAll={handleCollapseAll}
                 tree={tree}
             />
-            {total > 0 && (
+            {hasSearchRun && (
                 <div className={styles.progress}>
-                    Получено {progress} из {total}
+                    Получено {progress} элементов.
+                    {isSearchComplete &&
+                        (limitReached
+                            ? ` Достигнут лимит в ${countLimit} элементов, запрос прерван!`
+                            : " Запрос выполнен.")}
                 </div>
             )}
             <ul className={styles.tree} role="tree" aria-label="Результаты поиска">
@@ -172,7 +183,15 @@ const ResultTreePaneContent = ({ issues, progress, total }) => {
 };
 
 const ResultTreePane = () => {
-    const { issues, progress, total, resetVersion } =
+    const {
+        issues,
+        progress,
+        limitReached,
+        countLimit,
+        hasSearchRun,
+        isSearchComplete,
+        resetVersion,
+    } =
         useSelector(selectSearchResults);
 
     return (
@@ -180,7 +199,10 @@ const ResultTreePane = () => {
             key={resetVersion}
             issues={issues}
             progress={progress}
-            total={total}
+            limitReached={limitReached}
+            countLimit={countLimit}
+            hasSearchRun={hasSearchRun}
+            isSearchComplete={isSearchComplete}
         />
     );
 };

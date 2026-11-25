@@ -249,7 +249,7 @@ const QueryForm = () => {
                         <input
                             id="project_input"
                             type="text"
-                            placeholder="Любой проект"
+                            placeholder="Любой"
                             value={
                                 openQuery.project ? openQuery.project : ""
                             }

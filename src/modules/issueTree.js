@@ -1,5 +1,16 @@
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
+export function countIssueTree(issues) {
+    return issues.reduce(
+        (count, issue) =>
+            count +
+            1 +
+            countIssueTree(issue.children ?? []) +
+            countIssueTree(issue.epicChildren ?? []),
+        0,
+    );
+}
+
 const escapeJqlValue = (value) =>
     String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
@@ -181,8 +192,10 @@ export async function expandIssueTree(
     shouldStop = () => false,
     onUpdate = () => {},
     epicViewType = "linkedAndChildren",
+    issueBudget = { count: 0, limit: 0 },
 ) {
     let parents = issues;
+    const otherIssueCount = issueBudget.count - countIssueTree(issues);
 
     for (let levelIndex = 1; levelIndex < levelFilters.length; levelIndex += 1) {
         if (parents.length === 0 || shouldStop()) {
@@ -206,9 +219,13 @@ export async function expandIssueTree(
             parent.children = [];
             parent.epicChildren = [];
         }
+        issueBudget.count = otherIssueCount + countIssueTree(issues);
 
         for (let offset = 0; offset < candidateKeys.length; offset += 100) {
-            if (shouldStop()) {
+            if (
+                shouldStop() ||
+                (issueBudget.limit > 0 && issueBudget.count >= issueBudget.limit)
+            ) {
                 return issues;
             }
 
@@ -219,7 +236,11 @@ export async function expandIssueTree(
             const jql = filterJql
                 ? `${keyClause} AND (${filterJql})`
                 : keyClause;
-            const foundIssues = await searchIssuesByJql(jql);
+            const remaining =
+                issueBudget.limit > 0
+                    ? issueBudget.limit - issueBudget.count
+                    : undefined;
+            const foundIssues = await searchIssuesByJql(jql, remaining);
 
             if (!Array.isArray(foundIssues)) {
                 throw new Error(
@@ -233,24 +254,54 @@ export async function expandIssueTree(
                 }
             }
 
+            issueBudget.count =
+                otherIssueCount +
+                countIssueTree(issues) -
+                parents.reduce(
+                    (count, parent) =>
+                        count +
+                        countIssueTree(parent.children) +
+                        countIssueTree(parent.epicChildren),
+                    0,
+                );
             nextParents = [];
             for (const [parentIndex, parent] of parents.entries()) {
                 const children = [];
                 for (const key of keysByParent[parentIndex]) {
                     const matchingIssue = matchingIssues.get(key);
                     if (matchingIssue) {
+                        if (
+                            issueBudget.limit > 0 &&
+                            issueBudget.count >= issueBudget.limit
+                        ) {
+                            break;
+                        }
                         const child = { ...matchingIssue, children: [] };
                         children.push(child);
                         nextParents.push(child);
+                        issueBudget.count += 1;
                     }
                 }
                 parent.children = children;
             }
 
+            issueBudget.count = otherIssueCount + countIssueTree(issues);
             onUpdate(issues);
+            if (
+                issueBudget.limit > 0 &&
+                issueBudget.count >= issueBudget.limit
+            ) {
+                return issues;
+            }
         }
 
         for (const parent of parents) {
+            if (
+                issueBudget.limit > 0 &&
+                issueBudget.count >= issueBudget.limit
+            ) {
+                return issues;
+            }
             if (
                 epicViewType !== "linkedOnly" &&
                 parent.fields?.issuetype?.name?.toLowerCase() === "epic" &&
@@ -264,7 +315,11 @@ export async function expandIssueTree(
                 const jql = filterJql
                     ? `${epicLinkClause} AND (${filterJql})`
                     : epicLinkClause;
-                const foundIssues = await searchIssuesByJql(jql);
+                const remaining =
+                    issueBudget.limit > 0
+                        ? issueBudget.limit - issueBudget.count
+                        : undefined;
+                const foundIssues = await searchIssuesByJql(jql, remaining);
 
                 if (!Array.isArray(foundIssues)) {
                     throw new Error(
@@ -272,13 +327,22 @@ export async function expandIssueTree(
                     );
                 }
 
-                parent.epicChildren = foundIssues
-                    .filter((foundIssue) => foundIssue?.key)
-                    .map((foundIssue) => {
-                        const child = { ...foundIssue, children: [] };
-                        nextParents.push(child);
-                        return child;
-                    });
+                parent.epicChildren = [];
+                for (const foundIssue of foundIssues) {
+                    if (!foundIssue?.key) {
+                        continue;
+                    }
+                    if (
+                        issueBudget.limit > 0 &&
+                        issueBudget.count >= issueBudget.limit
+                    ) {
+                        break;
+                    }
+                    const child = { ...foundIssue, children: [] };
+                    parent.epicChildren.push(child);
+                    nextParents.push(child);
+                    issueBudget.count += 1;
+                }
 
                 onUpdate(issues);
             }
