@@ -39,7 +39,7 @@
 
 .project_input {
     grid-column: 2;
-    margin: 0px 8px 0px 0px;
+    margin: 0px 16px 0px 0px;
 }
 
 .project_input input {
@@ -58,7 +58,7 @@
 
 .maxCount_input {
     grid-column: 2;
-    margin: 0px 8px 0px 0px;
+    margin: 0px 16px 0px 0px;
 }
 
 .maxCount_input select {
