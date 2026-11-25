@@ -11,12 +11,14 @@ import {
     setIsInitialQueryOpened,
     setIsLoading,
     setIsQueryChanged,
+    setIsQueryListRefreshPending,
 } from "../redux/slices/statusSlice";
 import { setError } from "../redux/slices/errorSlice";
 import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { clearSearchResults } from "../redux/slices/searchResultsSlice";
 import { queryNameExists } from "../modules/queryNames";
+import { moveQueryDown, moveQueryUp } from "../redux/slices/queryListSlice";
 
 const QueryListItem = ({
     id,
@@ -50,6 +52,8 @@ const QueryListItem = ({
         DELETE: "DELETE",
     });
     const MENU_ITEMS = {
+        menu_item_move_up: "Переместить вверх",
+        menu_item_move_down: "Переместить вниз",
         menu_item_rename: "Переименовать",
         menu_item_clone: "Клонировать",
         menu_item_delete: "Удалить",
@@ -87,6 +91,16 @@ const QueryListItem = ({
             pendingAction: PendingAction.DELETE,
         });
     };
+
+    const handleMoveUpClick = () => {
+        dispatch(setIsQueryListRefreshPending(true));
+        dispatch(moveQueryUp(id));
+    };
+
+    const handleMoveDownClick = () => {
+        dispatch(setIsQueryListRefreshPending(true));
+        dispatch(moveQueryDown(id));
+    };  
 
     const saveClonedQuery = useCallback(
         async (clonedQueryName) => {
@@ -259,6 +273,12 @@ const QueryListItem = ({
                 break;
             case "menu_item_delete":
                 handleDeleteClick();
+                break;
+            case "menu_item_move_up":
+                handleMoveUpClick();
+                break;
+            case "menu_item_move_down":
+                handleMoveDownClick();
                 break;
         }
     };

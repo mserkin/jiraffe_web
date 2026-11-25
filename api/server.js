@@ -41,6 +41,11 @@ const LevelFilterSchema = new Schema({
     linkTypeFilter: [String],
 }, { _id: false });
 
+const CustomFilterSchema = new Schema ({
+    name: String,
+    value: String
+}, { _id: false });
+
 const QueryShortInfoSchema = new Schema(
     {
         id: String,
@@ -49,6 +54,7 @@ const QueryShortInfoSchema = new Schema(
         project: String,
         countLimit: Number,
         epicViewType: String,
+        customFilters: [CustomFilterSchema],
         levelFilters: [LevelFilterSchema],
     },
     { collection: "queries" },

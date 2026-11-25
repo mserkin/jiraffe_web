@@ -23,6 +23,26 @@ const queryListSlice = createSlice({
     name: 'queryList',
     initialState,
     reducers: {
+        moveQueryUp: (state, action) => {
+            // Implementation for moving query up
+            let newState = initialState;
+            const queryIndex = state.findIndex((q) => q.id === action.payload.id);
+            if (queryIndex > 0) {
+                newState = [...state];
+                [newState[queryIndex], newState[queryIndex - 1]] = [newState[queryIndex - 1], newState[queryIndex]];
+            }
+            return newState;
+        },
+        moveQueryDown: (state, action) => {
+            // Implementation for moving query down
+            let newState = initialState;
+            const queryIndex = state.findIndex((q) => q.id === action.payload.id);
+            if (queryIndex < state.length - 1) {
+                newState = [...state];
+                [newState[queryIndex], newState[queryIndex + 1]] = [newState[queryIndex + 1], newState[queryIndex]];
+            }
+            return newState;
+        }
     },
     extraReducers: (builder) => {
         builder.addCase(fetchQueryList.fulfilled, (state, action) => {
@@ -38,9 +58,8 @@ const queryListSlice = createSlice({
     },
 });
 
-//const { addBook, deleteBook, toggleFavorite } = booksSlice.actions;
-
 const selectQueryList = (state) => state.queryList;
 
-export { /*addBook, deleteBook, toggleFavorite,*/ selectQueryList, fetchQueryList };
+const { moveQueryUp, moveQueryDown } = queryListSlice.actions;
+export { selectQueryList, moveQueryUp, moveQueryDown, fetchQueryList };
 export default queryListSlice.reducer;
