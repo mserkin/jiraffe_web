@@ -46,7 +46,7 @@ const CustomFilterSchema = new Schema ({
     value: String
 }, { _id: false });
 
-const QueryShortInfoSchema = new Schema(
+const QuerySchema = new Schema(
     {
         id: String,
         name: String,
@@ -56,6 +56,7 @@ const QueryShortInfoSchema = new Schema(
         epicViewType: String,
         customFilters: [CustomFilterSchema],
         levelFilters: [LevelFilterSchema],
+        order: Number,
     },
     { collection: "queries" },
 );
@@ -124,7 +125,7 @@ const JiraMockSchema = new Schema(
 );
 
 
-const QueryShortInfo = model("Query", QueryShortInfoSchema);
+const Query = model("Query", QuerySchema);
 const Settings = model("Settings", SettingsSchema);
 const ExportSettings = model("ExportSettings", ExportSettingsSchema);
 const LinkTypes = model("LinkTypes", LinkTypesSchema);
@@ -330,10 +331,10 @@ async function respondWithJiraMock(req, res, demoModeEnabled, transformResponse)
 
 async function getQueryList(res) {
     try {
-        const queries = await QueryShortInfo.find(
+        const queries = await Query.find(
             {},
             { id: 1, name: 1, _id: 0 },
-        );
+        ).sort({ order: 1 });
         const queryList = queries.map((query) => ({
             id: query.id,
             name: query.name,
@@ -351,7 +352,7 @@ async function getQueryList(res) {
 async function getQueryById(req, res) {
     try {
         const { id } = req.params;
-        const query = await QueryShortInfo.findOne({ id }, { _id: 0 });
+        const query = await Query.findOne({ id }, { _id: 0 });
 
         if (!query) {
             return res.status(404).json({ message: "Запрос не найден" });
@@ -384,10 +385,20 @@ async function insertQuery(req, res) {
                 .json({ error: "Поле id не должно передаваться" });
         }
 
-        const query = await QueryShortInfo.create({
+        const last_query = await Query.findOne({}, { _id: 0 }).sort({ order: -1 });
+        let next_order = 1;
+        if (last_query) {
+            next_order = last_query.order + 1;
+        }
+
+        const query = await Query.create({
             ...req.body,
             id: randomUUID(),
+            order: next_order
         });
+
+        console.log(query);
+
         const queryDocument = query.toObject({ versionKey: false });
         delete queryDocument._id;
 
@@ -397,6 +408,56 @@ async function insertQuery(req, res) {
         return res
             .status(500)
             .json({ error: `Ошибка сервера при сохранении запроса: ${error}` });
+    }
+}
+
+async function swapQueries(req, res) {
+    try {
+        if (
+            !req.body ||
+            typeof req.body !== "object" ||
+            Array.isArray(req.body)
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Тело запроса должно быть объектом" });
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(req.body, "firstId") ||
+            !Object.prototype.hasOwnProperty.call(req.body, "secondId")
+        ) {
+            return res
+                .status(400)
+                .json({ error: "Должны передаваться поля firstId и secondId" });
+        }
+
+        const query1 = await Query.findOne({id: req.body.firstId}, { _id: 0 });
+        console.log(query1);
+        const query2 = await Query.findOne({id: req.body.secondId}, { _id: 0 });
+        console.log(query2);
+
+        await Query.bulkWrite([
+            {
+                updateOne: {
+                    filter: { id: req.body.firstId },
+                    update: { $set: { order: query2.order } }
+                }
+            },
+            {
+                updateOne: {
+                    filter: { id: req.body.secondId },
+                    update: { $set: { order: query1.order } }
+                }
+            }
+        ]);
+
+        return res.status(200).json({ message: "Изменение порядка запросов выполнено." });
+
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: `Ошибка сервера при изменении порядка объектов: ${error}` });
     }
 }
 
@@ -421,7 +482,7 @@ async function updateQueryById(req, res) {
         
         console.log(`updatedQuery: ${JSON.stringify(updatedQuery)}`);
 
-        const query = await QueryShortInfo.findOneAndUpdate(
+        const query = await Query.findOneAndUpdate(
             { id },
             { $set: updatedQuery },
             { returnDocument: "after", runValidators: true },
@@ -451,13 +512,13 @@ async function deleteQueryById(req, res) {
     try {
         const { id } = req.params;
 
-        const query = await QueryShortInfo.findOne({ id }, { _id: 0 });
+        const query = await Query.findOne({ id }, { _id: 0 });
 
         if (!query) {
             return res.status(404).json({ message: "Запрос не найден" });
         }
 
-        await QueryShortInfo.deleteOne({ id });
+        await Query.deleteOne({ id });
 
         const queryDocument = query.toObject({ versionKey: false });
         delete queryDocument._id;
@@ -1037,6 +1098,10 @@ app.get("/queries", async (req, res) => {
 
 app.post("/queries", async (req, res) => {
     insertQuery(req, res);
+});
+
+app.patch("/queries", async (req, res) => {
+    swapQueries(req, res);
 });
 
 app.get("/queries/:id", async (req, res) => {
