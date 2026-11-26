@@ -112,7 +112,6 @@ const QueryToolBar = ({ settingsDialogRef }) => {
 
     const createQuery = useCallback(
         async (name = queryTitleRef.current) => {
-            console.log("createQuery executed");
             try {
                 dispatch(setIsLoading(true));
                 const newQuery = {
@@ -123,14 +122,12 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     customFilters: [],
                     levelFilters: [{}],
                 };
-                console.log("POST /queries");
                 const createdQuery = (
                     await axios.post(
                         `${BACKEND_URI}${QUERIES_PATH_PART}`,
                         newQuery,
                     )
                 ).data;
-                console.log(`createdQuery.id=${createdQuery.id}`);
                 dispatch(setIsQueryListRefreshPending(createdQuery.id));
                 dispatch(setIsQueryChanged(false));
             } catch (error) {
@@ -148,8 +145,6 @@ const QueryToolBar = ({ settingsDialogRef }) => {
 
     const saveAsQuery = useCallback(
         async (name = queryTitleRef.current) => {
-            console.log("saveAsQuery executed");
-            console.log(`queryTitle: '${name}'`);
             try {
                 dispatch(setIsLoading(true));
                 const newQuery = {
@@ -161,14 +156,12 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     customFilters: openQuery.customFilters,
                     levelFilters: openQuery.levelFilters,
                 };
-                console.log("POST /queries");
                 const createdQuery = (
                     await axios.post(
                         `${BACKEND_URI}${QUERIES_PATH_PART}`,
                         newQuery,
                     )
                 ).data;
-                console.log(`createdQuery.id=${createdQuery.id}`);
                 dispatch(setIsQueryListRefreshPending(createdQuery.id));
                 dispatch(setIsQueryChanged(false));
             } catch (error) {
@@ -198,7 +191,6 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                 customFilters: openQuery.customFilters,
                 levelFilters: openQuery.levelFilters,
             };
-            console.log("PUT /queries/id");
             await axios.put(
                 `${BACKEND_URI}${QUERIES_PATH_PART}/${openQuery.id}`,
                 updatedQuery,
@@ -216,8 +208,6 @@ const QueryToolBar = ({ settingsDialogRef }) => {
 
     const handleTextInputDialogSubmit = async (dialogData) => {
         const nextQueryTitle = dialogData.requestName ?? "";
-        console.log("handleTextInputDialogSubmit executed");
-        console.log(`dialogData.requestName: '${nextQueryTitle}'`);
 
         queryTitleRef.current = nextQueryTitle;
         setQueryTitle(nextQueryTitle);

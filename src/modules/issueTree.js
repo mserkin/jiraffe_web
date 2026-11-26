@@ -107,10 +107,10 @@ const getLinkDirections = (linkType) => {
     const direction = normalizeLinkTypeValue(linkType?.direction);
 
     if (direction === "inward") {
-        return ["inwardIssue"];
+        return ["outwardIssue"];
     }
     if (direction === "outward") {
-        return ["outwardIssue"];
+        return ["inwardIssue"];
     }
 
     return ["inwardIssue", "outwardIssue"];
@@ -142,14 +142,17 @@ const matchesLinkType = (issueLinkType, selectedLinkType) => {
 
 export function getLinkedIssueKeys(issue, filters = {}, linkTypes = []) {
     const selectedLinkTypeIds = asArray(filters.linkTypeFilter).map(String);
+    console.log(`selectedLinkTypeIds: ${selectedLinkTypeIds}`);
     const keys = new Set();
 
     for (const issueLink of asArray(issue?.fields?.issuelinks)) {
+        console.log(`  issueLink: ${JSON.stringify(issueLink)}`);
         const issueLinkType = issueLink.type ?? {};
 
         if (selectedLinkTypeIds.length === 0) {
             for (const direction of ["inwardIssue", "outwardIssue"]) {
                 const key = issueLink[direction]?.key;
+                console.log(`    key: ${key}`);
                 if (key) {
                     keys.add(key);
                 }
