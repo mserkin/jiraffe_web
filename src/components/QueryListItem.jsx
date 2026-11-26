@@ -17,7 +17,11 @@ import TextInputDialog from "./TextInputDialog";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { clearSearchResults } from "../redux/slices/searchResultsSlice";
 import { queryNameExists } from "../modules/queryNames";
-import { moveQueryDown, moveQueryUp } from "../redux/slices/queryListSlice";
+import {
+    moveQueryDown,
+    moveQueryUp,
+    selectQueryList,
+} from "../redux/slices/queryListSlice";
 
 const QueryListItem = ({
     id,
@@ -36,6 +40,7 @@ const QueryListItem = ({
         useState(false);
     const MENU_BUTTON_ID_PREFIX = "menuBtn";
     const dispatch = useDispatch();
+    const queryList = useSelector(selectQueryList);
     const isQueryChanged = useSelector(selectIsQueryChanged);
     const isInitialQueryOpened = useSelector(selectIsInitialQueryOpened);
     const openQuery = useSelector(selectOpenQuery);
@@ -91,13 +96,33 @@ const QueryListItem = ({
         });
     };
 
-    const handleMoveUpClick = () => {
-        dispatch(moveQueryUp(id));
+    const handleMoveQuery = async (offset) => {
+        const queryIndex = queryList.findIndex((query) => query.id === id);
+        if (queryIndex < 0) {
+            return;
+        }
+
+        const adjacentQuery = queryList[queryIndex + offset];
+        if (!adjacentQuery) {
+            return;
+        }
+
+        try {
+            await axios.patch(`${BACKEND_URI}${QUERIES_PATH_PART}`, {
+                firstId: id,
+                secondId: adjacentQuery.id,
+            });
+            dispatch(offset < 0 ? moveQueryUp(id) : moveQueryDown(id));
+        } catch (error) {
+            dispatch(
+                setError(`Ошибка при подключении к серверу: ${error.message}`),
+            );
+        }
     };
 
-    const handleMoveDownClick = () => {
-        dispatch(moveQueryDown(id));
-    };  
+    const handleMoveUpClick = () => handleMoveQuery(-1);
+
+    const handleMoveDownClick = () => handleMoveQuery(1);
 
     const saveClonedQuery = useCallback(
         async (clonedQueryName) => {
