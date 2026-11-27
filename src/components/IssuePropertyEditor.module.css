@@ -63,8 +63,101 @@
     margin: 3px 0px 2px 0px;
 }
 
+.keyInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.keyInputWrapper .keyInput {
+    padding-right: 36px;
+}
+
+.copyKeyButton,
+.copyKeyButtonDisabled {
+    position: absolute;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    min-height: 24px;
+    height: 24px;
+    padding: 1px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    background-color: transparent;
+    color: var(--color-text-muted);
+    box-shadow: none;
+    appearance: none;
+    transition: color var(--transition-ui), background-color var(--transition-ui), border-color var(--transition-ui), transform var(--transition-ui);
+}
+
+.copyKeyButton:hover:not(:disabled),
+:global(:root[data-theme='dark']) .copyKeyButton:hover:not(:disabled) {
+    border-color: #d7e3ff;
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+    background-color: var(--color-accent-soft);
+    transform: translateY(-1px);
+}
+
+.copyKeyButton:active:not(:disabled),
+:global(:root[data-theme='dark']) .copyKeyButton:active:not(:disabled) {
+    transform: translateY(0) scale(0.97);
+}
+
+:global(:root[data-theme='dark']) .copyKeyButton {
+    border-color: transparent;
+    color: var(--color-text-muted);
+    background: transparent;
+    background-color: transparent;
+}
+
+.copyKeyButtonDisabled,
+.copyKeyButton:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.snackbar {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 1000;
+    transform: translateX(-50%);
+    min-width: 160px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #172b4d;
+    color: #fff;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+}
+
 .typeInput {
     margin: 3px 0px 2px 0px;
+}
+
+.typeInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.typeInputWrapper .typeInput {
+    padding-right: 36px;
+}
+
+.issueTypeIcon {
+    position: absolute;
+    right: 10px;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    pointer-events: none;
 }
 
 .summaryInput {

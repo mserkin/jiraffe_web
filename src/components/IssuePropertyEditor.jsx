@@ -1,4 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { VscCopy } from "react-icons/vsc";
 
 import { selectSelectedIssue } from "../redux/slices/selectedIssueSlice";
 import styles from "./IssuePropertyEditor.module.css";
@@ -6,7 +8,8 @@ import {
     selectIssueTypes,
     selectSprints,
 } from "../redux/slices/jiraMetadataSlice";
-import { selectTeamMembers } from "../redux/slices/settingsSlice";
+import { selectJiraServer, selectTeamMembers } from "../redux/slices/settingsSlice";
+import { JIRA_ISSUE_URL_PATH } from "../modules/const";
 
 
 const IssuePropertyEditor = () => {
@@ -14,6 +17,22 @@ const IssuePropertyEditor = () => {
     const issueTypes = useSelector(selectIssueTypes);
     const sprints = useSelector(selectSprints);
     const teamMembers = useSelector(selectTeamMembers);
+    const jiraServer = useSelector(selectJiraServer);
+    const [isCopiedSnackbarVisible, setIsCopiedSnackbarVisible] = useState(false);
+    const [issueTypeIconFailed, setIssueTypeIconFailed] = useState(false);
+    const snackbarTimerRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            if (snackbarTimerRef.current !== null) {
+                clearTimeout(snackbarTimerRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        setIssueTypeIconFailed(false);
+    }, [selectedIssue.issueTypeIcon]);
 
     const handleSummaryChange = (event) => {}
     const handleStatusChange = (event) => {}
@@ -22,6 +41,29 @@ const IssuePropertyEditor = () => {
     const handleAssigneeChange = (event) => {}
     const handleReporterChange = (event) => {}
     const handleStoryPointsChange = (event) => {}
+
+    const handleCopyIssueLink = async () => {
+        if (!selectedIssue.key || !navigator.clipboard) {
+            return;
+        }
+
+        const issueUrl = `${jiraServer}${JIRA_ISSUE_URL_PATH}${selectedIssue.key}`;
+
+        try {
+            await navigator.clipboard.writeText(issueUrl);
+            setIsCopiedSnackbarVisible(true);
+
+            if (snackbarTimerRef.current !== null) {
+                clearTimeout(snackbarTimerRef.current);
+            }
+            snackbarTimerRef.current = setTimeout(() => {
+                setIsCopiedSnackbarVisible(false);
+                snackbarTimerRef.current = null;
+            }, 3000);
+        } catch (error) {
+            console.error("Не удалось скопировать ссылку на задачу:", error);
+        }
+    };
 
     function getStatuses(issuetype, issueTypes) {
         const issueType = issueTypes.find((type) => type.name === issuetype);
@@ -38,14 +80,29 @@ const IssuePropertyEditor = () => {
                 >
                     Ключ
                 </label>
-                <input
-                    id="issue_key"
-                    type="text"
-                    disabled={true}
-                    className={styles.keyInput}
-                    aria-label="Ключ"
-                    value={selectedIssue.key ? selectedIssue.key : ""}
-                />
+                <div className={styles.keyInputWrapper}>
+                    <input
+                        id="issue_key"
+                        type="text"
+                        disabled={true}
+                        className={styles.keyInput}
+                        aria-label="Ключ"
+                        value={selectedIssue.key ? selectedIssue.key : ""}
+                    />
+                    <button
+                        type="button"
+                        className={
+                            selectedIssue.key
+                                ? styles.copyKeyButton
+                                : styles.copyKeyButtonDisabled
+                        }
+                        disabled={!selectedIssue.key}
+                        onClick={handleCopyIssueLink}
+                        aria-label="Скопировать ссылку на задачу"
+                    >
+                        <VscCopy size={16} />
+                    </button>
+                </div>
             </div>
             <div className={`${styles.field} ${styles.typeDiv}`}>
                 <label
@@ -55,14 +112,32 @@ const IssuePropertyEditor = () => {
                 >
                     Тип
                 </label>
-                <input
-                    id="issue_type"
-                    type="text"
-                    disabled={true}
-                    className={styles.typeInput}
-                    aria-label="Тип"
-                    value={selectedIssue.issuetype ? selectedIssue.issuetype : ""}
-                />
+                <div className={styles.typeInputWrapper}>
+                    <input
+                        id="issue_type"
+                        type="text"
+                        disabled={true}
+                        className={styles.typeInput}
+                        aria-label="Тип"
+                        value={selectedIssue.issuetype ? selectedIssue.issuetype : ""}
+                    />
+                    {selectedIssue.key &&
+                        selectedIssue.issueTypeIcon &&
+                        !issueTypeIconFailed && (
+                            <img
+                                className={styles.issueTypeIcon}
+                                src={`/${encodeURIComponent(
+                                    selectedIssue.issueTypeIcon
+                                        .toLowerCase()
+                                        .endsWith(".png")
+                                        ? selectedIssue.issueTypeIcon
+                                        : `${selectedIssue.issueTypeIcon}.png`,
+                                )}`}
+                                alt=""
+                                onError={() => setIssueTypeIconFailed(true)}
+                            />
+                        )}
+                </div>
             </div>
             <div className={`${styles.field} ${styles.summary}`}>
                 <textarea
@@ -226,6 +301,11 @@ const IssuePropertyEditor = () => {
                     aria-label="Описание"
                 />
             </div>
+            {isCopiedSnackbarVisible && (
+                <div className={styles.snackbar} role="status" aria-live="polite">
+                    Скопировано
+                </div>
+            )}
         </div>
     );
 };

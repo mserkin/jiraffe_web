@@ -4,6 +4,7 @@ const initialState = {
     key: null,
     summary: null,
     issuetype: null,
+    issueTypeIcon: null,
     status: null,
     sprints: [],
     creatorLogin: null,
@@ -22,6 +23,7 @@ const selectedIssueSlice = createSlice({
             state.key = action.payload.key;
             state.summary = action.payload.summary;
             state.issuetype = action.payload.issuetype;
+            state.issueTypeIcon = action.payload.issueTypeIcon ?? null;
             state.status = action.payload.status;
             state.sprints = action.payload.sprints,
             state.creatorLogin = action.payload.creatorLogin;

@@ -130,6 +130,7 @@ const ResultTreePaneContent = ({
                 key: node.issue.key ?? null,
                 summary: fields.summary ?? null,
                 issuetype: fields.issuetype?.name ?? null,
+                issueTypeIcon: node.icon ?? null,
                 status: fields.status?.name ?? null,
                 sprints: Array.isArray(fields.customfield_10375)
                     ? fields.customfield_10375
