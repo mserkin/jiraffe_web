@@ -12,6 +12,10 @@
     font-size: 0.875rem;
 }
 
+.progressError {
+    color: #c62828;
+}
+
 .tree {
     flex: 1 0 auto;
     margin: 0;

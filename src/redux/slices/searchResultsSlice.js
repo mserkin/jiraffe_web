@@ -7,6 +7,7 @@ const initialState = {
     countLimit: 0,
     hasSearchRun: false,
     isSearchComplete: false,
+    searchError: null,
     resetVersion: 0,
 };
 
@@ -29,10 +30,17 @@ const searchResultsSlice = createSlice({
         setSearchComplete: (state, action) => {
             state.isSearchComplete = action.payload;
         },
+        setSearchError: (state, action) => {
+            state.searchError = action.payload;
+        },
     },
 });
 
-export const { clearSearchResults, setSearchResults, setSearchComplete } =
-    searchResultsSlice.actions;
+export const {
+    clearSearchResults,
+    setSearchResults,
+    setSearchComplete,
+    setSearchError,
+} = searchResultsSlice.actions;
 export const selectSearchResults = (state) => state.searchResults;
 export default searchResultsSlice.reducer;

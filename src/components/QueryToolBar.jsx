@@ -39,6 +39,7 @@ import SettingsDialog from "./SettingsDialog";
 import {
     clearSearchResults,
     setSearchComplete,
+    setSearchError,
     setSearchResults,
 } from "../redux/slices/searchResultsSlice";
 import {
@@ -529,6 +530,14 @@ const QueryToolBar = ({ settingsDialogRef }) => {
                     `${BACKEND_URI}search/status/${taskId}`,
                     { signal: abortController.signal },
                 );
+                if (statusResponse.status === "failed") {
+                    const errorMessage =
+                        typeof statusResponse.error === "string"
+                            ? statusResponse.error
+                            : JSON.stringify(statusResponse.error);
+                    dispatch(setSearchError(errorMessage));
+                    break;
+                }
                 if (
                     statusResponse.error !== null &&
                     statusResponse.error !== undefined

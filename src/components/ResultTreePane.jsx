@@ -60,6 +60,7 @@ const ResultTreePaneContent = ({
     countLimit,
     hasSearchRun,
     isSearchComplete,
+    searchError,
 }) => {
     const issueTypes = useSelector(selectIssueTypes);
     const dispatch = useDispatch();
@@ -190,13 +191,23 @@ const ResultTreePaneContent = ({
                 onCollapseAll={handleCollapseAll}
                 tree={tree}
             />
-            {hasSearchRun && (
-                <div className={styles.progress}>
-                    Получено {progress} элементов.
-                    {isSearchComplete &&
-                        (limitReached
-                            ? ` Достигнут лимит в ${countLimit} элементов, запрос прерван!`
-                            : " Запрос выполнен.")}
+            {(hasSearchRun || searchError !== null) && (
+                <div
+                    className={`${styles.progress} ${
+                        searchError !== null ? styles.progressError : ""
+                    }`}
+                >
+                    {searchError !== null
+                        ? `Ошибка получения данных от Jira: ${searchError}`
+                        : (
+                              <>
+                                  Получено {progress} элементов.
+                                  {isSearchComplete &&
+                                      (limitReached
+                                          ? ` Достигнут лимит в ${countLimit} элементов, запрос прерван!`
+                                          : " Запрос выполнен.")}
+                              </>
+                          )}
                 </div>
             )}
             <ul className={styles.tree} role="tree" aria-label="Результаты поиска">
@@ -230,6 +241,7 @@ const ResultTreePane = () => {
         countLimit,
         hasSearchRun,
         isSearchComplete,
+        searchError,
         resetVersion,
     } =
         useSelector(selectSearchResults);
@@ -243,6 +255,7 @@ const ResultTreePane = () => {
             countLimit={countLimit}
             hasSearchRun={hasSearchRun}
             isSearchComplete={isSearchComplete}
+            searchError={searchError}
         />
     );
 };
