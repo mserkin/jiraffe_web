@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+    issueId: null,
     key: null,
     summary: null,
     issuetype: null,
@@ -20,6 +21,7 @@ const selectedIssueSlice = createSlice({
     reducers: {
         dropSelection: () => initialState,
         setSelection: (state, action) => {
+            state.issueId = action.payload.issueId ?? null;
             state.key = action.payload.key;
             state.summary = action.payload.summary;
             state.issuetype = action.payload.issuetype;

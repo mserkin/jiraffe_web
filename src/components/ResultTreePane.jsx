@@ -127,6 +127,7 @@ const ResultTreePaneContent = ({
         const fields = node.issue.fields ?? {};
         dispatch(
             setSelection({
+                issueId: node.issue.id ?? null,
                 key: node.issue.key ?? null,
                 summary: fields.summary ?? null,
                 issuetype: fields.issuetype?.name ?? null,

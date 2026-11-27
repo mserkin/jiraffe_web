@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { VscCopy } from "react-icons/vsc";
+import axios from "axios";
 
 import { selectSelectedIssue } from "../redux/slices/selectedIssueSlice";
 import styles from "./IssuePropertyEditor.module.css";
@@ -9,7 +10,7 @@ import {
     selectSprints,
 } from "../redux/slices/jiraMetadataSlice";
 import { selectJiraServer, selectTeamMembers } from "../redux/slices/settingsSlice";
-import { JIRA_ISSUE_URL_PATH } from "../modules/const";
+import { BACKEND_URI, JIRA_ISSUE_URL_PATH } from "../modules/const";
 
 
 const IssuePropertyEditor = () => {
@@ -20,6 +21,11 @@ const IssuePropertyEditor = () => {
     const jiraServer = useSelector(selectJiraServer);
     const [isCopiedSnackbarVisible, setIsCopiedSnackbarVisible] = useState(false);
     const [issueTypeIconFailed, setIssueTypeIconFailed] = useState(false);
+    const [commentsState, setCommentsState] = useState({
+        issueId: null,
+        comments: [],
+        error: "",
+    });
     const snackbarTimerRef = useRef(null);
 
     useEffect(() => {
@@ -33,6 +39,49 @@ const IssuePropertyEditor = () => {
     useEffect(() => {
         setIssueTypeIconFailed(false);
     }, [selectedIssue.issueTypeIcon]);
+
+    useEffect(() => {
+        if (selectedIssue.issueId === null) {
+            return undefined;
+        }
+
+        const controller = new AbortController();
+
+        axios
+            .get(
+                `${BACKEND_URI}issues/${encodeURIComponent(selectedIssue.issueId)}/comments`,
+                { signal: controller.signal },
+            )
+            .then(({ data }) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+                if (!Array.isArray(data)) {
+                    throw new Error("Сервер вернул некорректный список комментариев.");
+                }
+                setCommentsState({
+                    issueId: selectedIssue.issueId,
+                    comments: data,
+                    error: "",
+                });
+            })
+            .catch((error) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+                console.error("Не удалось загрузить комментарии задачи:", error);
+                setCommentsState({
+                    issueId: selectedIssue.issueId,
+                    comments: [],
+                    error:
+                        error.response?.data?.error ??
+                        error.message ??
+                        "Не удалось загрузить комментарии задачи.",
+                });
+            });
+
+        return () => controller.abort();
+    }, [selectedIssue.issueId]);
 
     const handleSummaryChange = (event) => {}
     const handleStatusChange = (event) => {}
@@ -69,6 +118,9 @@ const IssuePropertyEditor = () => {
         const issueType = issueTypes.find((type) => type.name === issuetype);
         return issueType ? issueType.statuses.map((status) => status.name) : [];
     }
+
+    const currentCommentsState =
+        commentsState.issueId === selectedIssue.issueId ? commentsState : null;
 
     return (
         <div className={styles.gridContainer}>
@@ -301,6 +353,35 @@ const IssuePropertyEditor = () => {
                     aria-label="Описание"
                 />
             </div>
+            {selectedIssue.issueId !== null && (
+                <section className={styles.comments} aria-labelledby="issue_comments_heading">
+                    <h3 id="issue_comments_heading">Комментарии</h3>
+                    {currentCommentsState === null ? (
+                        <p role="status">Загрузка комментариев...</p>
+                    ) : currentCommentsState.error ? (
+                        <p role="alert">{currentCommentsState.error}</p>
+                    ) : currentCommentsState.comments.length === 0 ? (
+                        <p>Комментариев нет.</p>
+                    ) : (
+                        <ul className={styles.commentsList}>
+                            {currentCommentsState.comments.map((comment, index) => (
+                                <li
+                                    className={styles.comment}
+                                    key={`${comment.created}-${index}`}
+                                >
+                                    <div className={styles.commentMeta}>
+                                        <strong>{comment.author}</strong>
+                                        <time dateTime={comment.created}>
+                                            {new Date(comment.created).toLocaleString("ru-RU")}
+                                        </time>
+                                    </div>
+                                    <p>{comment.comment}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+            )}
             {isCopiedSnackbarVisible && (
                 <div className={styles.snackbar} role="status" aria-live="polite">
                     Скопировано

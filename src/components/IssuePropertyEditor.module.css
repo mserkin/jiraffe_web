@@ -188,6 +188,48 @@
     font-size: 0.875rem;
 }
 
+.comments {
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin-top: 12px;
+}
+
+.comments h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+}
+
+.commentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.comment {
+    padding: 10px;
+    border: 1px solid var(--color-border, #dfe1e6);
+    border-radius: 6px;
+}
+
+.commentMeta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.comment p {
+    margin: 8px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+
 label {
     color: var(--color-text-muted);
     font-size: 0.875rem;

@@ -102,6 +102,7 @@ const LinkTypesSchema = new Schema([LinkTypeSchema], { collection: "link-types" 
 const IssueStatusSchema= new Schema({
     id: String,
     name: String,
+    category: String
 });
 
 const IssueTypeSchema = new Schema({
