@@ -999,6 +999,45 @@ async function cancelSearch(req, res) {
     return res.status(400).json({ message: `Нельзя отменить задачу в статусе ${task.status}` });
 }
 
+async function processComments(comments) {
+    return comments.map(c => ({
+        author: c.author.displayName,
+        created: c.created,
+        comment: c.body
+    }))
+}
+
+async function getIssueComments(req, res) {
+    try {
+        const { issueId } = req.params;
+        const settings = await Settings.findOne(
+            {},
+            { _id: 0, "teamMembers._id": 0 },
+        );
+
+        const config = {
+            baseUrl: settings.jiraServer,
+            username: settings.jiraLogin,
+            password: settings.jiraPassword
+        };
+
+        // Устанавливает соединение и проверяет credentials через /myself
+        console.log(`Вызов 1: Инициализация(${JSON.stringify(config)})`);
+        const jira1 = await JiraClient.getConnection(config);
+    
+        const response = await jira1.request(
+            `/rest/api/2/issue/${issueId}/comment`,
+        );
+
+        return res.status(200).json(await processComments(response?.comments));
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json({ error: `Ошибка сервера при получении информации о комментариях: ${error}` });
+    }
+}
+
 async function runJiraBackgroundSearch(taskId, jql, settings) {
     const task = activeTasks.get(taskId);
     
@@ -1159,6 +1198,10 @@ app.get("/search/status/:taskId", (req, res) => {
 // 3. ПРИНУДИТЕЛЬНАЯ ОТМЕНА ЗАДАЧИ ПОЛЬЗОВАТЕЛЕМ
 app.post("/search/cancel/:taskId", (req, res) => {
     cancelSearch(req, res)
+});
+
+app.get("/issues/:issueId/comments", (req, res) => {
+    getIssueComments(req, res)
 });
 
 app.listen(PORT, () => {
