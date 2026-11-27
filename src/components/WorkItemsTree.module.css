@@ -74,10 +74,46 @@
     line-height: 1.4;
 }
 
-.nodeButton span:last-child {
+.nodeLabel,
+.issueSummary {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.issueKey {
+    flex: 0 0 auto;
+    font-weight: 600;
+}
+
+.issueSummary {
+    flex: 1;
+    min-width: 0;
+}
+
+.statusBadge {
+    display: inline-flex;
+    min-height: 14px;
+    flex: 0 0 auto;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: var(--status-background);
+    color: var(--status-color);
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+:global(:root[data-theme="dark"]) .statusBadge {
+    background-color: var(--status-color);
+    color: var(--color-text);
+}
+
+:global(:root[data-theme="dark"]) .statusBadge[data-category="new"],
+:global(:root[data-theme="dark"]) .statusBadge[data-category="neutral"] {
+    background-color: #303030;
 }
 
 .treeNode:focus-visible,

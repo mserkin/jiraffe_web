@@ -18,6 +18,41 @@ const getExpandableNodeIds = (node) => {
     return [node.id, ...node.children.flatMap(getExpandableNodeIds)];
 };
 
+const STATUS_COLORS = {
+    new: { background: "#F1F2F4", color: "#172B4D" },
+    neutral: { background: "#818284", color: "#000000" },
+    intermediate: { background: "#E9F2FF", color: "#2555CC" },
+    done: { background: "#DCFFF1", color: "#216E4E" },
+};
+
+const getStatusBadge = (issue, issueTypes) => {
+    const issuetype = issue.fields?.issuetype;
+    const status = issue.fields?.status;
+    if (!issuetype?.name || !status?.name) {
+        return null;
+    }
+
+    const issueType = issueTypes.find((type) => type.name === issuetype.name);
+    const statusDescription = issueType?.statuses?.find(
+        (typeStatus) => typeStatus.name === status.name,
+    );
+    if (!statusDescription) {
+        return null;
+    }
+
+    const colors = STATUS_COLORS[statusDescription.category];
+    if (!colors) {
+        return null;
+    }
+
+    return {
+        label: statusDescription.name.toUpperCase(),
+        category: statusDescription.category,
+        background: colors.background,
+        color: colors.color,
+    };
+};
+
 const ResultTreePaneContent = ({
     issues,
     progress,
@@ -62,6 +97,9 @@ const ResultTreePaneContent = ({
                 id,
                 issue,
                 label: `${issue.key ?? ""} ${issue.fields?.summary ?? ""}`.trim(),
+                key: issue.key ?? "",
+                summary: issue.fields?.summary ?? "",
+                statusBadge: getStatusBadge(issue, issueTypes),
                 type: "issue",
                 icon:
                     issueTypes.find(

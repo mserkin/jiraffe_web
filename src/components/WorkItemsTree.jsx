@@ -82,7 +82,26 @@ const WorkItemsTree = ({
                     ) : (
                         <Icon className={styles.nodeIcon} aria-hidden="true" />
                     )}
-                    <span>{node.label}</span>
+                    {node.type === "issue" ? (
+                        <>
+                            <span className={styles.issueKey}>{node.key}</span>
+                            {node.statusBadge && (
+                                <span
+                                    className={styles.statusBadge}
+                                    data-category={node.statusBadge.category}
+                                    style={{
+                                        "--status-background": node.statusBadge.background,
+                                        "--status-color": node.statusBadge.color,
+                                    }}
+                                >
+                                    {node.statusBadge.label}
+                                </span>
+                            )}
+                            <span className={styles.issueSummary}>{node.summary}</span>
+                        </>
+                    ) : (
+                        <span className={styles.nodeLabel}>{node.label}</span>
+                    )}
                 </span>
             </div>
             {hasChildren && isExpanded && (
